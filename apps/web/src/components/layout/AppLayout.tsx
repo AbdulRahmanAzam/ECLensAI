@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Outlet } from 'react-router-dom';
+import { Outlet, useLocation } from 'react-router-dom';
 import { GuidedDemoSpotlight } from '@/components/demo/GuidedDemoSpotlight';
 import { Drawer } from '@/components/ui/Drawer';
 import { Breadcrumbs } from './Breadcrumbs';
@@ -11,6 +11,7 @@ import { Topbar } from './Topbar';
 export function AppLayout() {
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const location = useLocation();
 
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
@@ -24,26 +25,29 @@ export function AppLayout() {
   }, []);
 
   return (
-    <div className="flex min-h-screen">
+    <div className="flex min-h-screen bg-canvas">
       <Sidebar />
 
-      <Drawer
-        open={mobileNavOpen}
-        onClose={() => setMobileNavOpen(false)}
-        title="Navigation"
-      >
+      <Drawer open={mobileNavOpen} onClose={() => setMobileNavOpen(false)} title="Navigation">
         <div className="-mx-5 -my-4 h-[calc(100%+2rem)]">
           <MobileNav onNavigate={() => setMobileNavOpen(false)} />
         </div>
       </Drawer>
 
-      <div className="flex min-w-0 flex-1 flex-col">
-        <Topbar onMenuClick={() => setMobileNavOpen(true)} onSearchClick={() => setPaletteOpen(true)} />
-        <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-6 md:px-8">
+      <div className="app-canvas flex min-w-0 flex-1 flex-col">
+        <Topbar
+          onMenuClick={() => setMobileNavOpen(true)}
+          onSearchClick={() => setPaletteOpen(true)}
+        />
+        <main className="mx-auto w-full max-w-[88rem] flex-1 px-4 py-6 md:px-8 md:py-8">
           <Breadcrumbs />
-          <Outlet />
+          {/* Keyed on the path so each navigation replays the entrance — the
+              transition is what tells you the view actually changed. */}
+          <div key={location.pathname} className="animate-fade-up">
+            <Outlet />
+          </div>
         </main>
-        <footer className="border-t border-slate-200 px-4 py-3 text-center text-[11px] text-slate-400 md:px-8">
+        <footer className="border-t border-line px-4 py-4 text-center text-2xs text-slate-400 md:px-8">
           ECLens AI · All figures are synthetic demo data; AI output is advisory only.
         </footer>
       </div>

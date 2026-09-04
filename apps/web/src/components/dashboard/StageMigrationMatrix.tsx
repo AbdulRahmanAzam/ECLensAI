@@ -36,21 +36,28 @@ export function StageMigrationMatrix({ migration, loading }: StageMigrationMatri
     );
   }
 
-  const cellByKey = new Map(migration.cells.map((cell) => [`${cell.fromStage}-${cell.toStage}`, cell]));
+  const cellByKey = new Map(
+    migration.cells.map((cell) => [`${cell.fromStage}-${cell.toStage}`, cell]),
+  );
   const maxCount = Math.max(1, ...migration.cells.map((cell) => cell.count));
 
   return (
     <div>
       <p className="mb-3 text-xs text-slate-500">
-        {migration.fromSnapshot.label} ({migration.fromSnapshot.asOfDate}) → {migration.toSnapshot.label} (
-        {migration.toSnapshot.asOfDate}), {migration.matchedExposures} exposures matched.
+        {migration.fromSnapshot.label} ({migration.fromSnapshot.asOfDate}) →{' '}
+        {migration.toSnapshot.label} ({migration.toSnapshot.asOfDate}), {migration.matchedExposures}{' '}
+        exposures matched.
       </p>
       <p className="sr-only">
-        Stage migration matrix. {migration.cells
-          .map((cell) => `${cell.count} exposure(s) moved from stage ${cell.fromStage} to stage ${cell.toStage}`)
+        Stage migration matrix.{' '}
+        {migration.cells
+          .map(
+            (cell) =>
+              `${cell.count} exposure(s) moved from stage ${cell.fromStage} to stage ${cell.toStage}`,
+          )
           .join('; ')}
-        . {migration.onlyInFromSnapshot} exposures exited the book, {migration.onlyInToSnapshot} were newly
-        originated. Net Stage 3 change: {migration.netStage3Change >= 0 ? '+' : ''}
+        . {migration.onlyInFromSnapshot} exposures exited the book, {migration.onlyInToSnapshot}{' '}
+        were newly originated. Net Stage 3 change: {migration.netStage3Change >= 0 ? '+' : ''}
         {migration.netStage3Change}.
       </p>
       <div className="overflow-x-auto">
@@ -83,7 +90,7 @@ export function StageMigrationMatrix({ migration, loading }: StageMigrationMatri
                   return (
                     <td key={toStage} className="p-1.5 text-center align-middle">
                       <div
-                        className="mx-auto flex min-h-[3.25rem] w-full flex-col items-center justify-center gap-0.5 rounded-md border border-slate-200 px-1 py-1.5"
+                        className="mx-auto flex min-h-[3.25rem] w-full flex-col items-center justify-center gap-0.5 rounded-lg border border-line px-1 py-1.5"
                         style={{
                           backgroundColor: isDiagonal
                             ? `rgba(44, 74, 111, ${intensity * 0.35})`
@@ -105,7 +112,9 @@ export function StageMigrationMatrix({ migration, loading }: StageMigrationMatri
                           {count}
                         </span>
                         {count > 0 ? (
-                          <span className="text-[10px] text-slate-500">{moneyString(cell?.grossCarryingAmount, { compact: true })}</span>
+                          <span className="text-[10px] text-slate-500">
+                            {moneyString(cell?.grossCarryingAmount, { compact: true })}
+                          </span>
                         ) : (
                           <span className="text-[10px] text-slate-300">—</span>
                         )}
@@ -118,16 +127,16 @@ export function StageMigrationMatrix({ migration, loading }: StageMigrationMatri
           </tbody>
         </table>
       </div>
-      <div className="mt-3 grid grid-cols-3 gap-2 text-[11px]">
-        <div className="rounded-md border border-slate-200 px-2 py-1.5 text-center">
+      <div className="mt-3 grid grid-cols-3 gap-2 text-2xs">
+        <div className="rounded-lg border border-line px-2 py-1.5 text-center">
           <p className="font-semibold text-navy-900">{migration.onlyInFromSnapshot}</p>
           <p className="text-slate-500">Exited the book</p>
         </div>
-        <div className="rounded-md border border-slate-200 px-2 py-1.5 text-center">
+        <div className="rounded-lg border border-line px-2 py-1.5 text-center">
           <p className="font-semibold text-navy-900">{migration.onlyInToSnapshot}</p>
           <p className="text-slate-500">Newly originated</p>
         </div>
-        <div className="rounded-md border border-slate-200 px-2 py-1.5 text-center">
+        <div className="rounded-lg border border-line px-2 py-1.5 text-center">
           <p className="flex items-center justify-center gap-1 font-semibold text-navy-900">
             {migration.netStage3Change > 0 ? (
               <ArrowUp className="h-3 w-3 text-red-600" />
@@ -143,7 +152,7 @@ export function StageMigrationMatrix({ migration, loading }: StageMigrationMatri
         </div>
       </div>
       {migration.limitations.length > 0 ? (
-        <ul className="mt-2 space-y-1 text-[11px] leading-relaxed text-slate-500">
+        <ul className="mt-2 space-y-1 text-2xs leading-relaxed text-slate-500">
           {migration.limitations.map((limitation) => (
             <li key={limitation}>{limitation}</li>
           ))}

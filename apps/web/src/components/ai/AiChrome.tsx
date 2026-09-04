@@ -47,12 +47,15 @@ export function AiDisclaimer({ text, className }: { text?: string; className?: s
   return (
     <p
       className={cn(
-        'flex items-start gap-2 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-[11px] leading-relaxed text-amber-900',
+        'flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-2xs leading-relaxed text-amber-900',
         className,
       )}
     >
       <Sparkles className="mt-0.5 h-3.5 w-3.5 shrink-0" />
-      <span>{text ?? 'AI can make mistakes. Verify every figure against the cited source before relying on it.'}</span>
+      <span>
+        {text ??
+          'AI can make mistakes. Verify every figure against the cited source before relying on it.'}
+      </span>
     </p>
   );
 }
@@ -73,16 +76,16 @@ export function AiAvailabilityNotice({
 }) {
   if (availability.available) return null;
   return (
-    <div className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-3">
+    <div className="rounded-lg border border-line bg-surface-2 px-4 py-3">
       <p className="flex items-center gap-2 text-sm font-medium text-slate-800">
         <CircleSlash className="h-4 w-4 text-slate-500" />
         AI unavailable
         <Badge tone="neutral">{availability.reason.replace(/_/g, ' ').toLowerCase()}</Badge>
       </p>
       <p className="mt-1.5 text-xs leading-relaxed text-slate-600">{availability.message}</p>
-      <p className="mt-1.5 text-[11px] leading-relaxed text-slate-500">
-        Calculated figures, staging decisions and the audit trail are unaffected — they are produced by the
-        deterministic engine, not by this model.
+      <p className="mt-1.5 text-2xs leading-relaxed text-slate-500">
+        Calculated figures, staging decisions and the audit trail are unaffected — they are produced
+        by the deterministic engine, not by this model.
       </p>
       {children}
     </div>
@@ -108,10 +111,16 @@ const TOOL_STATUS_ICON: Record<AiToolActivity['status'], ReactNode> = {
  * whole, after the grounding guard has seen it, so `pending` renders a single
  * honest line instead of inventing progress.
  */
-export function AiToolTrail({ activity, pending }: { activity: AiToolActivity[]; pending?: boolean }) {
+export function AiToolTrail({
+  activity,
+  pending,
+}: {
+  activity: AiToolActivity[];
+  pending?: boolean;
+}) {
   if (pending) {
     return (
-      <p className="flex items-center gap-2 text-[11px] text-slate-500">
+      <p className="flex items-center gap-2 text-2xs text-slate-500">
         <Loader2 className="h-3.5 w-3.5 animate-spin text-navy-500" />
         Reading this organisation’s stored records…
       </p>
@@ -119,16 +128,19 @@ export function AiToolTrail({ activity, pending }: { activity: AiToolActivity[];
   }
   if (activity.length === 0) {
     return (
-      <p className="text-[11px] text-slate-500">
-        No stored record was read for this answer. A response with no evidence behind it is withheld rather than
-        shown.
+      <p className="text-2xs text-slate-500">
+        No stored record was read for this answer. A response with no evidence behind it is withheld
+        rather than shown.
       </p>
     );
   }
   return (
     <ul className="space-y-1">
       {activity.map((entry, index) => (
-        <li key={`${entry.tool}-${index}`} className="flex items-start gap-2 text-[11px] text-slate-600">
+        <li
+          key={`${entry.tool}-${index}`}
+          className="flex items-start gap-2 text-2xs text-slate-600"
+        >
           <span className="mt-0.5 shrink-0">{TOOL_STATUS_ICON[entry.status]}</span>
           <span className="min-w-0">
             {entry.label}
@@ -156,7 +168,7 @@ function SourceRefChip({ source }: { source: AiSourceRef }) {
     </>
   );
   const classes =
-    'inline-flex items-center gap-1 rounded border border-slate-200 bg-white px-1.5 py-0.5 text-[11px] leading-4 transition-colors';
+    'inline-flex items-center gap-1 rounded border border-line bg-surface px-1.5 py-0.5 text-2xs leading-4 transition-colors';
 
   // A citation is the user's way back to the record. Where the record has a page
   // in this app the chip links to it; where it does not, the chip still names the
@@ -175,7 +187,9 @@ export function AiSourceRefs({ refs, title = 'Sources' }: { refs: AiSourceRef[];
   return (
     <div>
       {title ? (
-        <p className="mb-1.5 text-[11px] font-medium uppercase tracking-wider text-slate-400">{title}</p>
+        <p className="mb-1.5 text-2xs font-medium uppercase tracking-wider text-slate-400">
+          {title}
+        </p>
       ) : null}
       <div className="flex flex-wrap gap-1.5">
         {refs.map((source, index) => (
@@ -193,12 +207,12 @@ export function AiSourceRefs({ refs, title = 'Sources' }: { refs: AiSourceRef[];
 export function AiCaveats({ items, title = 'Caveats' }: { items: string[]; title?: string }) {
   if (items.length === 0) return null;
   return (
-    <div className="rounded-md border border-slate-200 bg-slate-50 px-3 py-2">
-      <p className="mb-1 flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-wider text-slate-500">
+    <div className="rounded-lg border border-line bg-surface-2 px-3 py-2">
+      <p className="mb-1 flex items-center gap-1.5 text-2xs font-medium uppercase tracking-wider text-slate-500">
         <AlertTriangle className="h-3 w-3" />
         {title}
       </p>
-      <ul className="list-disc space-y-0.5 pl-4 text-[11px] leading-relaxed text-slate-600">
+      <ul className="list-disc space-y-0.5 pl-4 text-2xs leading-relaxed text-slate-600">
         {items.map((caveat, index) => (
           <li key={index}>{caveat}</li>
         ))}
@@ -211,13 +225,13 @@ export function AiCaveats({ items, title = 'Caveats' }: { items: string[]; title
 export function AiEvidence({ items }: { items: string[] }) {
   if (items.length === 0) return null;
   return (
-    <details className="rounded-md border border-slate-200 bg-white">
-      <summary className="cursor-pointer px-3 py-2 text-[11px] font-medium uppercase tracking-wider text-slate-500">
+    <details className="rounded-lg border border-line bg-surface">
+      <summary className="cursor-pointer px-3 py-2 text-2xs font-medium uppercase tracking-wider text-slate-500">
         Evidence the answer may quote ({items.length})
       </summary>
-      <ul className="space-y-1.5 border-t border-slate-100 px-3 py-2">
+      <ul className="space-y-1.5 border-t border-line-soft px-3 py-2">
         {items.map((item, index) => (
-          <li key={index} className="font-mono text-[11px] leading-relaxed text-slate-600">
+          <li key={index} className="font-mono text-2xs leading-relaxed text-slate-600">
             {item}
           </li>
         ))}
@@ -231,7 +245,7 @@ export function AiLineList({ title, items }: { title: string; items: string[] })
   if (items.length === 0) return null;
   return (
     <div>
-      <p className="mb-1 text-[11px] font-medium uppercase tracking-wider text-slate-400">{title}</p>
+      <p className="mb-1 text-2xs font-medium uppercase tracking-wider text-slate-400">{title}</p>
       <ul className="list-disc space-y-1 pl-4 text-xs leading-relaxed text-slate-700">
         {items.map((item, index) => (
           <li key={index}>{item}</li>
@@ -246,7 +260,7 @@ export function AiProse({ title, body }: { title: string; body: string }) {
   if (!body) return null;
   return (
     <div>
-      <p className="mb-1 text-[11px] font-medium uppercase tracking-wider text-slate-400">{title}</p>
+      <p className="mb-1 text-2xs font-medium uppercase tracking-wider text-slate-400">{title}</p>
       <p className="whitespace-pre-wrap text-sm leading-relaxed text-slate-700">{body}</p>
     </div>
   );

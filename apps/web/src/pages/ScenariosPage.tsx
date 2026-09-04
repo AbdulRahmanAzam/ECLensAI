@@ -9,7 +9,17 @@
  */
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { CheckCircle2, Clock, Info, Lock, Minus, Plus, TrendingDown, TrendingUp, Trash2 } from 'lucide-react';
+import {
+  CheckCircle2,
+  Clock,
+  Info,
+  Lock,
+  Minus,
+  Plus,
+  TrendingDown,
+  TrendingUp,
+  Trash2,
+} from 'lucide-react';
 import type { MacroIndicators, ScenarioSetRecord } from '@eclens/shared';
 import {
   decimalStringToNumber,
@@ -99,11 +109,19 @@ function ScenarioSetCard({ set, canApprove }: { set: ScenarioSetRecord; canAppro
   const approve = useMutation({
     mutationFn: () => api.scenarios.approve(set.id),
     onSuccess: (updated) => {
-      push('success', 'Scenario set approved', `${updated.name} v${updated.version} can now be used to create a run.`);
+      push(
+        'success',
+        'Scenario set approved',
+        `${updated.name} v${updated.version} can now be used to create a run.`,
+      );
       void queryClient.invalidateQueries({ queryKey: ['scenario-sets'] });
     },
     onError: (error) =>
-      push('error', 'Approval failed', error instanceof ApiError ? error.message : 'The scenario set could not be approved.'),
+      push(
+        'error',
+        'Approval failed',
+        error instanceof ApiError ? error.message : 'The scenario set could not be approved.',
+      ),
   });
 
   return (
@@ -113,7 +131,11 @@ function ScenarioSetCard({ set, canApprove }: { set: ScenarioSetRecord; canAppro
           <span className="flex flex-wrap items-center gap-2">
             {set.name}
             <Badge tone="neutral">v{set.version}</Badge>
-            {set.isActive ? <Badge tone="positive">active</Badge> : <Badge tone="neutral">superseded</Badge>}
+            {set.isActive ? (
+              <Badge tone="positive">active</Badge>
+            ) : (
+              <Badge tone="neutral">superseded</Badge>
+            )}
             {set.approvalStatus === 'APPROVED' ? (
               <Badge tone="positive">
                 <CheckCircle2 className="mr-1 inline h-3 w-3" />
@@ -139,7 +161,12 @@ function ScenarioSetCard({ set, canApprove }: { set: ScenarioSetRecord; canAppro
         }
         actions={
           set.approvalStatus === 'PENDING' && canApprove ? (
-            <Button size="sm" icon={<CheckCircle2 className="h-3.5 w-3.5" />} loading={approve.isPending} onClick={() => approve.mutate()}>
+            <Button
+              size="sm"
+              icon={<CheckCircle2 className="h-3.5 w-3.5" />}
+              loading={approve.isPending}
+              onClick={() => approve.mutate()}
+            >
               Approve for use
             </Button>
           ) : undefined
@@ -152,7 +179,7 @@ function ScenarioSetCard({ set, canApprove }: { set: ScenarioSetRecord; canAppro
 
         <div className="overflow-x-auto">
           <table className="w-full min-w-[720px] text-left text-sm">
-            <thead className="border-b border-slate-200 text-[11px] uppercase tracking-wide text-slate-500">
+            <thead className="border-b border-line text-2xs uppercase tracking-wide text-slate-500">
               <tr>
                 <th className="py-2 pr-3 font-medium">Scenario</th>
                 <th className="py-2 pr-3 font-medium">Weight</th>
@@ -162,7 +189,7 @@ function ScenarioSetCard({ set, canApprove }: { set: ScenarioSetRecord; canAppro
                 <th className="py-2 font-medium">State</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-line-soft">
               {set.scenarios.map((scenario) => (
                 <tr key={scenario.id} className={scenario.isActive ? '' : 'opacity-60'}>
                   <td className="py-2.5 pr-3">
@@ -172,13 +199,15 @@ function ScenarioSetCard({ set, canApprove }: { set: ScenarioSetRecord; canAppro
                       </span>
                       <span>
                         <span className="block font-medium text-slate-800">{scenario.name}</span>
-                        <code className="block font-mono text-[11px] text-slate-400">{scenario.code}</code>
+                        <code className="block font-mono text-2xs text-slate-400">
+                          {scenario.code}
+                        </code>
                       </span>
                     </span>
                   </td>
                   <td className="py-2.5 pr-3 tabular-nums text-slate-800">
                     {formatDecimalText(scenario.weight)}
-                    <span className="ml-1.5 text-[11px] text-slate-400">
+                    <span className="ml-1.5 text-2xs text-slate-400">
                       {formatPercent(decimalStringToNumber(scenario.weight), 0)}
                     </span>
                   </td>
@@ -190,7 +219,7 @@ function ScenarioSetCard({ set, canApprove }: { set: ScenarioSetRecord; canAppro
                   </td>
                   <td className="py-2.5 pr-3">
                     {scenario.indicators ? (
-                      <span className="flex flex-wrap gap-x-3 gap-y-0.5 text-[11px] text-slate-500">
+                      <span className="flex flex-wrap gap-x-3 gap-y-0.5 text-2xs text-slate-500">
                         {INDICATOR_LABELS.map((indicator) => (
                           <span key={indicator.key}>
                             {indicator.label}{' '}
@@ -201,11 +230,13 @@ function ScenarioSetCard({ set, canApprove }: { set: ScenarioSetRecord; canAppro
                         ))}
                       </span>
                     ) : (
-                      <span className="text-[11px] text-slate-400">none recorded</span>
+                      <span className="text-2xs text-slate-400">none recorded</span>
                     )}
                   </td>
                   <td className="py-2.5">
-                    <Badge tone={kindTone(scenario.kind)}>{scenario.isActive ? 'active' : 'inactive'}</Badge>
+                    <Badge tone={kindTone(scenario.kind)}>
+                      {scenario.isActive ? 'active' : 'inactive'}
+                    </Badge>
                   </td>
                 </tr>
               ))}
@@ -213,20 +244,25 @@ function ScenarioSetCard({ set, canApprove }: { set: ScenarioSetRecord; canAppro
           </table>
         </div>
 
-        <div className="flex flex-col gap-2 border-t border-slate-100 pt-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-2 border-t border-line-soft pt-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex flex-wrap items-center gap-2 text-sm">
             <span className="text-slate-500">Active weights total</span>
-            <span className="font-semibold tabular-nums text-navy-900">{formatPercent(sum, 2)}</span>
+            <span className="font-semibold tabular-nums text-navy-900">
+              {formatPercent(sum, 2)}
+            </span>
             {totalsOne(sum) ? (
               <Badge tone="positive">valid</Badge>
             ) : (
               <Badge tone="danger">must equal 100%</Badge>
             )}
           </div>
-          <p className="text-[11px] text-slate-400">
+          <p className="text-2xs text-slate-400">
             Created by {set.createdBy} on {formatDateTime(set.createdAt)}
             {set.approvedBy && set.approvedAt ? (
-              <> · Approved by {set.approvedBy} on {formatDateTime(set.approvedAt)}</>
+              <>
+                {' '}
+                · Approved by {set.approvedBy} on {formatDateTime(set.approvedAt)}
+              </>
             ) : null}
           </p>
         </div>
@@ -299,7 +335,8 @@ export function ScenariosPage() {
     onError: (error) => {
       // The engine, not this form, decides whether the weights are admissible —
       // surface its verdict verbatim rather than paraphrasing it.
-      const message = error instanceof ApiError ? error.message : 'The scenario set could not be created.';
+      const message =
+        error instanceof ApiError ? error.message : 'The scenario set could not be created.';
       setFormError(message);
       push('error', 'Scenario set rejected', message);
     },
@@ -327,7 +364,9 @@ export function ScenariosPage() {
       const lgd = decimalStringToNumber(scenario.lgdMultiplier || '1');
       return total + weight * pd * lgd;
     }, 0);
-  const currentAllowance = currentSummary ? decimalStringToNumber(currentSummary.totals.lossAllowance) : null;
+  const currentAllowance = currentSummary
+    ? decimalStringToNumber(currentSummary.totals.lossAllowance)
+    : null;
   const indicativeAllowance =
     currentAllowance !== null && totalsOne(draftSum) ? currentAllowance * indicativeSeverity : null;
 
@@ -352,12 +391,12 @@ export function ScenariosPage() {
         }
       />
 
-      <div className="mb-4 flex items-start gap-2 rounded-lg border border-navy-200 bg-navy-50 px-4 py-2.5 text-[11px] leading-relaxed text-navy-800">
+      <div className="mb-4 flex items-start gap-2 rounded-lg border border-navy-200 bg-navy-50 px-4 py-2.5 text-2xs leading-relaxed text-navy-800">
         <Info className="mt-0.5 h-3.5 w-3.5 shrink-0" />
         <span>
-          Scenario sets are immutable once created. Editing an assumption means publishing a new version; runs
-          that already completed stay locked to the version they used, which is why each card shows how many
-          runs froze it.
+          Scenario sets are immutable once created. Editing an assumption means publishing a new
+          version; runs that already completed stay locked to the version they used, which is why
+          each card shows how many runs froze it.
         </span>
       </div>
 
@@ -418,7 +457,11 @@ export function ScenariosPage() {
             <Button variant="ghost" onClick={() => setCreateOpen(false)}>
               Cancel
             </Button>
-            <Button loading={create.isPending} disabled={!draftValid} onClick={() => create.mutate()}>
+            <Button
+              loading={create.isPending}
+              disabled={!draftValid}
+              onClick={() => create.mutate()}
+            >
               Create version
             </Button>
           </div>
@@ -461,7 +504,7 @@ export function ScenariosPage() {
             </div>
 
             {scenarios.map((scenario, index) => (
-              <div key={index} className="rounded-lg border border-slate-200 p-3">
+              <div key={index} className="rounded-lg border border-line p-3">
                 <div className="grid gap-3 sm:grid-cols-2">
                   <Input
                     label="Code"
@@ -485,12 +528,16 @@ export function ScenariosPage() {
                     <Input
                       label="PD ×"
                       value={scenario.pdMultiplier}
-                      onChange={(event) => patchScenario(index, { pdMultiplier: event.target.value })}
+                      onChange={(event) =>
+                        patchScenario(index, { pdMultiplier: event.target.value })
+                      }
                     />
                     <Input
                       label="LGD ×"
                       value={scenario.lgdMultiplier}
-                      onChange={(event) => patchScenario(index, { lgdMultiplier: event.target.value })}
+                      onChange={(event) =>
+                        patchScenario(index, { lgdMultiplier: event.target.value })
+                      }
                     />
                   </div>
                 </div>
@@ -509,7 +556,9 @@ export function ScenariosPage() {
                       size="sm"
                       variant="ghost"
                       icon={<Trash2 className="h-3.5 w-3.5" />}
-                      onClick={() => setScenarios((current) => current.filter((_, i) => i !== index))}
+                      onClick={() =>
+                        setScenarios((current) => current.filter((_, i) => i !== index))
+                      }
                     >
                       Remove
                     </Button>
@@ -520,7 +569,9 @@ export function ScenariosPage() {
 
             <div className="flex items-center gap-2 text-sm">
               <span className="text-slate-500">Active weights total</span>
-              <span className="font-semibold tabular-nums text-navy-900">{formatPercent(draftSum, 2)}</span>
+              <span className="font-semibold tabular-nums text-navy-900">
+                {formatPercent(draftSum, 2)}
+              </span>
               {totalsOne(draftSum) ? (
                 <Badge tone="positive">valid</Badge>
               ) : (
@@ -535,26 +586,33 @@ export function ScenariosPage() {
                     <Badge tone="warning">Indicative</Badge>
                     Estimated allowance under this draft
                   </span>
-                  <span className="font-semibold tabular-nums text-amber-900">{money(indicativeAllowance, { compact: true })}</span>
+                  <span className="font-semibold tabular-nums text-amber-900">
+                    {money(indicativeAllowance, { compact: true })}
+                  </span>
                 </div>
-                <p className="mt-1 text-[11px] leading-relaxed text-amber-800">
-                  A weight-and-multiplier scalar applied to the book's current stored allowance ({money(currentAllowance ?? 0, { compact: true })}) —
-                  not the calculated result. The engine reprices every exposure period by period under each scenario; run it after saving to get
-                  the exact figure.
+                <p className="mt-1 text-2xs leading-relaxed text-amber-800">
+                  A weight-and-multiplier scalar applied to the book's current stored allowance (
+                  {money(currentAllowance ?? 0, { compact: true })}) — not the calculated result.
+                  The engine reprices every exposure period by period under each scenario; run it
+                  after saving to get the exact figure.
                 </p>
               </div>
             ) : null}
           </div>
 
           {formError ? (
-            <p className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700" role="alert">
+            <p
+              className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700"
+              role="alert"
+            >
               {formError}
             </p>
           ) : (
-            <p className="text-[11px] leading-relaxed text-slate-500">
-              PD multipliers are applied in hazard space, so a downside multiplier can never push a cumulative
-              default probability past 1. The total above is a browser-side sanity check; the server re-validates
-              the whole set in exact decimal arithmetic before it is accepted.
+            <p className="text-2xs leading-relaxed text-slate-500">
+              PD multipliers are applied in hazard space, so a downside multiplier can never push a
+              cumulative default probability past 1. The total above is a browser-side sanity check;
+              the server re-validates the whole set in exact decimal arithmetic before it is
+              accepted.
             </p>
           )}
         </div>

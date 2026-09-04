@@ -130,7 +130,10 @@ export interface Api {
     upload(file: File): Promise<JobAccepted<ImportBatchRecord> & { record: ImportBatchRecord }>;
     preview(idOrPublicId: string): Promise<ImportPreviewRecord>;
     applyMapping(idOrPublicId: string, input: MappingRequest): Promise<ImportBatchRecord>;
-    commit(idOrPublicId: string, input?: CommitRequest): Promise<JobAccepted<ImportBatchRecord> & { record: ImportBatchRecord }>;
+    commit(
+      idOrPublicId: string,
+      input?: CommitRequest,
+    ): Promise<JobAccepted<ImportBatchRecord> & { record: ImportBatchRecord }>;
     issues(idOrPublicId: string): Promise<ImportIssuesRecord>;
     issuesCsv(idOrPublicId: string): Promise<string>;
   };
@@ -142,13 +145,22 @@ export interface Api {
     get(idOrPublicId: string): Promise<EclRunRecord>;
     create(input: CreateRunRequest): Promise<EclRunRecord>;
     execute(idOrPublicId: string): Promise<JobAccepted<EclRunRecord> & { run: EclRunRecord }>;
-    results(idOrPublicId: string, query: ListQuery): Promise<Paginated<RunResultRowRecord> & { totals: PortfolioTotalsDto | null }>;
-    resultDetail(idOrPublicId: string, exposureIdOrPublicId: string): Promise<RunResultDetailRecord>;
+    results(
+      idOrPublicId: string,
+      query: ListQuery,
+    ): Promise<Paginated<RunResultRowRecord> & { totals: PortfolioTotalsDto | null }>;
+    resultDetail(
+      idOrPublicId: string,
+      exposureIdOrPublicId: string,
+    ): Promise<RunResultDetailRecord>;
     submit(idOrPublicId: string, comment?: string): Promise<EclRunRecord>;
     approve(idOrPublicId: string, comment: string): Promise<EclRunRecord>;
     reject(idOrPublicId: string, comment: string): Promise<EclRunRecord>;
     /** `aiCommentary`, when supplied, is text the caller already fetched — never generated here. */
-    report(idOrPublicId: string, aiCommentary?: { headline: string; overview: string } | null): Promise<ReportDownload>;
+    report(
+      idOrPublicId: string,
+      aiCommentary?: { headline: string; overview: string } | null,
+    ): Promise<ReportDownload>;
   };
   scenarios: {
     list(query: ListQuery): Promise<Paginated<ScenarioSetRecord>>;
@@ -178,9 +190,14 @@ export interface Api {
     runComparison(query?: RunComparisonQuery): Promise<RunComparison>;
   };
   overrides: {
-    request(exposureIdOrPublicId: string, input: StageOverrideRequest): Promise<StageOverrideHistoryRecord>;
+    request(
+      exposureIdOrPublicId: string,
+      input: StageOverrideRequest,
+    ): Promise<StageOverrideHistoryRecord>;
     review(overrideId: string, input: OverrideReviewRequest): Promise<StageOverrideHistoryRecord>;
-    queue(query: ListQuery & { status?: 'PENDING_REVIEW' | 'REVIEWED' | 'REJECTED' }): Promise<Paginated<StageOverrideListItem>>;
+    queue(
+      query: ListQuery & { status?: 'PENDING_REVIEW' | 'REVIEWED' | 'REJECTED' },
+    ): Promise<Paginated<StageOverrideListItem>>;
   };
   exceptions: {
     list(query: ExceptionListQuery): Promise<Paginated<ExceptionItemRecord>>;
@@ -203,12 +220,22 @@ export interface Api {
     queryCopilot(input: CopilotQueryRequest): Promise<CopilotQueryResponse>;
     listThreads(query: ListQuery): Promise<CopilotThreadListResponse>;
     getThread(threadId: string): Promise<CopilotThreadRecord>;
-    feedback(threadId: string, turnId: string, input: CopilotFeedbackRequest): Promise<CopilotFeedbackResponse>;
+    feedback(
+      threadId: string,
+      turnId: string,
+      input: CopilotFeedbackRequest,
+    ): Promise<CopilotFeedbackResponse>;
     explainEcl(input: ExplainEclRequest): Promise<AiResponse<EclExplanation>>;
-    suggestImportMapping(input: AiImportMappingRequest): Promise<AiResponse<ImportMappingSuggestionSet>>;
-    investigateQuality(input: InvestigateQualityRequest): Promise<AiResponse<DataQualityInvestigation>>;
+    suggestImportMapping(
+      input: AiImportMappingRequest,
+    ): Promise<AiResponse<ImportMappingSuggestionSet>>;
+    investigateQuality(
+      input: InvestigateQualityRequest,
+    ): Promise<AiResponse<DataQualityInvestigation>>;
     draftScenario(input: ScenarioDraftRequest): Promise<AiResponse<ScenarioProposal>>;
-    executiveCommentary(input: ExecutiveCommentaryRequest): Promise<AiResponse<ExecutiveCommentary>>;
+    executiveCommentary(
+      input: ExecutiveCommentaryRequest,
+    ): Promise<AiResponse<ExecutiveCommentary>>;
   };
   demo: {
     /** Whole-database wipe-and-reseed. Invalidates the caller's own session — the response clears the cookie. */
@@ -219,12 +246,17 @@ export interface Api {
     get(idOrPublicId: string): Promise<DocumentRecord>;
     upload(file: File, input: DocumentUploadRequest): Promise<DocumentUploadResponse>;
     extract(idOrPublicId: string, force?: boolean): Promise<AiResponse<DocumentExtraction>>;
-    decideSignal(idOrPublicId: string, signalId: string, input: SignalDecisionRequest): Promise<DocumentSignalRecord>;
+    decideSignal(
+      idOrPublicId: string,
+      signalId: string,
+      input: SignalDecisionRequest,
+    ): Promise<DocumentSignalRecord>;
     remove(idOrPublicId: string): Promise<void>;
   };
 }
 
-const query = (value: Record<string, unknown> | undefined): Record<string, unknown> | undefined => value;
+const query = (value: Record<string, unknown> | undefined): Record<string, unknown> | undefined =>
+  value;
 
 export const api: Api = {
   auth: {
@@ -250,12 +282,17 @@ export const api: Api = {
   },
 
   portfolio: {
-    summary: (snapshotId) => request<PortfolioSummaryRecord>('/portfolio/summary', { query: query({ snapshotId }) }),
-    listExposures: (params) => request<Paginated<ExposureRecord>>('/portfolio/exposures', { query: { ...params } }),
+    summary: (snapshotId) =>
+      request<PortfolioSummaryRecord>('/portfolio/summary', { query: query({ snapshotId }) }),
+    listExposures: (params) =>
+      request<Paginated<ExposureRecord>>('/portfolio/exposures', { query: { ...params } }),
     exportExposuresCsv: (params) => downloadText('/portfolio/exposures/export', { ...params }),
-    getExposure: (id) => request<ExposureDetailRecord>(`/portfolio/exposures/${encodeURIComponent(id)}`),
+    getExposure: (id) =>
+      request<ExposureDetailRecord>(`/portfolio/exposures/${encodeURIComponent(id)}`),
     async listSnapshots(take = 50) {
-      const body = await request<{ items: PortfolioSnapshotRecord[] }>('/portfolio/snapshots', { query: query({ take }) });
+      const body = await request<{ items: PortfolioSnapshotRecord[] }>('/portfolio/snapshots', {
+        query: query({ take }),
+      });
       return body.items;
     },
   },
@@ -269,10 +306,13 @@ export const api: Api = {
     },
     preview: (id) => request<ImportPreviewRecord>(`/imports/${encodeURIComponent(id)}/preview`),
     async applyMapping(id, input) {
-      const body = await request<{ batch: ImportBatchRecord }>(`/imports/${encodeURIComponent(id)}/mapping`, {
-        method: 'POST',
-        body: input,
-      });
+      const body = await request<{ batch: ImportBatchRecord }>(
+        `/imports/${encodeURIComponent(id)}/mapping`,
+        {
+          method: 'POST',
+          body: input,
+        },
+      );
       return body.batch;
     },
     commit: (id, input) =>
@@ -283,19 +323,25 @@ export const api: Api = {
 
   templates: {
     async portfolio(params = {}) {
-      const body = await request<{ template: TemplateDownloadRecord }>('/templates/portfolio', { query: { ...params } });
+      const body = await request<{ template: TemplateDownloadRecord }>('/templates/portfolio', {
+        query: { ...params },
+      });
       return body.template;
     },
   },
 
   runs: {
-    list: (params) => request<Paginated<EclRunSummaryRecord>>('/ecl-runs', { query: { ...params } }),
+    list: (params) =>
+      request<Paginated<EclRunSummaryRecord>>('/ecl-runs', { query: { ...params } }),
     async get(id) {
       const body = await request<{ run: EclRunRecord }>(`/ecl-runs/${encodeURIComponent(id)}`);
       return body.run;
     },
     async create(input) {
-      const body = await request<{ run: EclRunRecord }>('/ecl-runs', { method: 'POST', body: input });
+      const body = await request<{ run: EclRunRecord }>('/ecl-runs', {
+        method: 'POST',
+        body: input,
+      });
       return body.run;
     },
     execute: (id) => request(`/ecl-runs/${encodeURIComponent(id)}/execute`, { method: 'POST' }),
@@ -309,54 +355,78 @@ export const api: Api = {
         `/ecl-runs/${encodeURIComponent(id)}/results/${encodeURIComponent(exposureId)}`,
       ),
     async submit(id, comment) {
-      const body = await request<{ run: EclRunRecord }>(`/ecl-runs/${encodeURIComponent(id)}/submit`, {
-        method: 'POST',
-        body: { comment },
-      });
+      const body = await request<{ run: EclRunRecord }>(
+        `/ecl-runs/${encodeURIComponent(id)}/submit`,
+        {
+          method: 'POST',
+          body: { comment },
+        },
+      );
       return body.run;
     },
     async approve(id, comment) {
-      const body = await request<{ run: EclRunRecord }>(`/ecl-runs/${encodeURIComponent(id)}/approve`, {
-        method: 'POST',
-        body: { comment },
-      });
+      const body = await request<{ run: EclRunRecord }>(
+        `/ecl-runs/${encodeURIComponent(id)}/approve`,
+        {
+          method: 'POST',
+          body: { comment },
+        },
+      );
       return body.run;
     },
     async reject(id, comment) {
-      const body = await request<{ run: EclRunRecord }>(`/ecl-runs/${encodeURIComponent(id)}/reject`, {
-        method: 'POST',
-        body: { comment },
-      });
+      const body = await request<{ run: EclRunRecord }>(
+        `/ecl-runs/${encodeURIComponent(id)}/reject`,
+        {
+          method: 'POST',
+          body: { comment },
+        },
+      );
       return body.run;
     },
     async report(id, aiCommentary) {
-      const body = await request<{ report: ReportDownload }>(`/ecl-runs/${encodeURIComponent(id)}/report`, {
-        query: query({ aiHeadline: aiCommentary?.headline, aiOverview: aiCommentary?.overview }),
-      });
+      const body = await request<{ report: ReportDownload }>(
+        `/ecl-runs/${encodeURIComponent(id)}/report`,
+        {
+          query: query({ aiHeadline: aiCommentary?.headline, aiOverview: aiCommentary?.overview }),
+        },
+      );
       return body.report;
     },
   },
 
   scenarios: {
-    list: (params) => request<Paginated<ScenarioSetRecord>>('/scenario-sets', { query: { ...params } }),
+    list: (params) =>
+      request<Paginated<ScenarioSetRecord>>('/scenario-sets', { query: { ...params } }),
     async get(id) {
-      const body = await request<{ scenarioSet: ScenarioSetRecord }>(`/scenario-sets/${encodeURIComponent(id)}`);
+      const body = await request<{ scenarioSet: ScenarioSetRecord }>(
+        `/scenario-sets/${encodeURIComponent(id)}`,
+      );
       return body.scenarioSet;
     },
     async create(input) {
-      const body = await request<{ scenarioSet: ScenarioSetRecord }>('/scenario-sets', { method: 'POST', body: input });
+      const body = await request<{ scenarioSet: ScenarioSetRecord }>('/scenario-sets', {
+        method: 'POST',
+        body: input,
+      });
       return body.scenarioSet;
     },
     async approve(id) {
-      const body = await request<{ scenarioSet: ScenarioSetRecord }>(`/scenario-sets/${encodeURIComponent(id)}/approve`, {
-        method: 'POST',
-      });
+      const body = await request<{ scenarioSet: ScenarioSetRecord }>(
+        `/scenario-sets/${encodeURIComponent(id)}/approve`,
+        {
+          method: 'POST',
+        },
+      );
       return body.scenarioSet;
     },
   },
 
   modelConfigurations: {
-    list: (params) => request<Paginated<ModelConfigurationRecord>>('/model-configurations', { query: { ...params } }),
+    list: (params) =>
+      request<Paginated<ModelConfigurationRecord>>('/model-configurations', {
+        query: { ...params },
+      }),
     async get(id) {
       const body = await request<{ modelConfiguration: ModelConfigurationRecord }>(
         `/model-configurations/${encodeURIComponent(id)}`,
@@ -364,24 +434,35 @@ export const api: Api = {
       return body.modelConfiguration;
     },
     async create(input) {
-      const body = await request<{ modelConfiguration: ModelConfigurationRecord }>('/model-configurations', {
-        method: 'POST',
-        body: input,
-      });
+      const body = await request<{ modelConfiguration: ModelConfigurationRecord }>(
+        '/model-configurations',
+        {
+          method: 'POST',
+          body: input,
+        },
+      );
       return body.modelConfiguration;
     },
   },
 
   analytics: {
-    summary: (filter) => request<AnalyticsSummary>('/analytics/summary', { query: query({ ...filter }) }),
-    movement: (filter) => request<MovementBridge>('/analytics/movement', { query: query({ ...filter }) }),
+    summary: (filter) =>
+      request<AnalyticsSummary>('/analytics/summary', { query: query({ ...filter }) }),
+    movement: (filter) =>
+      request<MovementBridge>('/analytics/movement', { query: query({ ...filter }) }),
     trend: (filter) => request<AnalyticsTrend>('/analytics/trend', { query: query({ ...filter }) }),
-    concentration: (filter) => request<AnalyticsConcentration>('/analytics/concentration', { query: query({ ...filter }) }),
-    drivers: (filter) => request<AnalyticsDrivers>('/analytics/drivers', { query: query({ ...filter }) }),
-    filters: (snapshotId) => request<PortfolioFilters>('/analytics/filters', { query: query({ snapshotId }) }),
-    scenarios: (params) => request<AnalyticsScenarios>('/analytics/scenarios', { query: query({ ...params }) }),
-    migration: (params) => request<AnalyticsMigration>('/analytics/migration', { query: query({ ...params }) }),
-    runComparison: (params) => request<RunComparison>('/analytics/run-comparison', { query: query({ ...params }) }),
+    concentration: (filter) =>
+      request<AnalyticsConcentration>('/analytics/concentration', { query: query({ ...filter }) }),
+    drivers: (filter) =>
+      request<AnalyticsDrivers>('/analytics/drivers', { query: query({ ...filter }) }),
+    filters: (snapshotId) =>
+      request<PortfolioFilters>('/analytics/filters', { query: query({ snapshotId }) }),
+    scenarios: (params) =>
+      request<AnalyticsScenarios>('/analytics/scenarios', { query: query({ ...params }) }),
+    migration: (params) =>
+      request<AnalyticsMigration>('/analytics/migration', { query: query({ ...params }) }),
+    runComparison: (params) =>
+      request<RunComparison>('/analytics/run-comparison', { query: query({ ...params }) }),
   },
 
   overrides: {
@@ -399,11 +480,13 @@ export const api: Api = {
       );
       return body.override;
     },
-    queue: (params) => request<Paginated<StageOverrideListItem>>('/stage-overrides', { query: { ...params } }),
+    queue: (params) =>
+      request<Paginated<StageOverrideListItem>>('/stage-overrides', { query: { ...params } }),
   },
 
   exceptions: {
-    list: (params) => request<Paginated<ExceptionItemRecord>>('/exceptions', { query: { ...params } }),
+    list: (params) =>
+      request<Paginated<ExceptionItemRecord>>('/exceptions', { query: { ...params } }),
     summary: () => request<ExceptionSummaryRecord>('/exceptions/summary'),
     async acknowledge(id, note) {
       const body = await request<{ exception: ExceptionItemRecord }>(
@@ -413,37 +496,54 @@ export const api: Api = {
       return body.exception;
     },
     async resolve(id, note) {
-      const body = await request<{ exception: ExceptionItemRecord }>(`/exceptions/${encodeURIComponent(id)}/resolve`, {
-        method: 'POST',
-        body: { note },
-      });
+      const body = await request<{ exception: ExceptionItemRecord }>(
+        `/exceptions/${encodeURIComponent(id)}/resolve`,
+        {
+          method: 'POST',
+          body: { note },
+        },
+      );
       return body.exception;
     },
   },
 
   audit: {
-    list: (params) => request<Paginated<AuditEventRecord>>('/audit-events', { query: { ...params } }),
+    list: (params) =>
+      request<Paginated<AuditEventRecord>>('/audit-events', { query: { ...params } }),
   },
 
   ai: {
     status: () => request<AiStatusResponse>('/ai/status'),
-    queryCopilot: (input) => request<CopilotQueryResponse>('/ai/copilot/query', { method: 'POST', body: input }),
-    listThreads: (params) => request<CopilotThreadListResponse>('/ai/copilot/threads', { query: { ...params } }),
-    getThread: (threadId) => request<CopilotThreadRecord>(`/ai/copilot/threads/${encodeURIComponent(threadId)}`),
+    queryCopilot: (input) =>
+      request<CopilotQueryResponse>('/ai/copilot/query', { method: 'POST', body: input }),
+    listThreads: (params) =>
+      request<CopilotThreadListResponse>('/ai/copilot/threads', { query: { ...params } }),
+    getThread: (threadId) =>
+      request<CopilotThreadRecord>(`/ai/copilot/threads/${encodeURIComponent(threadId)}`),
     feedback: (threadId, turnId, input) =>
       request<CopilotFeedbackResponse>(
         `/ai/copilot/threads/${encodeURIComponent(threadId)}/turns/${encodeURIComponent(turnId)}/feedback`,
         { method: 'POST', body: input },
       ),
-    explainEcl: (input) => request<AiResponse<EclExplanation>>('/ai/explain-ecl', { method: 'POST', body: input }),
+    explainEcl: (input) =>
+      request<AiResponse<EclExplanation>>('/ai/explain-ecl', { method: 'POST', body: input }),
     suggestImportMapping: (input) =>
-      request<AiResponse<ImportMappingSuggestionSet>>('/ai/import-mapping', { method: 'POST', body: input }),
+      request<AiResponse<ImportMappingSuggestionSet>>('/ai/import-mapping', {
+        method: 'POST',
+        body: input,
+      }),
     investigateQuality: (input) =>
-      request<AiResponse<DataQualityInvestigation>>('/ai/investigate-quality', { method: 'POST', body: input }),
+      request<AiResponse<DataQualityInvestigation>>('/ai/investigate-quality', {
+        method: 'POST',
+        body: input,
+      }),
     draftScenario: (input) =>
       request<AiResponse<ScenarioProposal>>('/ai/scenario-draft', { method: 'POST', body: input }),
     executiveCommentary: (input) =>
-      request<AiResponse<ExecutiveCommentary>>('/ai/executive-commentary', { method: 'POST', body: input }),
+      request<AiResponse<ExecutiveCommentary>>('/ai/executive-commentary', {
+        method: 'POST',
+        body: input,
+      }),
   },
 
   demo: {

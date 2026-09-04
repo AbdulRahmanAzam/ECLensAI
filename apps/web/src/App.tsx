@@ -11,21 +11,51 @@ import { ProtectedRoute } from '@/routes/ProtectedRoute';
 // needs the landing/login/shell code, and each page's own weight (a chart
 // library import, a large form) is fetched on first visit to that route
 // rather than paid by everyone up front.
-const AuditLogPage = lazy(() => import('@/pages/AuditLogPage').then((m) => ({ default: m.AuditLogPage })));
-const CopilotPage = lazy(() => import('@/pages/CopilotPage').then((m) => ({ default: m.CopilotPage })));
-const DashboardPage = lazy(() => import('@/pages/DashboardPage').then((m) => ({ default: m.DashboardPage })));
-const DocumentsPage = lazy(() => import('@/pages/DocumentsPage').then((m) => ({ default: m.DocumentsPage })));
-const EclRunDetailPage = lazy(() => import('@/pages/EclRunDetailPage').then((m) => ({ default: m.EclRunDetailPage })));
-const EclRunsPage = lazy(() => import('@/pages/EclRunsPage').then((m) => ({ default: m.EclRunsPage })));
-const ExceptionsPage = lazy(() => import('@/pages/ExceptionsPage').then((m) => ({ default: m.ExceptionsPage })));
-const ExposureDetailPage = lazy(() => import('@/pages/ExposureDetailPage').then((m) => ({ default: m.ExposureDetailPage })));
-const ImportsPage = lazy(() => import('@/pages/ImportsPage').then((m) => ({ default: m.ImportsPage })));
-const ModelGovernancePage = lazy(() => import('@/pages/ModelGovernancePage').then((m) => ({ default: m.ModelGovernancePage })));
-const OverridesPage = lazy(() => import('@/pages/OverridesPage').then((m) => ({ default: m.OverridesPage })));
-const PortfolioPage = lazy(() => import('@/pages/PortfolioPage').then((m) => ({ default: m.PortfolioPage })));
-const ReportsPage = lazy(() => import('@/pages/ReportsPage').then((m) => ({ default: m.ReportsPage })));
-const ScenariosPage = lazy(() => import('@/pages/ScenariosPage').then((m) => ({ default: m.ScenariosPage })));
-const SettingsPage = lazy(() => import('@/pages/SettingsPage').then((m) => ({ default: m.SettingsPage })));
+const AuditLogPage = lazy(() =>
+  import('@/pages/AuditLogPage').then((m) => ({ default: m.AuditLogPage })),
+);
+const CopilotPage = lazy(() =>
+  import('@/pages/CopilotPage').then((m) => ({ default: m.CopilotPage })),
+);
+const DashboardPage = lazy(() =>
+  import('@/pages/DashboardPage').then((m) => ({ default: m.DashboardPage })),
+);
+const DocumentsPage = lazy(() =>
+  import('@/pages/DocumentsPage').then((m) => ({ default: m.DocumentsPage })),
+);
+const EclRunDetailPage = lazy(() =>
+  import('@/pages/EclRunDetailPage').then((m) => ({ default: m.EclRunDetailPage })),
+);
+const EclRunsPage = lazy(() =>
+  import('@/pages/EclRunsPage').then((m) => ({ default: m.EclRunsPage })),
+);
+const ExceptionsPage = lazy(() =>
+  import('@/pages/ExceptionsPage').then((m) => ({ default: m.ExceptionsPage })),
+);
+const ExposureDetailPage = lazy(() =>
+  import('@/pages/ExposureDetailPage').then((m) => ({ default: m.ExposureDetailPage })),
+);
+const ImportsPage = lazy(() =>
+  import('@/pages/ImportsPage').then((m) => ({ default: m.ImportsPage })),
+);
+const ModelGovernancePage = lazy(() =>
+  import('@/pages/ModelGovernancePage').then((m) => ({ default: m.ModelGovernancePage })),
+);
+const OverridesPage = lazy(() =>
+  import('@/pages/OverridesPage').then((m) => ({ default: m.OverridesPage })),
+);
+const PortfolioPage = lazy(() =>
+  import('@/pages/PortfolioPage').then((m) => ({ default: m.PortfolioPage })),
+);
+const ReportsPage = lazy(() =>
+  import('@/pages/ReportsPage').then((m) => ({ default: m.ReportsPage })),
+);
+const ScenariosPage = lazy(() =>
+  import('@/pages/ScenariosPage').then((m) => ({ default: m.ScenariosPage })),
+);
+const SettingsPage = lazy(() =>
+  import('@/pages/SettingsPage').then((m) => ({ default: m.SettingsPage })),
+);
 
 function PageFallback() {
   return (

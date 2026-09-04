@@ -13,7 +13,11 @@
  */
 import { useState } from 'react';
 import { Copy, Sparkles } from 'lucide-react';
-import type { CommentaryMovement, ExecutiveCommentary, ExecutiveCommentaryRequest } from '@eclens/shared';
+import type {
+  CommentaryMovement,
+  ExecutiveCommentary,
+  ExecutiveCommentaryRequest,
+} from '@eclens/shared';
 import { api } from '@/api/client';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
@@ -28,15 +32,22 @@ function MovementList({ title, movements }: { title: string; movements: Commenta
   if (movements.length === 0) return null;
   return (
     <div>
-      <p className="mb-1.5 text-[11px] font-medium uppercase tracking-wider text-slate-400">{title}</p>
+      <p className="mb-1.5 text-2xs font-medium uppercase tracking-wider text-slate-400">{title}</p>
       <ul className="space-y-2">
         {movements.map((movement, index) => (
-          <li key={`${movement.claimKind}-${index}`} className="rounded-md border border-slate-200 bg-white px-3 py-2">
+          <li
+            key={`${movement.claimKind}-${index}`}
+            className="rounded-lg border border-line bg-surface px-3 py-2"
+          >
             <div className="flex flex-wrap items-center gap-1.5">
-              <Badge tone={CLAIM_TONE[movement.claimKind]}>{claimKindLabel(movement.claimKind)}</Badge>
+              <Badge tone={CLAIM_TONE[movement.claimKind]}>
+                {claimKindLabel(movement.claimKind)}
+              </Badge>
               <span className="text-xs font-medium text-navy-900">{movement.label}</span>
             </div>
-            <p className="mt-1 whitespace-pre-wrap text-xs leading-relaxed text-slate-600">{movement.detail}</p>
+            <p className="mt-1 whitespace-pre-wrap text-xs leading-relaxed text-slate-600">
+              {movement.detail}
+            </p>
             {movement.sourceRefs.length > 0 ? (
               <div className="mt-1.5">
                 <AiSourceRefs refs={movement.sourceRefs} title="" />
@@ -58,9 +69,13 @@ export interface ExecutiveCommentaryPanelProps {
 export function ExecutiveCommentaryPanel({ runId, runLabel }: ExecutiveCommentaryPanelProps) {
   const { push } = useToast();
   const [audience, setAudience] = useState('');
-  const commentary = useAiFeature<ExecutiveCommentaryRequest, ExecutiveCommentary>(api.ai.executiveCommentary);
+  const commentary = useAiFeature<ExecutiveCommentaryRequest, ExecutiveCommentary>(
+    api.ai.executiveCommentary,
+  );
 
-  const input: ExecutiveCommentaryRequest = audience.trim() ? { runId, audience: audience.trim() } : { runId };
+  const input: ExecutiveCommentaryRequest = audience.trim()
+    ? { runId, audience: audience.trim() }
+    : { runId };
   const ask = () => commentary.run(input);
 
   const copy = async () => {
@@ -86,7 +101,12 @@ export function ExecutiveCommentaryPanel({ runId, runLabel }: ExecutiveCommentar
       actions={
         <>
           {commentary.response?.result ? (
-            <Button size="sm" variant="ghost" icon={<Copy className="h-4 w-4" />} onClick={() => void copy()}>
+            <Button
+              size="sm"
+              variant="ghost"
+              icon={<Copy className="h-4 w-4" />}
+              onClick={() => void copy()}
+            >
               Copy
             </Button>
           ) : null}
@@ -110,18 +130,20 @@ export function ExecutiveCommentaryPanel({ runId, runLabel }: ExecutiveCommentar
       idle={
         <div className="space-y-3">
           <p className="text-xs leading-relaxed text-slate-500">
-            Nothing has been drafted yet. A commentary for {runLabel ?? 'this run'} will be written from the stored run
-            result, its snapshot and the scenario weights in force, with each claim labelled as a fact, an inference or a
-            recommendation.
+            Nothing has been drafted yet. A commentary for {runLabel ?? 'this run'} will be written
+            from the stored run result, its snapshot and the scenario weights in force, with each
+            claim labelled as a fact, an inference or a recommendation.
           </p>
           <label className="block">
-            <span className="text-[11px] font-medium uppercase tracking-wider text-slate-400">Audience (optional)</span>
+            <span className="text-2xs font-medium uppercase tracking-wider text-slate-400">
+              Audience (optional)
+            </span>
             <input
               value={audience}
               onChange={(event) => setAudience(event.target.value)}
               maxLength={120}
               placeholder="ALCO, board risk committee…"
-              className="mt-1 w-full rounded-md border border-slate-300 px-2.5 py-1.5 text-xs text-slate-700 focus:border-navy-500 focus:outline-none focus:ring-1 focus:ring-navy-500"
+              className="mt-1 w-full rounded-lg border border-slate-300 px-2.5 py-1.5 text-xs text-slate-700 focus:border-navy-500 focus:outline-none focus:ring-1 focus:ring-navy-500"
             />
           </label>
         </div>

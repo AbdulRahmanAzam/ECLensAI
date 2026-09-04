@@ -72,7 +72,8 @@ function parameterRows(config: ModelConfigurationRecord): ParameterRow[] {
     {
       label: 'PD ceiling',
       value: formatDecimalText(config.pdCeiling),
-      description: 'Upper PD clamp. Survival logic separately guarantees cumulative PD never exceeds 1.',
+      description:
+        'Upper PD clamp. Survival logic separately guarantees cumulative PD never exceeds 1.',
     },
     {
       label: 'Lifetime horizon cap',
@@ -87,17 +88,20 @@ function parameterRows(config: ModelConfigurationRecord): ParameterRow[] {
     {
       label: 'Twelve-month window',
       value: `${config.twelveMonthWindow} months`,
-      description: 'Periods summed for Stage 1. This is the window of possible default events, not of cash shortfalls.',
+      description:
+        'Periods summed for Stage 1. This is the window of possible default events, not of cash shortfalls.',
     },
     {
       label: 'Discount convention',
       value: config.discountConvention,
-      description: 'END_PERIOD discounts at t/12; MID_PERIOD at (t − 0.5)/12. Twelve periods per year.',
+      description:
+        'END_PERIOD discounts at t/12; MID_PERIOD at (t − 0.5)/12. Twelve periods per year.',
     },
     {
       label: 'Effective interest rate range',
       value: `${formatDecimalText(config.effectiveInterestRateMin)} … ${formatDecimalText(config.effectiveInterestRateMax)}`,
-      description: 'Inclusive supported range. A rate outside it fails validation rather than being clamped.',
+      description:
+        'Inclusive supported range. A rate outside it fails validation rather than being clamped.',
     },
     {
       label: 'Default credit conversion factor',
@@ -107,7 +111,8 @@ function parameterRows(config: ModelConfigurationRecord): ParameterRow[] {
     {
       label: 'Default simplified EAD profile',
       value: config.defaultSimplifiedEadProfile,
-      description: 'Used only when no contractual amortization schedule was supplied; always labeled in output.',
+      description:
+        'Used only when no contractual amortization schedule was supplied; always labeled in output.',
     },
   ];
 }
@@ -165,7 +170,8 @@ function validationChecks(config: ModelConfigurationRecord): Check[] {
     {
       label: 'Deterministic engine, no model-generated figures',
       ok: true,
-      detail: 'ECL is produced by versioned, unit-tested decimal code. No LLM contributes to any persisted number.',
+      detail:
+        'ECL is produced by versioned, unit-tested decimal code. No LLM contributes to any persisted number.',
     },
   ];
 }
@@ -294,7 +300,10 @@ export function ModelGovernancePage() {
 
   const canWrite = can('model:write');
   const configs = useMemo(() => data?.items ?? [], [data]);
-  const active = useMemo(() => configs.find((config) => config.isActive) ?? configs[0] ?? null, [configs]);
+  const active = useMemo(
+    () => configs.find((config) => config.isActive) ?? configs[0] ?? null,
+    [configs],
+  );
 
   const create = useMutation({
     mutationFn: (input: ConfigDraft) =>
@@ -348,15 +357,20 @@ export function ModelGovernancePage() {
     },
     onError: (error) => {
       const message =
-        error instanceof ApiError ? error.message : 'The model configuration could not be published.';
+        error instanceof ApiError
+          ? error.message
+          : 'The model configuration could not be published.';
       setFormError(message);
       push('error', 'Version rejected', message);
     },
   });
 
-  const patch = (fields: Partial<ConfigDraft>) => setDraft((current) => (current ? { ...current, ...fields } : current));
+  const patch = (fields: Partial<ConfigDraft>) =>
+    setDraft((current) => (current ? { ...current, ...fields } : current));
   const patchRuleSet = (fields: Partial<ConfigDraft['ruleSet']>) =>
-    setDraft((current) => (current ? { ...current, ruleSet: { ...current.ruleSet, ...fields } } : current));
+    setDraft((current) =>
+      current ? { ...current, ruleSet: { ...current.ruleSet, ...fields } } : current,
+    );
 
   const draftValid =
     draft !== null &&
@@ -419,7 +433,7 @@ export function ModelGovernancePage() {
                 {active.description ? (
                   <p className="text-xs leading-relaxed text-slate-600">{active.description}</p>
                 ) : null}
-                <div className="space-y-1.5 border-t border-slate-100 pt-3 text-sm">
+                <div className="space-y-1.5 border-t border-line-soft pt-3 text-sm">
                   <div className="flex justify-between gap-2">
                     <span className="text-slate-500">Status</span>
                     <Badge tone={active.isActive ? 'positive' : 'neutral'}>
@@ -432,7 +446,9 @@ export function ModelGovernancePage() {
                   </div>
                   <div className="flex justify-between gap-2">
                     <span className="text-slate-500">Approved on</span>
-                    <span className="tabular-nums text-slate-800">{formatDate(active.approvedAt)}</span>
+                    <span className="tabular-nums text-slate-800">
+                      {formatDate(active.approvedAt)}
+                    </span>
                   </div>
                   <div className="flex justify-between gap-2">
                     <span className="text-slate-500">Created by</span>
@@ -440,7 +456,9 @@ export function ModelGovernancePage() {
                   </div>
                   <div className="flex justify-between gap-2">
                     <span className="text-slate-500">Supersedes</span>
-                    <span className="tabular-nums text-slate-800">{active.supersedesVersion ?? '—'}</span>
+                    <span className="tabular-nums text-slate-800">
+                      {active.supersedesVersion ?? '—'}
+                    </span>
                   </div>
                   <div className="flex justify-between gap-2">
                     <span className="flex items-center gap-1.5 text-slate-500">
@@ -453,16 +471,23 @@ export function ModelGovernancePage() {
             </Card>
 
             <Card className="lg:col-span-2">
-              <CardHeader title="Approved parameters" description="Every value the deterministic engine reads" />
+              <CardHeader
+                title="Approved parameters"
+                description="Every value the deterministic engine reads"
+              />
               <CardContent>
                 <dl className="grid gap-x-6 gap-y-4 sm:grid-cols-2">
                   {parameterRows(active).map((row) => (
-                    <div key={row.label} className="border-b border-slate-100 pb-3 last:border-b-0">
+                    <div key={row.label} className="border-b border-line-soft pb-3 last:border-b-0">
                       <div className="flex items-baseline justify-between gap-2">
                         <dt className="text-xs font-medium text-slate-600">{row.label}</dt>
-                        <dd className="text-right text-sm font-semibold tabular-nums text-navy-900">{row.value}</dd>
+                        <dd className="text-right text-sm font-semibold tabular-nums text-navy-900">
+                          {row.value}
+                        </dd>
                       </div>
-                      <p className="mt-0.5 text-[11px] leading-relaxed text-slate-400">{row.description}</p>
+                      <p className="mt-0.5 text-2xs leading-relaxed text-slate-400">
+                        {row.description}
+                      </p>
                     </div>
                   ))}
                 </dl>
@@ -481,13 +506,33 @@ export function ModelGovernancePage() {
                   {[
                     ['Stage 3 DPD backstop', `${active.stagingRuleSet.stage3DpdThreshold} days`],
                     ['Stage 2 DPD backstop', `${active.stagingRuleSet.stage2DpdThreshold} days`],
-                    ['Rating-notch SICR threshold', `${active.stagingRuleSet.ratingNotchSicrThreshold} notches`],
-                    ['PD-increase SICR multiple', `× ${formatDecimalText(String(active.stagingRuleSet.pdIncreaseSicrMultiple))}`],
-                    ['PD-increase absolute floor', formatDecimalText(String(active.stagingRuleSet.pdIncreaseSicrAbsoluteFloor))],
-                    ['Near-threshold DPD buffer', `${active.stagingRuleSet.nearThresholdDpdBufferDays} days`],
-                    ['Near-threshold PD buffer', formatDecimalText(String(active.stagingRuleSet.nearThresholdPdBufferFraction))],
+                    [
+                      'Rating-notch SICR threshold',
+                      `${active.stagingRuleSet.ratingNotchSicrThreshold} notches`,
+                    ],
+                    [
+                      'PD-increase SICR multiple',
+                      `× ${formatDecimalText(String(active.stagingRuleSet.pdIncreaseSicrMultiple))}`,
+                    ],
+                    [
+                      'PD-increase absolute floor',
+                      formatDecimalText(String(active.stagingRuleSet.pdIncreaseSicrAbsoluteFloor)),
+                    ],
+                    [
+                      'Near-threshold DPD buffer',
+                      `${active.stagingRuleSet.nearThresholdDpdBufferDays} days`,
+                    ],
+                    [
+                      'Near-threshold PD buffer',
+                      formatDecimalText(
+                        String(active.stagingRuleSet.nearThresholdPdBufferFraction),
+                      ),
+                    ],
                   ].map(([label, value]) => (
-                    <div key={label} className="flex items-baseline justify-between gap-3 border-b border-slate-100 pb-2 last:border-b-0">
+                    <div
+                      key={label}
+                      className="flex items-baseline justify-between gap-3 border-b border-line-soft pb-2 last:border-b-0"
+                    >
                       <dt className="text-xs text-slate-500">{label}</dt>
                       <dd className="tabular-nums font-medium text-slate-800">{value}</dd>
                     </div>
@@ -505,7 +550,7 @@ export function ModelGovernancePage() {
                           className={
                             enabled
                               ? 'rounded-full border border-navy-200 bg-navy-50 px-2 py-0.5 font-mono text-[10px] text-navy-800'
-                              : 'rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5 font-mono text-[10px] text-slate-400 line-through'
+                              : 'rounded-full border border-line bg-surface-2 px-2 py-0.5 font-mono text-[10px] text-slate-400 line-through'
                           }
                         >
                           {code}
@@ -518,7 +563,10 @@ export function ModelGovernancePage() {
             </Card>
 
             <Card>
-              <CardHeader title="Validation checks" description="Read off this version, not asserted separately" />
+              <CardHeader
+                title="Validation checks"
+                description="Read off this version, not asserted separately"
+              />
               <CardContent className="space-y-4">
                 <ul className="space-y-3">
                   {validationChecks(active).map((check) => (
@@ -535,25 +583,34 @@ export function ModelGovernancePage() {
                     </li>
                   ))}
                 </ul>
-                <div className="border-t border-slate-100 pt-3">
-                  <p className="mb-1.5 text-xs font-medium text-slate-600">Exception queue thresholds</p>
+                <div className="border-t border-line-soft pt-3">
+                  <p className="mb-1.5 text-xs font-medium text-slate-600">
+                    Exception queue thresholds
+                  </p>
                   <div className="flex flex-wrap gap-x-5 gap-y-1 text-xs text-slate-500">
                     <span>
                       Relative change{' '}
                       <span className="tabular-nums text-slate-800">
-                        {formatDecimalPercent(thresholdText(active.exceptionThresholds.relativeChange), 0)}
+                        {formatDecimalPercent(
+                          thresholdText(active.exceptionThresholds.relativeChange),
+                          0,
+                        )}
                       </span>
                     </span>
                     <span>
                       Absolute change{' '}
                       <span className="tabular-nums text-slate-800">
-                        {formatDecimalText(thresholdText(active.exceptionThresholds.absoluteChange))}
+                        {formatDecimalText(
+                          thresholdText(active.exceptionThresholds.absoluteChange),
+                        )}
                       </span>
                     </span>
                     <span>
                       Materiality floor{' '}
                       <span className="tabular-nums text-slate-800">
-                        {formatDecimalText(thresholdText(active.exceptionThresholds.materialityFloor))}
+                        {formatDecimalText(
+                          thresholdText(active.exceptionThresholds.materialityFloor),
+                        )}
                       </span>
                     </span>
                   </div>
@@ -563,14 +620,20 @@ export function ModelGovernancePage() {
           </div>
 
           <Card className="mt-4">
-            <CardHeader title="Version history" description="Superseded versions stay readable; the runs locked to them are unchanged" />
+            <CardHeader
+              title="Version history"
+              description="Superseded versions stay readable; the runs locked to them are unchanged"
+            />
             <CardContent>
               {configs.length === 0 ? (
-                <EmptyState title="No model configurations" description="Publish a version before running the engine." />
+                <EmptyState
+                  title="No model configurations"
+                  description="Publish a version before running the engine."
+                />
               ) : (
                 <div className="overflow-x-auto">
                   <table className="w-full min-w-[720px] text-left text-sm">
-                    <thead className="border-b border-slate-200 text-[11px] uppercase tracking-wide text-slate-500">
+                    <thead className="border-b border-line text-2xs uppercase tracking-wide text-slate-500">
                       <tr>
                         <th className="py-2 pr-3 font-medium">Version</th>
                         <th className="py-2 pr-3 font-medium">Name</th>
@@ -580,28 +643,34 @@ export function ModelGovernancePage() {
                         <th className="py-2 font-medium">State</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-100">
+                    <tbody className="divide-y divide-line-soft">
                       {configs.map((config) => (
                         <tr key={config.id} className={config.isActive ? '' : 'opacity-70'}>
                           <td className="py-2.5 pr-3">
-                            <span className="block tabular-nums font-medium text-navy-900">{config.version}</span>
+                            <span className="block tabular-nums font-medium text-navy-900">
+                              {config.version}
+                            </span>
                             {config.supersedesVersion ? (
-                              <span className="block text-[11px] text-slate-400">
+                              <span className="block text-2xs text-slate-400">
                                 supersedes {config.supersedesVersion}
                               </span>
                             ) : null}
                           </td>
                           <td className="py-2.5 pr-3 text-slate-700">{config.name}</td>
                           <td className="py-2.5 pr-3">
-                            <code className="font-mono text-[11px] text-slate-500">
+                            <code className="font-mono text-2xs text-slate-500">
                               {config.stagingRuleSet.id} v{config.stagingRuleSet.version}
                             </code>
                           </td>
                           <td className="py-2.5 pr-3 text-xs text-slate-500">
-                            <span className="block tabular-nums">{formatDate(config.approvedAt)}</span>
+                            <span className="block tabular-nums">
+                              {formatDate(config.approvedAt)}
+                            </span>
                             <span className="block">{config.approvedBy}</span>
                           </td>
-                          <td className="py-2.5 pr-3 tabular-nums text-slate-700">{config.lockedByRunCount}</td>
+                          <td className="py-2.5 pr-3 tabular-nums text-slate-700">
+                            {config.lockedByRunCount}
+                          </td>
                           <td className="py-2.5">
                             <Badge tone={config.isActive ? 'positive' : 'neutral'}>
                               {config.isActive ? 'active' : 'superseded'}
@@ -642,7 +711,11 @@ export function ModelGovernancePage() {
         {draft ? (
           <div className="space-y-4">
             <div className="grid gap-3 sm:grid-cols-2">
-              <Input label="Name" value={draft.name} onChange={(event) => patch({ name: event.target.value })} />
+              <Input
+                label="Name"
+                value={draft.name}
+                onChange={(event) => patch({ name: event.target.value })}
+              />
               <Input
                 label="Version"
                 value={draft.version}
@@ -669,14 +742,34 @@ export function ModelGovernancePage() {
               placeholder="What changed in this version and why"
             />
 
-            <div className="rounded-lg border border-slate-200 p-3">
+            <div className="rounded-lg border border-line p-3">
               <p className="mb-2 text-xs font-medium text-slate-700">Bounds and horizon</p>
               <div className="grid gap-3 sm:grid-cols-3">
-                <Input label="LGD floor" value={draft.lgdFloor} onChange={(event) => patch({ lgdFloor: event.target.value })} />
-                <Input label="LGD ceiling" value={draft.lgdCeiling} onChange={(event) => patch({ lgdCeiling: event.target.value })} />
-                <Input label="Default CCF" value={draft.defaultCreditConversionFactor} onChange={(event) => patch({ defaultCreditConversionFactor: event.target.value })} />
-                <Input label="PD floor" value={draft.pdFloor} onChange={(event) => patch({ pdFloor: event.target.value })} />
-                <Input label="PD ceiling" value={draft.pdCeiling} onChange={(event) => patch({ pdCeiling: event.target.value })} />
+                <Input
+                  label="LGD floor"
+                  value={draft.lgdFloor}
+                  onChange={(event) => patch({ lgdFloor: event.target.value })}
+                />
+                <Input
+                  label="LGD ceiling"
+                  value={draft.lgdCeiling}
+                  onChange={(event) => patch({ lgdCeiling: event.target.value })}
+                />
+                <Input
+                  label="Default CCF"
+                  value={draft.defaultCreditConversionFactor}
+                  onChange={(event) => patch({ defaultCreditConversionFactor: event.target.value })}
+                />
+                <Input
+                  label="PD floor"
+                  value={draft.pdFloor}
+                  onChange={(event) => patch({ pdFloor: event.target.value })}
+                />
+                <Input
+                  label="PD ceiling"
+                  value={draft.pdCeiling}
+                  onChange={(event) => patch({ pdCeiling: event.target.value })}
+                />
                 <Input
                   label="12-month window"
                   value={draft.twelveMonthWindow}
@@ -692,12 +785,22 @@ export function ModelGovernancePage() {
                   value={draft.maxCalculationPeriods}
                   onChange={(event) => patch({ maxCalculationPeriods: event.target.value })}
                 />
-                <Input label="EIR min" value={draft.effectiveInterestRateMin} onChange={(event) => patch({ effectiveInterestRateMin: event.target.value })} />
-                <Input label="EIR max" value={draft.effectiveInterestRateMax} onChange={(event) => patch({ effectiveInterestRateMax: event.target.value })} />
+                <Input
+                  label="EIR min"
+                  value={draft.effectiveInterestRateMin}
+                  onChange={(event) => patch({ effectiveInterestRateMin: event.target.value })}
+                />
+                <Input
+                  label="EIR max"
+                  value={draft.effectiveInterestRateMax}
+                  onChange={(event) => patch({ effectiveInterestRateMax: event.target.value })}
+                />
                 <Select
                   label="Discount convention"
                   value={draft.discountConvention}
-                  onChange={(event) => patch({ discountConvention: event.target.value as DiscountConvention })}
+                  onChange={(event) =>
+                    patch({ discountConvention: event.target.value as DiscountConvention })
+                  }
                 >
                   {DISCOUNT_CONVENTIONS.map((convention) => (
                     <option key={convention} value={convention}>
@@ -709,7 +812,9 @@ export function ModelGovernancePage() {
                   label="Simplified EAD profile"
                   value={draft.defaultSimplifiedEadProfile}
                   onChange={(event) =>
-                    patch({ defaultSimplifiedEadProfile: event.target.value as SimplifiedEadProfile })
+                    patch({
+                      defaultSimplifiedEadProfile: event.target.value as SimplifiedEadProfile,
+                    })
                   }
                 >
                   {SIMPLIFIED_EAD_PROFILES.map((profile) => (
@@ -721,7 +826,7 @@ export function ModelGovernancePage() {
               </div>
             </div>
 
-            <div className="rounded-lg border border-slate-200 p-3">
+            <div className="rounded-lg border border-line p-3">
               <div className="mb-2 grid gap-3 sm:grid-cols-2">
                 <Input
                   label="Staging rule set id"
@@ -748,7 +853,9 @@ export function ModelGovernancePage() {
                 <Input
                   label="Rating notches for SICR"
                   value={draft.ruleSet.ratingNotchSicrThreshold}
-                  onChange={(event) => patchRuleSet({ ratingNotchSicrThreshold: event.target.value })}
+                  onChange={(event) =>
+                    patchRuleSet({ ratingNotchSicrThreshold: event.target.value })
+                  }
                 />
                 <Input
                   label="PD-increase multiple"
@@ -758,17 +865,23 @@ export function ModelGovernancePage() {
                 <Input
                   label="PD-increase floor"
                   value={draft.ruleSet.pdIncreaseSicrAbsoluteFloor}
-                  onChange={(event) => patchRuleSet({ pdIncreaseSicrAbsoluteFloor: event.target.value })}
+                  onChange={(event) =>
+                    patchRuleSet({ pdIncreaseSicrAbsoluteFloor: event.target.value })
+                  }
                 />
                 <Input
                   label="Near-threshold DPD buffer"
                   value={draft.ruleSet.nearThresholdDpdBufferDays}
-                  onChange={(event) => patchRuleSet({ nearThresholdDpdBufferDays: event.target.value })}
+                  onChange={(event) =>
+                    patchRuleSet({ nearThresholdDpdBufferDays: event.target.value })
+                  }
                 />
                 <Input
                   label="Near-threshold PD buffer"
                   value={draft.ruleSet.nearThresholdPdBufferFraction}
-                  onChange={(event) => patchRuleSet({ nearThresholdPdBufferFraction: event.target.value })}
+                  onChange={(event) =>
+                    patchRuleSet({ nearThresholdPdBufferFraction: event.target.value })
+                  }
                 />
               </div>
               <p className="mb-2 mt-3 text-xs font-medium text-slate-700">Enabled rules</p>
@@ -790,8 +903,10 @@ export function ModelGovernancePage() {
                         className="mt-0.5 h-4 w-4 rounded border-slate-300 text-navy-700 focus:ring-navy-500"
                       />
                       <span>
-                        <code className="font-mono text-[11px]">{code}</code>
-                        <span className="block text-[11px] text-slate-400">{stagingCodeLabel(code)}</span>
+                        <code className="font-mono text-2xs">{code}</code>
+                        <span className="block text-2xs text-slate-400">
+                          {stagingCodeLabel(code)}
+                        </span>
                       </span>
                     </label>
                   );
@@ -799,28 +914,43 @@ export function ModelGovernancePage() {
               </div>
             </div>
 
-            <div className="rounded-lg border border-slate-200 p-3">
+            <div className="rounded-lg border border-line p-3">
               <p className="mb-2 text-xs font-medium text-slate-700">Exception queue thresholds</p>
               <div className="grid gap-3 sm:grid-cols-3">
                 <Input
                   label="Relative change"
                   value={draft.exceptionThresholds.relativeChange}
                   onChange={(event) =>
-                    patch({ exceptionThresholds: { ...draft.exceptionThresholds, relativeChange: event.target.value } })
+                    patch({
+                      exceptionThresholds: {
+                        ...draft.exceptionThresholds,
+                        relativeChange: event.target.value,
+                      },
+                    })
                   }
                 />
                 <Input
                   label="Absolute change"
                   value={draft.exceptionThresholds.absoluteChange}
                   onChange={(event) =>
-                    patch({ exceptionThresholds: { ...draft.exceptionThresholds, absoluteChange: event.target.value } })
+                    patch({
+                      exceptionThresholds: {
+                        ...draft.exceptionThresholds,
+                        absoluteChange: event.target.value,
+                      },
+                    })
                   }
                 />
                 <Input
                   label="Materiality floor"
                   value={draft.exceptionThresholds.materialityFloor}
                   onChange={(event) =>
-                    patch({ exceptionThresholds: { ...draft.exceptionThresholds, materialityFloor: event.target.value } })
+                    patch({
+                      exceptionThresholds: {
+                        ...draft.exceptionThresholds,
+                        materialityFloor: event.target.value,
+                      },
+                    })
                   }
                 />
               </div>
@@ -837,17 +967,23 @@ export function ModelGovernancePage() {
             </label>
 
             {formError ? (
-              <p className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700" role="alert">
+              <p
+                className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700"
+                role="alert"
+              >
                 {formError}
               </p>
             ) : (
-              <p className="flex items-start gap-2 text-[11px] leading-relaxed text-slate-500">
+              <p className="flex items-start gap-2 text-2xs leading-relaxed text-slate-500">
                 <Info className="mt-0.5 h-3.5 w-3.5 shrink-0" />
-                Publishing never mutates an existing version. {active?.lockedByRunCount ?? 0} run(s) are frozen to
-                the configuration shown above and will keep reporting exactly the figures they already produced.
+                Publishing never mutates an existing version. {active?.lockedByRunCount ?? 0} run(s)
+                are frozen to the configuration shown above and will keep reporting exactly the
+                figures they already produced.
               </p>
             )}
-            <p className="text-[11px] text-slate-400">Last published {active ? formatDateTime(active.createdAt) : '—'}</p>
+            <p className="text-2xs text-slate-400">
+              Last published {active ? formatDateTime(active.createdAt) : '—'}
+            </p>
           </div>
         ) : null}
       </Modal>

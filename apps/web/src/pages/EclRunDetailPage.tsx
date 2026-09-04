@@ -30,7 +30,13 @@ import {
   XCircle,
 } from 'lucide-react';
 import type { RunResultRowRecord, RunStatus, Stage } from '@eclens/shared';
-import { formatDate, formatDateTime, formatDecimalPercent, formatDecimalText, formatVersionedRef } from '@eclens/shared';
+import {
+  formatDate,
+  formatDateTime,
+  formatDecimalPercent,
+  formatDecimalText,
+  formatVersionedRef,
+} from '@eclens/shared';
 import { api } from '@/api/client';
 import { ApiError, saveBase64File } from '@/api/http';
 import { ExecutiveCommentaryPanel } from '@/components/ai/ExecutiveCommentaryPanel';
@@ -75,34 +81,36 @@ const REVIEW_COMMENT_MIN = 3;
 
 type ReviewAction = 'submit' | 'approve' | 'reject';
 
-const REVIEW_COPY: Record<ReviewAction, { title: string; label: string; confirm: string; tone: 'primary' | 'danger' }> =
-  {
-    submit: {
-      title: 'Submit for review',
-      label: 'An optional note for the reviewer',
-      confirm: 'Submit for review',
-      tone: 'primary',
-    },
-    approve: {
-      title: 'Approve and lock this run',
-      label: 'Review comment (required, at least 3 characters)',
-      confirm: 'Approve and lock',
-      tone: 'primary',
-    },
-    reject: {
-      title: 'Reject this run',
-      label: 'Review comment (required, at least 3 characters)',
-      confirm: 'Reject',
-      tone: 'danger',
-    },
-  };
+const REVIEW_COPY: Record<
+  ReviewAction,
+  { title: string; label: string; confirm: string; tone: 'primary' | 'danger' }
+> = {
+  submit: {
+    title: 'Submit for review',
+    label: 'An optional note for the reviewer',
+    confirm: 'Submit for review',
+    tone: 'primary',
+  },
+  approve: {
+    title: 'Approve and lock this run',
+    label: 'Review comment (required, at least 3 characters)',
+    confirm: 'Approve and lock',
+    tone: 'primary',
+  },
+  reject: {
+    title: 'Reject this run',
+    label: 'Review comment (required, at least 3 characters)',
+    confirm: 'Reject',
+    tone: 'danger',
+  },
+};
 
 const messageOf = (error: unknown, fallback: string): string =>
   error instanceof ApiError ? error.message : fallback;
 
 function Fact({ label, value }: { label: string; value: React.ReactNode }) {
   return (
-    <div className="flex items-baseline justify-between gap-3 border-b border-slate-100 py-1.5 last:border-0">
+    <div className="flex items-baseline justify-between gap-3 border-b border-line-soft py-1.5 last:border-0">
       <dt className="shrink-0 text-xs text-slate-500">{label}</dt>
       <dd className="text-right text-xs text-slate-800">{value}</dd>
     </div>
@@ -120,13 +128,22 @@ export function EclRunDetailPage() {
   const [comment, setComment] = useState('');
   const [openExposureId, setOpenExposureId] = useState<string | null>(null);
 
-  const results = useServerList<{ stage?: Stage }>({}, { sortBy: 'lossAllowance', sortDir: 'desc', pageSize: 25 });
+  const results = useServerList<{ stage?: Stage }>(
+    {},
+    { sortBy: 'lossAllowance', sortDir: 'desc', pageSize: 25 },
+  );
 
-  const { data: run, isLoading, isError, refetch } = useQuery({
+  const {
+    data: run,
+    isLoading,
+    isError,
+    refetch,
+  } = useQuery({
     queryKey: ['ecl-run', runId],
     queryFn: () => api.runs.get(runId ?? ''),
     enabled: runId !== undefined,
-    refetchInterval: (query) => (IN_FLIGHT.includes(query.state.data?.status ?? 'DRAFT') ? 1500 : false),
+    refetchInterval: (query) =>
+      IN_FLIGHT.includes(query.state.data?.status ?? 'DRAFT') ? 1500 : false,
   });
 
   const hasResults = run?.totals !== null && run?.totals !== undefined;
@@ -155,7 +172,8 @@ export function EclRunDetailPage() {
       );
       refreshAll();
     },
-    onError: (error) => push('error', 'Execution rejected', messageOf(error, 'The run could not be started.')),
+    onError: (error) =>
+      push('error', 'Execution rejected', messageOf(error, 'The run could not be started.')),
   });
 
   const report = useMutation({
@@ -164,7 +182,12 @@ export function EclRunDetailPage() {
       saveBase64File(download.fileName, download.contentBase64, download.contentType);
       push('success', 'Report downloaded', download.fileName);
     },
-    onError: (error) => push('error', 'Report generation failed', messageOf(error, 'The report could not be generated.')),
+    onError: (error) =>
+      push(
+        'error',
+        'Report generation failed',
+        messageOf(error, 'The report could not be generated.'),
+      ),
   });
 
   const review = useMutation({
@@ -196,11 +219,16 @@ export function EclRunDetailPage() {
     onError: (error) => {
       // The four-eyes guard is a policy answer, not a failure to parse: show it as
       // the API phrased it so the reviewer knows exactly which rule stopped them.
-      push('error', 'Review rejected', messageOf(error, 'The review action could not be completed.'));
+      push(
+        'error',
+        'Review rejected',
+        messageOf(error, 'The review action could not be completed.'),
+      );
     },
   });
 
-  if (isError) return <ErrorState title="The run could not be loaded" onRetry={() => void refetch()} />;
+  if (isError)
+    return <ErrorState title="The run could not be loaded" onRetry={() => void refetch()} />;
 
   if (isLoading || !run) {
     return (
@@ -257,34 +285,46 @@ export function EclRunDetailPage() {
     }),
     column.accessor('grossCarryingAmount', {
       header: 'Gross',
-      cell: (info) => <span className="tabular-nums">{moneyString(info.getValue(), { compact: true })}</span>,
+      cell: (info) => (
+        <span className="tabular-nums">{moneyString(info.getValue(), { compact: true })}</span>
+      ),
     }),
     column.accessor('ead', {
       header: 'EAD',
       enableSorting: false,
       cell: (info) => (
-        <span className="tabular-nums text-slate-600">{moneyString(info.getValue(), { compact: true })}</span>
+        <span className="tabular-nums text-slate-600">
+          {moneyString(info.getValue(), { compact: true })}
+        </span>
       ),
     }),
     column.accessor('pd', {
       header: 'PD',
       enableSorting: false,
-      cell: (info) => <span className="tabular-nums">{formatDecimalPercent(info.getValue(), 3)}</span>,
+      cell: (info) => (
+        <span className="tabular-nums">{formatDecimalPercent(info.getValue(), 3)}</span>
+      ),
     }),
     column.accessor('lgd', {
       header: 'LGD',
       enableSorting: false,
-      cell: (info) => <span className="tabular-nums">{formatDecimalPercent(info.getValue(), 1)}</span>,
+      cell: (info) => (
+        <span className="tabular-nums">{formatDecimalPercent(info.getValue(), 1)}</span>
+      ),
     }),
     column.accessor('lossAllowance', {
       header: 'Loss allowance',
       cell: (info) => (
-        <span className="font-medium tabular-nums text-red-700">{moneyString(info.getValue())}</span>
+        <span className="font-medium tabular-nums text-red-700">
+          {moneyString(info.getValue())}
+        </span>
       ),
     }),
     column.accessor('coverageRatio', {
       header: 'Coverage',
-      cell: (info) => <span className="tabular-nums text-slate-600">{percentString(info.getValue())}</span>,
+      cell: (info) => (
+        <span className="tabular-nums text-slate-600">{percentString(info.getValue())}</span>
+      ),
     }),
     column.accessor('changeVsPreviousRun', {
       header: 'Δ vs previous',
@@ -376,7 +416,11 @@ export function EclRunDetailPage() {
             ) : null}
             {canReview ? (
               <>
-                <Button size="sm" icon={<CheckCircle2 className="h-3.5 w-3.5" />} onClick={() => setReviewAction('approve')}>
+                <Button
+                  size="sm"
+                  icon={<CheckCircle2 className="h-3.5 w-3.5" />}
+                  onClick={() => setReviewAction('approve')}
+                >
                   Approve
                 </Button>
                 <Button
@@ -405,8 +449,8 @@ export function EclRunDetailPage() {
       {IN_FLIGHT.includes(run.status) ? (
         <p className="mb-4 flex items-center gap-2 rounded-lg border border-navy-200 bg-navy-50 px-4 py-3 text-sm text-navy-800">
           <RefreshCw className="h-4 w-4 shrink-0 animate-spin" />
-          {run.status === 'PENDING' ? 'Queued for execution…' : 'Calculating…'} This page polls the run until it
-          settles.
+          {run.status === 'PENDING' ? 'Queued for execution…' : 'Calculating…'} This page polls the
+          run until it settles.
         </p>
       ) : null}
 
@@ -414,7 +458,9 @@ export function EclRunDetailPage() {
         <MetricCard
           label="Total loss allowance"
           value={totals ? moneyString(totals.totalLossAllowance) : '—'}
-          hint={totals ? `${totals.exposureCount} exposure(s) · scenario-weighted` : 'No results yet'}
+          hint={
+            totals ? `${totals.exposureCount} exposure(s) · scenario-weighted` : 'No results yet'
+          }
           loading={isLoading}
         />
         <MetricCard
@@ -439,7 +485,10 @@ export function EclRunDetailPage() {
           <CardHeader title="Run parameters" description="Locked when the run was created" />
           <CardContent>
             <dl>
-              <Fact label="Snapshot" value={`${run.snapshotLabel} · ${run.snapshotId.slice(0, 12)}…`} />
+              <Fact
+                label="Snapshot"
+                value={`${run.snapshotLabel} · ${run.snapshotId.slice(0, 12)}…`}
+              />
               <Fact
                 label="Model configuration"
                 value={
@@ -459,12 +508,22 @@ export function EclRunDetailPage() {
               <Fact label="Created by" value={run.createdByName} />
               <Fact
                 label="Started"
-                value={run.startedAt ? formatDateTime(run.startedAt) : <span className="text-slate-400">not run</span>}
+                value={
+                  run.startedAt ? (
+                    formatDateTime(run.startedAt)
+                  ) : (
+                    <span className="text-slate-400">not run</span>
+                  )
+                }
               />
               <Fact
                 label="Completed"
                 value={
-                  run.completedAt ? formatDateTime(run.completedAt) : <span className="text-slate-400">not run</span>
+                  run.completedAt ? (
+                    formatDateTime(run.completedAt)
+                  ) : (
+                    <span className="text-slate-400">not run</span>
+                  )
                 }
               />
               <Fact
@@ -494,7 +553,7 @@ export function EclRunDetailPage() {
                 </li>
               ))}
             </ul>
-            <p className="border-t border-slate-100 pt-2 text-[11px] text-slate-500">
+            <p className="border-t border-line-soft pt-2 text-2xs text-slate-500">
               {run.readiness.ready
                 ? 'All checks pass — execution is allowed.'
                 : `${failedChecks.length} check(s) failed — the API will answer 409 RUN_NOT_READY.`}
@@ -515,7 +574,7 @@ export function EclRunDetailPage() {
                   <li key={code} className="flex items-center justify-between text-xs">
                     <span className="text-slate-700">{code}</span>
                     <span className="tabular-nums text-slate-600">
-                      <span className="font-mono text-[11px]">{formatDecimalText(weight)}</span>{' '}
+                      <span className="font-mono text-2xs">{formatDecimalText(weight)}</span>{' '}
                       <span className="text-slate-400">({formatDecimalPercent(weight, 1)})</span>
                     </span>
                   </li>
@@ -523,7 +582,7 @@ export function EclRunDetailPage() {
               </ul>
             )}
             {totals ? (
-              <p className="border-t border-slate-100 pt-2 text-[11px] leading-relaxed text-slate-500">
+              <p className="border-t border-line-soft pt-2 text-2xs leading-relaxed text-slate-500">
                 {totals.roundingPolicy}
               </p>
             ) : null}
@@ -533,7 +592,10 @@ export function EclRunDetailPage() {
 
       <div className="mt-4 grid gap-4 lg:grid-cols-2">
         <Card>
-          <CardHeader title="Stage buckets" description="Allowance and net carrying amount by IFRS 9 stage" />
+          <CardHeader
+            title="Stage buckets"
+            description="Allowance and net carrying amount by IFRS 9 stage"
+          />
           <CardContent>
             {totals ? (
               <div className="overflow-x-auto">
@@ -548,13 +610,15 @@ export function EclRunDetailPage() {
                       <th className="px-2 py-1.5 text-right font-medium">Coverage</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-100">
+                  <tbody className="divide-y divide-line-soft">
                     {totals.stageBuckets.map((bucket) => (
                       <tr key={bucket.stage}>
                         <td className="px-2 py-1.5">
                           <StageBadge stage={bucket.stage} />
                         </td>
-                        <td className="px-2 py-1.5 text-right tabular-nums">{bucket.exposureCount}</td>
+                        <td className="px-2 py-1.5 text-right tabular-nums">
+                          {bucket.exposureCount}
+                        </td>
                         <td className="px-2 py-1.5 text-right tabular-nums">
                           {moneyString(bucket.grossCarryingAmount, { compact: true })}
                         </td>
@@ -573,21 +637,28 @@ export function EclRunDetailPage() {
                 </table>
               </div>
             ) : (
-              <p className="text-xs text-slate-500">No totals — this run has not produced results.</p>
+              <p className="text-xs text-slate-500">
+                No totals — this run has not produced results.
+              </p>
             )}
           </CardContent>
         </Card>
 
         <Card>
-          <CardHeader title="Review trail" description="Four-eyes: the creator cannot approve or reject their own run" />
+          <CardHeader
+            title="Review trail"
+            description="Four-eyes: the creator cannot approve or reject their own run"
+          />
           <CardContent>
             <dl>
               <Fact
                 label="Submitted"
                 value={
-                  run.submittedAt
-                    ? `${run.submittedByName ?? '—'} · ${formatDateTime(run.submittedAt)}`
-                    : <span className="text-slate-400">not submitted</span>
+                  run.submittedAt ? (
+                    `${run.submittedByName ?? '—'} · ${formatDateTime(run.submittedAt)}`
+                  ) : (
+                    <span className="text-slate-400">not submitted</span>
+                  )
                 }
               />
               <Fact
@@ -605,19 +676,27 @@ export function EclRunDetailPage() {
               <Fact
                 label="Reviewed"
                 value={
-                  run.reviewedAt
-                    ? `${run.reviewedByName ?? '—'} · ${formatDateTime(run.reviewedAt)}`
-                    : <span className="text-slate-400">—</span>
+                  run.reviewedAt ? (
+                    `${run.reviewedByName ?? '—'} · ${formatDateTime(run.reviewedAt)}`
+                  ) : (
+                    <span className="text-slate-400">—</span>
+                  )
                 }
               />
               {run.reviewComment ? <Fact label="Comment" value={run.reviewComment} /> : null}
               <Fact
                 label="Locked at"
-                value={run.lockedAt ? formatDateTime(run.lockedAt) : <span className="text-slate-400">not locked</span>}
+                value={
+                  run.lockedAt ? (
+                    formatDateTime(run.lockedAt)
+                  ) : (
+                    <span className="text-slate-400">not locked</span>
+                  )
+                }
               />
             </dl>
             {locked && run.lockedConfiguration ? (
-              <p className="mt-2 flex items-start gap-2 rounded-md border border-navy-200 bg-navy-50 px-3 py-2 text-[11px] leading-relaxed text-navy-800">
+              <p className="mt-2 flex items-start gap-2 rounded-lg border border-navy-200 bg-navy-50 px-3 py-2 text-2xs leading-relaxed text-navy-800">
                 <Lock className="mt-0.5 h-3 w-3 shrink-0" />
                 Frozen model configuration{' '}
                 <code>
@@ -639,11 +718,13 @@ export function EclRunDetailPage() {
               </p>
             ) : null}
             {isCreator && canReview ? (
-              <p className="mt-2 flex items-start gap-2 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-[11px] leading-relaxed text-amber-800">
+              <p className="mt-2 flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-2xs leading-relaxed text-amber-800">
                 <AlertTriangle className="mt-0.5 h-3 w-3 shrink-0" />
                 You created this run, so the API will refuse your approval or rejection with{' '}
-                <code>RUN_SELF_{reviewAction === 'reject' ? 'REJECTION' : 'APPROVAL'}_PROHIBITED</code>. Another
-                reviewer must decide.
+                <code>
+                  RUN_SELF_{reviewAction === 'reject' ? 'REJECTION' : 'APPROVAL'}_PROHIBITED
+                </code>
+                . Another reviewer must decide.
               </p>
             ) : null}
           </CardContent>
@@ -652,11 +733,16 @@ export function EclRunDetailPage() {
 
       {run.lineage ? (
         <Card className="mt-4">
-          <CardHeader title="Lineage" description="Every input version, the reporting date, the actor and the timestamp" />
+          <CardHeader
+            title="Lineage"
+            description="Every input version, the reporting date, the actor and the timestamp"
+          />
           <CardContent>
             <dl className="grid grid-cols-2 gap-x-6 gap-y-3 md:grid-cols-4">
               <div>
-                <dt className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Input version</dt>
+                <dt className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">
+                  Input version
+                </dt>
                 <dd className="mt-0.5 text-xs">
                   <code>{run.lineage.inputVersion}</code>
                 </dd>
@@ -674,7 +760,9 @@ export function EclRunDetailPage() {
                 </dd>
               </div>
               <div>
-                <dt className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Staging rule set</dt>
+                <dt className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">
+                  Staging rule set
+                </dt>
                 <dd className="mt-0.5 text-xs">
                   <code>
                     {run.lineage.stagingRuleSetId} v{run.lineage.stagingRuleSetVersion}
@@ -682,7 +770,9 @@ export function EclRunDetailPage() {
                 </dd>
               </div>
               <div>
-                <dt className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Scenario set</dt>
+                <dt className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">
+                  Scenario set
+                </dt>
                 <dd className="mt-0.5 text-xs">
                   {formatVersionedRef(
                     run.lineage.scenarioSetName,
@@ -692,21 +782,34 @@ export function EclRunDetailPage() {
                 </dd>
               </div>
               <div>
-                <dt className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Reporting date</dt>
-                <dd className="mt-0.5 text-xs tabular-nums">{formatDate(run.lineage.reportingDate)}</dd>
-              </div>
-              <div>
-                <dt className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Calculated at</dt>
-                <dd className="mt-0.5 text-xs tabular-nums">{formatDateTime(run.lineage.calculatedAt)}</dd>
-              </div>
-              <div>
-                <dt className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Actor</dt>
-                <dd className="mt-0.5 text-xs">
-                  {run.lineage.actorName} <span className="text-slate-400">({run.lineage.actorId})</span>
+                <dt className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">
+                  Reporting date
+                </dt>
+                <dd className="mt-0.5 text-xs tabular-nums">
+                  {formatDate(run.lineage.reportingDate)}
                 </dd>
               </div>
               <div>
-                <dt className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Rounding</dt>
+                <dt className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">
+                  Calculated at
+                </dt>
+                <dd className="mt-0.5 text-xs tabular-nums">
+                  {formatDateTime(run.lineage.calculatedAt)}
+                </dd>
+              </div>
+              <div>
+                <dt className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">
+                  Actor
+                </dt>
+                <dd className="mt-0.5 text-xs">
+                  {run.lineage.actorName}{' '}
+                  <span className="text-slate-400">({run.lineage.actorId})</span>
+                </dd>
+              </div>
+              <div>
+                <dt className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">
+                  Rounding
+                </dt>
                 <dd className="mt-0.5 text-xs text-slate-600">{run.lineage.roundingPolicy}</dd>
               </div>
             </dl>
@@ -735,7 +838,10 @@ export function EclRunDetailPage() {
                 className="w-32"
                 value={results.filters.stage ?? ''}
                 onChange={(event) =>
-                  results.setFilter('stage', event.target.value === '' ? undefined : (Number(event.target.value) as Stage))
+                  results.setFilter(
+                    'stage',
+                    event.target.value === '' ? undefined : (Number(event.target.value) as Stage),
+                  )
                 }
               >
                 <option value="">All stages</option>
@@ -757,7 +863,10 @@ export function EclRunDetailPage() {
             }
           />
         ) : resultsQuery.isError ? (
-          <ErrorState title="The results could not be loaded" onRetry={() => void resultsQuery.refetch()} />
+          <ErrorState
+            title="The results could not be loaded"
+            onRetry={() => void resultsQuery.refetch()}
+          />
         ) : (
           <>
             <DataTable
@@ -784,12 +893,15 @@ export function EclRunDetailPage() {
       </Card>
 
       {totals ? (
-        <p className="mt-3 text-[11px] leading-relaxed text-slate-500">
-          The portfolio total is the exact sum of the per-exposure allowances, and each exposure allowance is the exact
-          sum of its rounded scenario contributions — so this table adds up to{' '}
-          <span className="font-medium text-slate-700">{moneyString(totals.totalLossAllowance)}</span> with no
-          unexplained residual. Per-row EAD is rounded to 2 decimals before it is summed, so the total EAD can differ
-          from a hand-summed column by at most half a rupee per exposure.
+        <p className="mt-3 text-2xs leading-relaxed text-slate-500">
+          The portfolio total is the exact sum of the per-exposure allowances, and each exposure
+          allowance is the exact sum of its rounded scenario contributions — so this table adds up
+          to{' '}
+          <span className="font-medium text-slate-700">
+            {moneyString(totals.totalLossAllowance)}
+          </span>{' '}
+          with no unexplained residual. Per-row EAD is rounded to 2 decimals before it is summed, so
+          the total EAD can differ from a hand-summed column by at most half a rupee per exposure.
         </p>
       ) : null}
 
@@ -853,7 +965,9 @@ export function EclRunDetailPage() {
           value={comment}
           onChange={(event) => setComment(event.target.value)}
           error={
-            reviewAction !== null && reviewAction !== 'submit' && comment.trim().length < REVIEW_COMMENT_MIN
+            reviewAction !== null &&
+            reviewAction !== 'submit' &&
+            comment.trim().length < REVIEW_COMMENT_MIN
               ? `At least ${REVIEW_COMMENT_MIN} characters are required for the audit trail.`
               : undefined
           }

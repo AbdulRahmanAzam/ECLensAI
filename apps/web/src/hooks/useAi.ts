@@ -55,7 +55,9 @@ export function useAiStatus() {
  * "Explain again" reads as a failure. `reset` is exposed for the panels that do
  * want to clear, such as when the exposure being explained changes.
  */
-export function useAiFeature<TInput, TResult>(call: (input: TInput) => Promise<AiResponse<TResult>>) {
+export function useAiFeature<TInput, TResult>(
+  call: (input: TInput) => Promise<AiResponse<TResult>>,
+) {
   const mutation = useMutation({ mutationFn: call });
 
   const failure = mutation.error

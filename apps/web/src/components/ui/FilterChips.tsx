@@ -27,14 +27,14 @@ export function FilterChips({ chips, onRemove, onClearAll }: FilterChipsProps) {
         <span
           key={chip.key}
           role="listitem"
-          className="inline-flex items-center gap-1 rounded-full border border-navy-200 bg-navy-50 py-1 pl-2.5 pr-1.5 text-xs font-medium text-navy-800"
+          className="inline-flex animate-fade-in items-center gap-1 rounded-full bg-brand-soft py-1 pl-2.5 pr-1.5 text-xs font-medium text-navy-700 ring-1 ring-inset ring-navy-500/20"
         >
           {chip.label}
           <button
             type="button"
             onClick={() => onRemove(chip.key)}
             aria-label={`Remove filter: ${chip.label}`}
-            className="rounded-full p-0.5 text-navy-500 hover:bg-navy-100 hover:text-navy-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-navy-500"
+            className="rounded-full p-0.5 text-navy-500 transition-colors hover:bg-navy-100 hover:text-navy-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/50"
           >
             <X className="h-3 w-3" />
           </button>
@@ -44,7 +44,7 @@ export function FilterChips({ chips, onRemove, onClearAll }: FilterChipsProps) {
         <button
           type="button"
           onClick={onClearAll}
-          className="text-xs font-medium text-slate-500 underline-offset-2 hover:text-slate-700 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-navy-500"
+          className="rounded px-1 text-xs font-medium text-slate-500 underline-offset-2 transition-colors hover:text-slate-800 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/50"
         >
           Clear all
         </button>

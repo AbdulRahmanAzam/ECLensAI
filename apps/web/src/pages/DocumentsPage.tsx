@@ -47,7 +47,13 @@ import type {
 import { DOCUMENT_CATEGORIES, DOCUMENT_PROCESSING_STATUSES, formatDateTime } from '@eclens/shared';
 import { api } from '@/api/client';
 import { ApiError } from '@/api/http';
-import { AiAvailabilityNotice, AiCaveats, AiDisclaimer, AiLineList, AiProse } from '@/components/ai/AiChrome';
+import {
+  AiAvailabilityNotice,
+  AiCaveats,
+  AiDisclaimer,
+  AiLineList,
+  AiProse,
+} from '@/components/ai/AiChrome';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { Card, CardHeader } from '@/components/ui/Card';
@@ -109,7 +115,7 @@ function VerbatimBadge({ verbatim }: { verbatim: boolean }) {
 function PageRef({ page, chunkOrdinal }: { page?: number | null; chunkOrdinal?: number }) {
   if (!page && chunkOrdinal == null) return null;
   return (
-    <span className="font-mono text-[11px] text-slate-400">
+    <span className="font-mono text-2xs text-slate-400">
       {page ? `p. ${page}` : 'no page number'}
       {chunkOrdinal != null ? ` · chunk ${chunkOrdinal}` : ''}
     </span>
@@ -126,7 +132,7 @@ function SignalCard({
   onDecide: (decision: Decision) => void;
 }) {
   return (
-    <li className="rounded-md border border-slate-200 bg-white px-3 py-2.5">
+    <li className="rounded-lg border border-line bg-surface px-3 py-2.5">
       <div className="flex flex-wrap items-center gap-1.5">
         <Badge tone={SEVERITY_TONE[signal.severity]}>{signal.severity.toLowerCase()}</Badge>
         <span className="text-xs font-medium text-navy-900">{signal.title}</span>
@@ -139,7 +145,7 @@ function SignalCard({
         for the proposal, and a signal the reviewer cannot check against the
         document is a signal they are being asked to take on trust.
       */}
-      <p className="mt-1.5 flex items-start gap-1.5 border-l-2 border-slate-200 pl-2 text-[11px] italic leading-relaxed text-slate-500">
+      <p className="mt-1.5 flex items-start gap-1.5 border-l-2 border-line pl-2 text-2xs italic leading-relaxed text-slate-500">
         <Quote className="mt-0.5 h-3 w-3 shrink-0" />
         <span>{signal.supportingText}</span>
       </p>
@@ -149,25 +155,35 @@ function SignalCard({
         {signal.status === 'PROPOSED' ? (
           canDecide ? (
             <span className="ml-auto flex gap-2">
-              <Button size="sm" variant="secondary" icon={<Check className="h-3.5 w-3.5" />} onClick={() => onDecide('ACCEPTED')}>
+              <Button
+                size="sm"
+                variant="secondary"
+                icon={<Check className="h-3.5 w-3.5" />}
+                onClick={() => onDecide('ACCEPTED')}
+              >
                 Accept
               </Button>
-              <Button size="sm" variant="ghost" icon={<X className="h-3.5 w-3.5" />} onClick={() => onDecide('REJECTED')}>
+              <Button
+                size="sm"
+                variant="ghost"
+                icon={<X className="h-3.5 w-3.5" />}
+                onClick={() => onDecide('REJECTED')}
+              >
                 Reject
               </Button>
             </span>
           ) : (
-            <span className="ml-auto text-[11px] text-slate-400">Your role cannot decide this</span>
+            <span className="ml-auto text-2xs text-slate-400">Your role cannot decide this</span>
           )
         ) : (
-          <span className="ml-auto text-[11px] text-slate-500">
+          <span className="ml-auto text-2xs text-slate-500">
             {signal.decidedBy} · {formatDateTime(signal.decidedAt ?? '')}
           </span>
         )}
       </div>
 
       {signal.status !== 'PROPOSED' && signal.decisionNote ? (
-        <p className="mt-1.5 rounded bg-slate-50 px-2 py-1.5 text-[11px] leading-relaxed text-slate-600">
+        <p className="mt-1.5 rounded bg-surface-2 px-2 py-1.5 text-2xs leading-relaxed text-slate-600">
           <span className="font-medium text-slate-500">Note: </span>
           {signal.decisionNote}
         </p>
@@ -186,10 +202,10 @@ export function DocumentsPage() {
   const canWrite = can('document:write');
   const canDelete = can('document:delete');
 
-  const list = useServerList<{ category?: DocumentCategory; processingStatus?: DocumentProcessingStatus }>(
-    {},
-    { sortBy: 'uploadedAt', pageSize: 25 },
-  );
+  const list = useServerList<{
+    category?: DocumentCategory;
+    processingStatus?: DocumentProcessingStatus;
+  }>({}, { sortBy: 'uploadedAt', pageSize: 25 });
 
   const [uploadOpen, setUploadOpen] = useState(false);
   const [file, setFile] = useState<File | null>(null);
@@ -281,7 +297,11 @@ export function DocumentsPage() {
       }
     },
     onError: (error: unknown) => {
-      push('error', 'Extraction request refused', messageOf(error, 'The request did not reach the server.'));
+      push(
+        'error',
+        'Extraction request refused',
+        messageOf(error, 'The request did not reach the server.'),
+      );
     },
   });
 
@@ -291,7 +311,11 @@ export function DocumentsPage() {
   const remove = useMutation({
     mutationFn: (target: DocumentRecord) => api.documents.remove(target.publicId),
     onSuccess: (_result, target) => {
-      push('success', 'Document deleted', `${target.name} is no longer searchable and its citations no longer resolve.`);
+      push(
+        'success',
+        'Document deleted',
+        `${target.name} is no longer searchable and its citations no longer resolve.`,
+      );
       setPendingDelete(null);
       if (selectedId === target.publicId) close();
       invalidate();
@@ -326,7 +350,11 @@ export function DocumentsPage() {
     },
     onError: (error: unknown) => {
       setPendingDecision(null);
-      push('error', 'Decision not recorded', messageOf(error, 'The decision could not be recorded.'));
+      push(
+        'error',
+        'Decision not recorded',
+        messageOf(error, 'The decision could not be recorded.'),
+      );
       invalidate();
     },
   });
@@ -365,7 +393,7 @@ export function DocumentsPage() {
         return (
           <div className="max-w-sm">
             <p className="truncate font-medium text-slate-800">{info.getValue()}</p>
-            <p className="truncate text-[11px] text-slate-500">
+            <p className="truncate text-2xs text-slate-500">
               {row.documentType ?? row.mimeType}
               {row.seeded ? ' · seeded governance library' : ''}
             </p>
@@ -396,9 +424,9 @@ export function DocumentsPage() {
       cell: (info) => {
         const signals = info.getValue();
         const proposed = signals.filter((signal) => signal.status === 'PROPOSED').length;
-        if (signals.length === 0) return <span className="text-[11px] text-slate-400">none</span>;
+        if (signals.length === 0) return <span className="text-2xs text-slate-400">none</span>;
         return (
-          <span className="flex items-center gap-1.5 text-[11px] text-slate-600">
+          <span className="flex items-center gap-1.5 text-2xs text-slate-600">
             <span className="tabular-nums">{signals.length}</span>
             {proposed > 0 ? <Badge tone="warning">{proposed} awaiting decision</Badge> : null}
           </span>
@@ -407,14 +435,16 @@ export function DocumentsPage() {
     }),
     column.accessor('sizeBytes', {
       header: 'Size',
-      cell: (info) => <span className="tabular-nums text-xs text-slate-600">{formatBytes(info.getValue())}</span>,
+      cell: (info) => (
+        <span className="tabular-nums text-xs text-slate-600">{formatBytes(info.getValue())}</span>
+      ),
     }),
     column.accessor('uploadedAt', {
       header: 'Uploaded',
       cell: (info) => (
         <div>
           <p className="tabular-nums text-xs text-slate-500">{formatDateTime(info.getValue())}</p>
-          <p className="text-[11px] text-slate-400">{info.row.original.uploadedBy}</p>
+          <p className="text-2xs text-slate-400">{info.row.original.uploadedBy}</p>
         </div>
       ),
     }),
@@ -455,7 +485,9 @@ export function DocumentsPage() {
             availability.available ? (
               <Badge tone="positive">extraction available · {availability.model}</Badge>
             ) : (
-              <Badge tone="neutral">indexing only · {availability.reason.replace(/_/g, ' ').toLowerCase()}</Badge>
+              <Badge tone="neutral">
+                indexing only · {availability.reason.replace(/_/g, ' ').toLowerCase()}
+              </Badge>
             )
           ) : undefined
         }
@@ -471,9 +503,10 @@ export function DocumentsPage() {
       {availability && !availability.available ? (
         <div className="mb-4">
           <AiAvailabilityNotice availability={availability}>
-            <p className="mt-1.5 text-[11px] leading-relaxed text-slate-500">
-              Documents already stored stay indexed and citable, and the copilot can still quote from them. What is
-              unavailable is extraction: no new facts or proposed signals can be produced until a model is configured.
+            <p className="mt-1.5 text-2xs leading-relaxed text-slate-500">
+              Documents already stored stay indexed and citable, and the copilot can still quote
+              from them. What is unavailable is extraction: no new facts or proposed signals can be
+              produced until a model is configured.
             </p>
           </AiAvailabilityNotice>
         </div>
@@ -491,7 +524,10 @@ export function DocumentsPage() {
             aria-label="Filter by category"
             value={list.filters.category ?? ''}
             onChange={(event) =>
-              list.setFilter('category', event.target.value === '' ? undefined : (event.target.value as DocumentCategory))
+              list.setFilter(
+                'category',
+                event.target.value === '' ? undefined : (event.target.value as DocumentCategory),
+              )
             }
           >
             <option value="">All categories</option>
@@ -507,7 +543,9 @@ export function DocumentsPage() {
             onChange={(event) =>
               list.setFilter(
                 'processingStatus',
-                event.target.value === '' ? undefined : (event.target.value as DocumentProcessingStatus),
+                event.target.value === ''
+                  ? undefined
+                  : (event.target.value as DocumentProcessingStatus),
               )
             }
           >
@@ -568,13 +606,20 @@ export function DocumentsPage() {
             }
           />
         )}
-        {documents.data ? <Pagination meta={documents.data.meta} onPageChange={list.setPage} loading={documents.isLoading} /> : null}
+        {documents.data ? (
+          <Pagination
+            meta={documents.data.meta}
+            onPageChange={list.setPage}
+            loading={documents.isLoading}
+          />
+        ) : null}
       </Card>
 
-      <p className="mt-3 text-[11px] leading-relaxed text-slate-500">
-        Uploaded text is treated as data, never as instructions: it cannot change the system policy, cannot call an
-        application action, and is screened for injection attempts before a model sees it. Full text of copyrighted
-        standards is not bundled — upload your own licensed copy if you need it cited.
+      <p className="mt-3 text-2xs leading-relaxed text-slate-500">
+        Uploaded text is treated as data, never as instructions: it cannot change the system policy,
+        cannot call an application action, and is screened for injection attempts before a model
+        sees it. Full text of copyrighted standards is not bundled — upload your own licensed copy
+        if you need it cited.
       </p>
 
       {/* ------------------------------------------------------------------ */}
@@ -593,7 +638,7 @@ export function DocumentsPage() {
         footer={
           selected ? (
             <span className="flex w-full items-center justify-between gap-2">
-              <span className="font-mono text-[11px] text-slate-400">{selected.publicId}</span>
+              <span className="font-mono text-2xs text-slate-400">{selected.publicId}</span>
               <span className="flex gap-2">
                 {canWrite && selected.processingStatus !== 'UNSUPPORTED' ? (
                   <Button
@@ -601,7 +646,9 @@ export function DocumentsPage() {
                     variant="secondary"
                     icon={<Sparkles className="h-3.5 w-3.5" />}
                     loading={extract.isPending}
-                    onClick={() => extract.mutate({ id: selected.publicId, force: Boolean(extraction) })}
+                    onClick={() =>
+                      extract.mutate({ id: selected.publicId, force: Boolean(extraction) })
+                    }
                   >
                     {extraction ? 'Re-extract' : 'Extract facts and signals'}
                   </Button>
@@ -624,7 +671,10 @@ export function DocumentsPage() {
         {document.isError ? (
           <ErrorState
             title="This document could not be opened"
-            description={messageOf(document.error, 'It may have been deleted, or it belongs to another organisation.')}
+            description={messageOf(
+              document.error,
+              'It may have been deleted, or it belongs to another organisation.',
+            )}
             onRetry={() => void document.refetch()}
           />
         ) : !selected ? (
@@ -647,7 +697,7 @@ export function DocumentsPage() {
             </div>
 
             {selected.message ? (
-              <p className="rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-[11px] leading-relaxed text-slate-600">
+              <p className="rounded-lg border border-line bg-surface-2 px-3 py-2 text-2xs leading-relaxed text-slate-600">
                 {selected.message}
               </p>
             ) : null}
@@ -655,17 +705,18 @@ export function DocumentsPage() {
             {extract.isPending ? (
               <p className="flex items-center gap-2 text-xs text-slate-500">
                 <Loader2 className="h-3.5 w-3.5 animate-spin text-navy-500" />
-                Reading the document and checking every extracted figure against the text it came from…
+                Reading the document and checking every extracted figure against the text it came
+                from…
               </p>
             ) : null}
             {extractRefusal ? (
               extractRefusal.status === 'UNAVAILABLE' ? (
                 <AiAvailabilityNotice availability={extractRefusal.availability} />
               ) : (
-                <p className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-xs leading-relaxed text-red-700">
+                <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs leading-relaxed text-red-700">
                   {extractRefusal.message}
                   {extractRefusal.aiRequestId ? (
-                    <span className="mt-1 block font-mono text-[11px] text-red-500">
+                    <span className="mt-1 block font-mono text-2xs text-red-500">
                       AI request {extractRefusal.aiRequestId}
                     </span>
                   ) : null}
@@ -673,7 +724,7 @@ export function DocumentsPage() {
               )
             ) : null}
 
-            <div className="grid grid-cols-2 gap-2 text-[11px] text-slate-500">
+            <div className="grid grid-cols-2 gap-2 text-2xs text-slate-500">
               <div>
                 <p className="uppercase tracking-wider text-slate-400">MIME type</p>
                 <p className="mt-0.5 font-mono text-slate-600">{selected.mimeType}</p>
@@ -688,10 +739,12 @@ export function DocumentsPage() {
 
             {extraction ? (
               <>
-                <div className="border-t border-slate-200 pt-3">
+                <div className="border-t border-line pt-3">
                   <div className="mb-2 flex flex-wrap items-center gap-1.5">
                     <FileText className="h-4 w-4 text-slate-400" />
-                    <span className="text-sm font-medium text-slate-800">{extraction.documentType}</span>
+                    <span className="text-sm font-medium text-slate-800">
+                      {extraction.documentType}
+                    </span>
                     <Badge tone="warning">approval required</Badge>
                   </div>
                   <AiProse title="Summary" body={extraction.summary} />
@@ -699,10 +752,10 @@ export function DocumentsPage() {
 
                 {extraction.extractedFacts.length > 0 ? (
                   <div>
-                    <p className="mb-1.5 text-[11px] font-medium uppercase tracking-wider text-slate-400">
+                    <p className="mb-1.5 text-2xs font-medium uppercase tracking-wider text-slate-400">
                       Extracted facts ({extraction.extractedFacts.length})
                     </p>
-                    <ul className="divide-y divide-slate-100 rounded-md border border-slate-200">
+                    <ul className="divide-y divide-line-soft rounded-lg border border-line">
                       {extraction.extractedFacts.map((fact, index) => (
                         <li key={`${fact.label}-${index}`} className="px-3 py-2">
                           <div className="flex flex-wrap items-center gap-1.5">
@@ -713,7 +766,9 @@ export function DocumentsPage() {
                             </span>
                           </div>
                           <p className="mt-0.5 font-mono text-xs text-navy-900">{fact.value}</p>
-                          {fact.asOf ? <p className="mt-0.5 text-[11px] text-slate-500">as of {fact.asOf}</p> : null}
+                          {fact.asOf ? (
+                            <p className="mt-0.5 text-2xs text-slate-500">as of {fact.asOf}</p>
+                          ) : null}
                         </li>
                       ))}
                     </ul>
@@ -722,16 +777,21 @@ export function DocumentsPage() {
 
                 {extraction.citations.length > 0 ? (
                   <div>
-                    <p className="mb-1.5 text-[11px] font-medium uppercase tracking-wider text-slate-400">
+                    <p className="mb-1.5 text-2xs font-medium uppercase tracking-wider text-slate-400">
                       Citations ({extraction.citations.length})
                     </p>
                     <ul className="space-y-1.5">
                       {extraction.citations.map((citation, index) => (
-                        <li key={`${citation.page ?? 0}-${index}`} className="rounded-md bg-slate-50 px-3 py-2">
-                          <p className="text-[11px] italic leading-relaxed text-slate-600">“{citation.quote}”</p>
+                        <li
+                          key={`${citation.page ?? 0}-${index}`}
+                          className="rounded-lg bg-surface-2 px-3 py-2"
+                        >
+                          <p className="text-2xs italic leading-relaxed text-slate-600">
+                            “{citation.quote}”
+                          </p>
                           <p className="mt-1 flex flex-wrap items-center gap-1.5">
                             <PageRef page={citation.page} chunkOrdinal={citation.chunkOrdinal} />
-                            <span className="text-[11px] text-slate-400">{citation.documentName}</span>
+                            <span className="text-2xs text-slate-400">{citation.documentName}</span>
                           </p>
                         </li>
                       ))}
@@ -743,18 +803,19 @@ export function DocumentsPage() {
                 <AiCaveats title="Warnings" items={extraction.warnings} />
               </>
             ) : (
-              <p className="rounded-md border border-dashed border-slate-300 px-3 py-2.5 text-[11px] leading-relaxed text-slate-500">
+              <p className="rounded-lg border border-dashed border-slate-300 px-3 py-2.5 text-2xs leading-relaxed text-slate-500">
                 {selected.processingStatus === 'INDEXED'
                   ? 'Indexed and citable, but not yet extracted. Extraction needs a model; run it to get facts, citations and proposed risk signals.'
-                  : selected.processingStatus === 'FAILED' || selected.processingStatus === 'UNSUPPORTED'
+                  : selected.processingStatus === 'FAILED' ||
+                      selected.processingStatus === 'UNSUPPORTED'
                     ? 'This document could not be processed, so there is nothing to extract from it. The message above says why.'
                     : 'Processing has not finished yet. Reload once the status above reads indexed.'}
               </p>
             )}
 
             {selected.signals.length > 0 ? (
-              <div className="border-t border-slate-200 pt-3">
-                <p className="mb-1.5 text-[11px] font-medium uppercase tracking-wider text-slate-400">
+              <div className="border-t border-line pt-3">
+                <p className="mb-1.5 text-2xs font-medium uppercase tracking-wider text-slate-400">
                   Proposed risk signals ({selected.signals.length})
                 </p>
                 <ul className="space-y-2">
@@ -765,14 +826,19 @@ export function DocumentsPage() {
                       canDecide={canWrite}
                       onDecide={(decision) => {
                         setDecisionNote('');
-                        setPendingDecision({ documentPublicId: selected.publicId, signal, decision });
+                        setPendingDecision({
+                          documentPublicId: selected.publicId,
+                          signal,
+                          decision,
+                        });
                       }}
                     />
                   ))}
                 </ul>
-                <p className="mt-2 text-[11px] leading-relaxed text-slate-500">
-                  Deciding a signal records your decision, your note and your name in the audit trail. It does not raise
-                  an exception, override a stage, or change an exposure — those stay on their own permissioned paths.
+                <p className="mt-2 text-2xs leading-relaxed text-slate-500">
+                  Deciding a signal records your decision, your note and your name in the audit
+                  trail. It does not raise an exception, override a stage, or change an exposure —
+                  those stay on their own permissioned paths.
                 </p>
               </div>
             ) : null}
@@ -793,7 +859,11 @@ export function DocumentsPage() {
         description="PDF only. The file is parsed, chunked and indexed for citation; nothing in it is executed as an instruction."
         footer={
           <span className="flex justify-end gap-2">
-            <Button variant="ghost" onClick={() => setUploadOpen(false)} disabled={upload.isPending}>
+            <Button
+              variant="ghost"
+              onClick={() => setUploadOpen(false)}
+              disabled={upload.isPending}
+            >
               Cancel
             </Button>
             <Button
@@ -814,11 +884,11 @@ export function DocumentsPage() {
               type="file"
               accept={PDF_MIME_TYPE}
               onChange={(event) => pickFile(event.target.files?.[0] ?? null)}
-              className="mt-1.5 block w-full text-xs text-slate-600 file:mr-3 file:rounded-md file:border file:border-slate-300 file:bg-white file:px-3 file:py-1.5 file:text-xs file:font-medium file:text-slate-700 hover:file:bg-slate-50"
+              className="mt-1.5 block w-full text-xs text-slate-600 file:mr-3 file:rounded-lg file:border file:border-slate-300 file:bg-surface file:px-3 file:py-1.5 file:text-xs file:font-medium file:text-slate-700 hover:file:bg-surface-2"
             />
           </label>
           {file ? (
-            <p className="text-[11px] text-slate-500">
+            <p className="text-2xs text-slate-500">
               {file.name} · {formatBytes(file.size)}
               {maxBytes ? ` · limit ${formatBytes(maxBytes)}` : ''}
             </p>
@@ -847,13 +917,16 @@ export function DocumentsPage() {
           />
 
           {fileError ? (
-            <p className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-xs leading-relaxed text-red-700" role="alert">
+            <p
+              className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs leading-relaxed text-red-700"
+              role="alert"
+            >
               {fileError}
             </p>
           ) : (
-            <p className="text-[11px] leading-relaxed text-slate-500">
-              A byte-identical file that is already stored is reported rather than silently deduplicated, so you will
-              know when two citations point at the same document.
+            <p className="text-2xs leading-relaxed text-slate-500">
+              A byte-identical file that is already stored is reported rather than silently
+              deduplicated, so you will know when two citations point at the same document.
             </p>
           )}
         </div>
@@ -867,16 +940,30 @@ export function DocumentsPage() {
         open={pendingDecision !== null}
         onClose={() => setPendingDecision(null)}
         size="sm"
-        title={pendingDecision?.decision === 'ACCEPTED' ? 'Accept proposed signal' : 'Reject proposed signal'}
+        title={
+          pendingDecision?.decision === 'ACCEPTED'
+            ? 'Accept proposed signal'
+            : 'Reject proposed signal'
+        }
         description={pendingDecision?.signal.title}
         footer={
           <span className="flex justify-end gap-2">
-            <Button variant="ghost" onClick={() => setPendingDecision(null)} disabled={decide.isPending}>
+            <Button
+              variant="ghost"
+              onClick={() => setPendingDecision(null)}
+              disabled={decide.isPending}
+            >
               Cancel
             </Button>
             <Button
               variant={pendingDecision?.decision === 'ACCEPTED' ? 'primary' : 'danger'}
-              icon={pendingDecision?.decision === 'ACCEPTED' ? <Check className="h-4 w-4" /> : <ThumbsDown className="h-4 w-4" />}
+              icon={
+                pendingDecision?.decision === 'ACCEPTED' ? (
+                  <Check className="h-4 w-4" />
+                ) : (
+                  <ThumbsDown className="h-4 w-4" />
+                )
+              }
               loading={decide.isPending}
               disabled={!noteValid}
               onClick={() =>
@@ -910,9 +997,9 @@ export function DocumentsPage() {
                 ? 'What did you verify against the document, and what happens next?'
                 : 'Why is this signal not a finding — misread text, superseded document, or already handled?'
             }
-            className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm focus:border-navy-400 focus:outline-none focus:ring-2 focus:ring-navy-100"
+            className="w-full rounded-lg border border-line px-3 py-2 text-sm focus:border-navy-400 focus:outline-none focus:ring-2 focus:ring-navy-100"
           />
-          <p className="text-[11px] text-slate-500">
+          <p className="text-2xs text-slate-500">
             {noteValid
               ? 'Recorded with your name against this signal. A decision is one-way: it cannot be changed afterwards.'
               : `At least ${MIN_DECISION_NOTE} characters — the server requires a note, so the decision is never recorded without a reason.`}

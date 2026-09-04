@@ -20,12 +20,7 @@ import {
   SearchX,
   UserCog,
 } from 'lucide-react';
-import type {
-  AuditEventRecord,
-  PeriodDto,
-  ScenarioResultDto,
-  Stage,
-} from '@eclens/shared';
+import type { AuditEventRecord, PeriodDto, ScenarioResultDto, Stage } from '@eclens/shared';
 import {
   formatDate,
   formatDateTime,
@@ -70,7 +65,7 @@ const EXCEPTION_TONE: Record<string, BadgeTone> = {
 function Fact({ label, value }: { label: string; value: ReactNode }) {
   return (
     <div>
-      <dt className="text-[11px] font-medium uppercase tracking-wide text-slate-400">{label}</dt>
+      <dt className="text-2xs font-medium uppercase tracking-wide text-slate-400">{label}</dt>
       <dd className="mt-0.5 break-words text-sm text-slate-800">{value}</dd>
     </div>
   );
@@ -110,19 +105,35 @@ function ScenarioPanel({
       />
       <CardContent className="space-y-3">
         <div className="grid gap-3 sm:grid-cols-4">
-          <Fact label="Cumulative PD in horizon" value={<Numeric value={scenario.cumulativePdInHorizon} />} />
-          <Fact label="Scenario ECL (unweighted)" value={<Numeric value={scenario.unweightedEcl} />} />
+          <Fact
+            label="Cumulative PD in horizon"
+            value={<Numeric value={scenario.cumulativePdInHorizon} />}
+          />
+          <Fact
+            label="Scenario ECL (unweighted)"
+            value={<Numeric value={scenario.unweightedEcl} />}
+          />
           <Fact label="Weight applied" value={<Numeric value={scenario.weight} />} />
-          <Fact label="Weighted contribution" value={<span className="font-medium text-red-700"><Numeric value={scenario.weightedEcl} /></span>} />
+          <Fact
+            label="Weighted contribution"
+            value={
+              <span className="font-medium text-red-700">
+                <Numeric value={scenario.weightedEcl} />
+              </span>
+            }
+          />
         </div>
 
         {periods.length === 0 ? (
-          <EmptyState title="No calculation periods" description="The engine produced no periods for this scenario." />
+          <EmptyState
+            title="No calculation periods"
+            description="The engine produced no periods for this scenario."
+          />
         ) : (
-          <div className="overflow-x-auto rounded-md border border-slate-200">
+          <div className="overflow-x-auto rounded-lg border border-line">
             <table className="w-full border-collapse text-xs">
               <thead>
-                <tr className="border-b border-slate-200 bg-slate-50 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500">
+                <tr className="border-b border-line bg-surface-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500">
                   <th className="w-8 px-2 py-1.5" aria-label="Expand period" />
                   <th className="px-2 py-1.5">Period</th>
                   <th className="px-2 py-1.5">Window</th>
@@ -140,31 +151,50 @@ function ScenarioPanel({
                   return (
                     <Fragment key={period.period}>
                       <tr
-                        className="cursor-pointer border-b border-slate-100 transition-colors hover:bg-navy-50/40"
+                        className="cursor-pointer border-b border-line-soft transition-colors hover:bg-navy-50/40"
                         onClick={() => setExpanded(isOpen ? null : period.period)}
                         aria-expanded={isOpen}
                       >
                         <td className="px-2 py-1.5 text-slate-400">
-                          {isOpen ? <ChevronDown className="h-3.5 w-3.5" /> : <ChevronRight className="h-3.5 w-3.5" />}
+                          {isOpen ? (
+                            <ChevronDown className="h-3.5 w-3.5" />
+                          ) : (
+                            <ChevronRight className="h-3.5 w-3.5" />
+                          )}
                         </td>
-                        <td className="px-2 py-1.5 font-medium tabular-nums text-navy-800">{period.period}</td>
+                        <td className="px-2 py-1.5 font-medium tabular-nums text-navy-800">
+                          {period.period}
+                        </td>
                         <td className="whitespace-nowrap px-2 py-1.5 tabular-nums text-slate-500">
                           {formatDate(period.periodStart)} – {formatDate(period.periodEnd)}
                         </td>
-                        <td className="px-2 py-1.5 text-right tabular-nums">{formatDecimalText(period.marginalPd)}</td>
-                        <td className="px-2 py-1.5 text-right tabular-nums text-slate-500">{formatDecimalText(period.cumulativePd)}</td>
-                        <td className="px-2 py-1.5 text-right tabular-nums">{formatDecimalText(period.lgd)}</td>
-                        <td className="px-2 py-1.5 text-right tabular-nums">{moneyString(period.ead)}</td>
-                        <td className="px-2 py-1.5 text-right tabular-nums">{formatDecimalText(period.discountFactor)}</td>
-                        <td className="px-2 py-1.5 text-right font-medium tabular-nums text-red-700">{moneyString(period.expectedLoss)}</td>
+                        <td className="px-2 py-1.5 text-right tabular-nums">
+                          {formatDecimalText(period.marginalPd)}
+                        </td>
+                        <td className="px-2 py-1.5 text-right tabular-nums text-slate-500">
+                          {formatDecimalText(period.cumulativePd)}
+                        </td>
+                        <td className="px-2 py-1.5 text-right tabular-nums">
+                          {formatDecimalText(period.lgd)}
+                        </td>
+                        <td className="px-2 py-1.5 text-right tabular-nums">
+                          {moneyString(period.ead)}
+                        </td>
+                        <td className="px-2 py-1.5 text-right tabular-nums">
+                          {formatDecimalText(period.discountFactor)}
+                        </td>
+                        <td className="px-2 py-1.5 text-right font-medium tabular-nums text-red-700">
+                          {moneyString(period.expectedLoss)}
+                        </td>
                       </tr>
                       {isOpen ? (
-                        <tr className="border-b border-slate-100 bg-slate-50/70">
+                        <tr className="border-b border-line-soft bg-surface-2/70">
                           <td colSpan={9} className="px-3 py-2">
                             <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">
-                              Formula trace · {period.monthsFromReportingDate} month(s) from the reporting date
+                              Formula trace · {period.monthsFromReportingDate} month(s) from the
+                              reporting date
                             </p>
-                            <code className="mt-1 block whitespace-pre-wrap break-words font-mono text-[11px] leading-relaxed text-navy-900">
+                            <code className="mt-1 block whitespace-pre-wrap break-words font-mono text-2xs leading-relaxed text-navy-900">
                               {period.formulaTrace}
                             </code>
                           </td>
@@ -184,11 +214,11 @@ function ScenarioPanel({
           </Button>
         ) : null}
 
-        <p className="flex items-start gap-1.5 text-[11px] leading-relaxed text-slate-500">
+        <p className="flex items-start gap-1.5 text-2xs leading-relaxed text-slate-500">
           <Info className="mt-0.5 h-3.5 w-3.5 shrink-0" />
-          Each period expected loss is marginal PD × LGD × EAD × discount factor at 40-digit precision, rounded once
-          to 2 decimals. The scenario ECL is the exact sum of the rounded periods shown above, so this table always
-          adds to the scenario total on screen.
+          Each period expected loss is marginal PD × LGD × EAD × discount factor at 40-digit
+          precision, rounded once to 2 decimals. The scenario ECL is the exact sum of the rounded
+          periods shown above, so this table always adds to the scenario total on screen.
         </p>
       </CardContent>
     </Card>
@@ -227,7 +257,8 @@ export function ExposureDetailPage() {
   const canUseAi = can('ai:use');
 
   const overrideMutation = useMutation({
-    mutationFn: () => api.overrides.request(exposureId ?? '', { stageAfter, reason: reason.trim() }),
+    mutationFn: () =>
+      api.overrides.request(exposureId ?? '', { stageAfter, reason: reason.trim() }),
     onSuccess: (override) => {
       push(
         'success',
@@ -289,7 +320,17 @@ export function ExposureDetailPage() {
     );
   }
 
-  const { exposure, staging, latestResult, eadSchedule, pdTermStructure, overrideHistory, exceptions, lineage, auditTrail } = data;
+  const {
+    exposure,
+    staging,
+    latestResult,
+    eadSchedule,
+    pdTermStructure,
+    overrideHistory,
+    exceptions,
+    lineage,
+    auditTrail,
+  } = data;
   const resultLineage = latestResult?.lineage ?? lineage;
   const scenarioPeriods = detail?.scenarioPeriods ?? [];
   const horizonNote = staging.stage === 1 ? TWELVE_MONTH_ECL_NOTE : LIFETIME_ECL_NOTE;
@@ -312,15 +353,50 @@ export function ExposureDetailPage() {
             <Fact label="Currency" value={exposure.currency} />
             <Fact label="Origination" value={formatDate(exposure.originationDate)} />
             <Fact label="Maturity" value={formatDate(exposure.maturityDate)} />
-            <Fact label="Days past due" value={<span className="tabular-nums">{exposure.daysPastDue}</span>} />
-            <Fact label="Gross carrying amount" value={<Numeric value={exposure.grossCarryingAmount} />} />
-            <Fact label="Undrawn commitment" value={<Numeric value={exposure.undrawnCommitment} />} />
-            <Fact label="Credit conversion factor" value={<Numeric value={exposure.creditConversionFactor} />} />
-            <Fact label="Effective interest rate" value={<span className="tabular-nums">{percentString(exposure.effectiveInterestRate, 3)}</span>} />
-            <Fact label="12-month PD" value={<span className="tabular-nums">{percentString(exposure.twelveMonthPd, 3)}</span>} />
-            <Fact label="Lifetime PD" value={<span className="tabular-nums">{percentString(exposure.lifetimePd, 3)}</span>} />
-            <Fact label="PD at origination" value={<span className="tabular-nums">{percentString(exposure.pdAtOrigination, 3)}</span>} />
-            <Fact label="LGD" value={<span className="tabular-nums">{percentString(exposure.lgd, 1)}</span>} />
+            <Fact
+              label="Days past due"
+              value={<span className="tabular-nums">{exposure.daysPastDue}</span>}
+            />
+            <Fact
+              label="Gross carrying amount"
+              value={<Numeric value={exposure.grossCarryingAmount} />}
+            />
+            <Fact
+              label="Undrawn commitment"
+              value={<Numeric value={exposure.undrawnCommitment} />}
+            />
+            <Fact
+              label="Credit conversion factor"
+              value={<Numeric value={exposure.creditConversionFactor} />}
+            />
+            <Fact
+              label="Effective interest rate"
+              value={
+                <span className="tabular-nums">
+                  {percentString(exposure.effectiveInterestRate, 3)}
+                </span>
+              }
+            />
+            <Fact
+              label="12-month PD"
+              value={
+                <span className="tabular-nums">{percentString(exposure.twelveMonthPd, 3)}</span>
+              }
+            />
+            <Fact
+              label="Lifetime PD"
+              value={<span className="tabular-nums">{percentString(exposure.lifetimePd, 3)}</span>}
+            />
+            <Fact
+              label="PD at origination"
+              value={
+                <span className="tabular-nums">{percentString(exposure.pdAtOrigination, 3)}</span>
+              }
+            />
+            <Fact
+              label="LGD"
+              value={<span className="tabular-nums">{percentString(exposure.lgd, 1)}</span>}
+            />
             <Fact label="Collateral value" value={<Numeric value={exposure.collateralValue} />} />
             <Fact label="Original rating" value={exposure.originalCreditRating} />
             <Fact label="Current rating" value={exposure.currentCreditRating} />
@@ -329,7 +405,9 @@ export function ExposureDetailPage() {
               value={
                 <span className="flex flex-wrap gap-1">
                   {exposure.defaultFlag ? <Badge tone="danger">Default</Badge> : null}
-                  {exposure.creditImpairedFlag ? <Badge tone="danger">Credit-impaired</Badge> : null}
+                  {exposure.creditImpairedFlag ? (
+                    <Badge tone="danger">Credit-impaired</Badge>
+                  ) : null}
                   {exposure.forbearanceFlag ? <Badge tone="warning">Forbearance</Badge> : null}
                   {exposure.restructuringFlag ? <Badge tone="warning">Restructured</Badge> : null}
                   {exposure.watchlistFlag ? <Badge tone="warning">Watchlist</Badge> : null}
@@ -370,8 +448,8 @@ export function ExposureDetailPage() {
         ) : (
           <div className="max-h-80 overflow-auto">
             <table className="w-full border-collapse text-xs">
-              <thead className="sticky top-0 bg-slate-50">
-                <tr className="border-b border-slate-200 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500">
+              <thead className="sticky top-0 bg-surface-2">
+                <tr className="border-b border-line text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500">
                   <th className="px-3 py-2">Period</th>
                   <th className="px-3 py-2 text-right">Drawn balance</th>
                   <th className="px-3 py-2 text-right">Undrawn</th>
@@ -381,12 +459,22 @@ export function ExposureDetailPage() {
               </thead>
               <tbody>
                 {eadSchedule.map((point) => (
-                  <tr key={point.period} className="border-b border-slate-100 last:border-b-0">
-                    <td className="px-3 py-1.5 font-medium tabular-nums text-navy-800">{point.period}</td>
-                    <td className="px-3 py-1.5 text-right tabular-nums">{moneyString(point.drawnBalance)}</td>
-                    <td className="px-3 py-1.5 text-right tabular-nums text-slate-500">{moneyString(point.undrawnCommitment)}</td>
-                    <td className="px-3 py-1.5 text-right tabular-nums">{formatDecimalText(point.creditConversionFactor)}</td>
-                    <td className="px-3 py-1.5 text-right font-medium tabular-nums">{moneyString(point.ead)}</td>
+                  <tr key={point.period} className="border-b border-line-soft last:border-b-0">
+                    <td className="px-3 py-1.5 font-medium tabular-nums text-navy-800">
+                      {point.period}
+                    </td>
+                    <td className="px-3 py-1.5 text-right tabular-nums">
+                      {moneyString(point.drawnBalance)}
+                    </td>
+                    <td className="px-3 py-1.5 text-right tabular-nums text-slate-500">
+                      {moneyString(point.undrawnCommitment)}
+                    </td>
+                    <td className="px-3 py-1.5 text-right tabular-nums">
+                      {formatDecimalText(point.creditConversionFactor)}
+                    </td>
+                    <td className="px-3 py-1.5 text-right font-medium tabular-nums">
+                      {moneyString(point.ead)}
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -407,17 +495,23 @@ export function ExposureDetailPage() {
         {pdTermStructure ? (
           <div className="max-h-80 overflow-auto">
             <table className="w-full border-collapse text-xs">
-              <thead className="sticky top-0 bg-slate-50">
-                <tr className="border-b border-slate-200 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500">
+              <thead className="sticky top-0 bg-surface-2">
+                <tr className="border-b border-line text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500">
                   <th className="px-3 py-2">Period</th>
-                  <th className="px-3 py-2 text-right">Supplied PD ({pdTermStructure.basis.toLowerCase()})</th>
+                  <th className="px-3 py-2 text-right">
+                    Supplied PD ({pdTermStructure.basis.toLowerCase()})
+                  </th>
                 </tr>
               </thead>
               <tbody>
                 {pdTermStructure.points.map((point) => (
-                  <tr key={point.period} className="border-b border-slate-100 last:border-b-0">
-                    <td className="px-3 py-1.5 font-medium tabular-nums text-navy-800">{point.period}</td>
-                    <td className="px-3 py-1.5 text-right tabular-nums">{formatDecimalText(point.pd)}</td>
+                  <tr key={point.period} className="border-b border-line-soft last:border-b-0">
+                    <td className="px-3 py-1.5 font-medium tabular-nums text-navy-800">
+                      {point.period}
+                    </td>
+                    <td className="px-3 py-1.5 text-right tabular-nums">
+                      {formatDecimalText(point.pd)}
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -426,9 +520,9 @@ export function ExposureDetailPage() {
         ) : (
           <CardContent>
             <p className="text-xs leading-relaxed text-slate-500">
-              Marginals are built in two blocks from the anchors above: periods 1–12 from the 12-month PD and the
-              remainder of the horizon from the lifetime PD. Survival logic guarantees the cumulative default
-              probability can never exceed 1.
+              Marginals are built in two blocks from the anchors above: periods 1–12 from the
+              12-month PD and the remainder of the horizon from the lifetime PD. Survival logic
+              guarantees the cumulative default probability can never exceed 1.
             </p>
           </CardContent>
         )}
@@ -444,7 +538,12 @@ export function ExposureDetailPage() {
           description={`Rule set ${staging.ruleSetId} v${staging.ruleSetVersion} · primary code ${staging.primaryRuleCode}`}
           actions={
             canOverride ? (
-              <Button size="sm" variant="secondary" icon={<UserCog className="h-3.5 w-3.5" />} onClick={() => setOverrideOpen(true)}>
+              <Button
+                size="sm"
+                variant="secondary"
+                icon={<UserCog className="h-3.5 w-3.5" />}
+                onClick={() => setOverrideOpen(true)}
+              >
                 Request override
               </Button>
             ) : null
@@ -455,18 +554,19 @@ export function ExposureDetailPage() {
             <StageBadge stage={staging.stage} />
             {staging.hasOverride ? <Badge tone="info">Analyst override in force</Badge> : null}
             <span className="text-xs text-slate-500">
-              Model stage without any override: <strong className="font-semibold text-navy-900">Stage {staging.modelStage}</strong>
+              Model stage without any override:{' '}
+              <strong className="font-semibold text-navy-900">Stage {staging.modelStage}</strong>
             </span>
           </div>
-          <p className="rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-xs leading-relaxed text-slate-700">
+          <p className="rounded-lg border border-line bg-surface-2 px-3 py-2 text-xs leading-relaxed text-slate-700">
             {staging.primaryReason}
           </p>
-          <p className="rounded-md border border-navy-100 bg-navy-50/50 px-3 py-2 text-[11px] leading-relaxed text-navy-800">
+          <p className="rounded-lg border border-navy-100 bg-navy-50/50 px-3 py-2 text-2xs leading-relaxed text-navy-800">
             {horizonNote}
           </p>
 
           <div>
-            <p className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+            <p className="mb-2 text-2xs font-semibold uppercase tracking-wider text-slate-500">
               Every rule that fired ({staging.triggeredRules.length})
             </p>
             {staging.triggeredRules.length === 0 ? (
@@ -476,15 +576,18 @@ export function ExposureDetailPage() {
             ) : (
               <ul className="space-y-2">
                 {staging.triggeredRules.map((rule) => (
-                  <li key={rule.code} className="rounded-md border border-slate-200 px-3 py-2">
+                  <li key={rule.code} className="rounded-lg border border-line px-3 py-2">
                     <div className="flex flex-wrap items-center gap-2">
                       <StageBadge stage={rule.stage} />
-                      <code className="font-mono text-[11px] font-semibold text-navy-800">{rule.code}</code>
+                      <code className="font-mono text-2xs font-semibold text-navy-800">
+                        {rule.code}
+                      </code>
                       <span className="text-xs text-slate-500">{stagingCodeLabel(rule.code)}</span>
                     </div>
                     <p className="mt-1.5 text-xs leading-relaxed text-slate-700">{rule.reason}</p>
-                    <p className="mt-1.5 text-[11px] text-slate-500">
-                      Source fields <span className="font-mono">{rule.sourceFields.join(', ')}</span> · observed{' '}
+                    <p className="mt-1.5 text-2xs text-slate-500">
+                      Source fields{' '}
+                      <span className="font-mono">{rule.sourceFields.join(', ')}</span> · observed{' '}
                       <span className="font-mono">{rule.observedValue}</span> · configured threshold{' '}
                       <span className="font-mono">{rule.configuredThreshold}</span>
                     </p>
@@ -495,13 +598,16 @@ export function ExposureDetailPage() {
           </div>
 
           {staging.override ? (
-            <div className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2">
-              <p className="text-[11px] font-semibold uppercase tracking-wider text-amber-800">Override on this decision</p>
-              <p className="mt-1 text-xs leading-relaxed text-amber-900">
-                Stage {staging.override.stageBefore} → {staging.override.stageAfter} by {staging.override.actorName} at{' '}
-                {formatDateTime(staging.override.occurredAt)}. Reason: {staging.override.reason}
+            <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2">
+              <p className="text-2xs font-semibold uppercase tracking-wider text-amber-800">
+                Override on this decision
               </p>
-              <p className="mt-1 text-[11px] text-amber-800">
+              <p className="mt-1 text-xs leading-relaxed text-amber-900">
+                Stage {staging.override.stageBefore} → {staging.override.stageAfter} by{' '}
+                {staging.override.actorName} at {formatDateTime(staging.override.occurredAt)}.
+                Reason: {staging.override.reason}
+              </p>
+              <p className="mt-1 text-2xs text-amber-800">
                 Reviewer status {staging.override.reviewerStatus}
                 {staging.override.reviewerName ? ` · ${staging.override.reviewerName}` : ''}
               </p>
@@ -512,15 +618,29 @@ export function ExposureDetailPage() {
 
       {latestResult ? (
         <Card>
-          <CardHeader title="Horizon applied to the calculation" description="How the engine turned the stage into a number of monthly periods" />
+          <CardHeader
+            title="Horizon applied to the calculation"
+            description="How the engine turned the stage into a number of monthly periods"
+          />
           <CardContent>
             <dl className="grid grid-cols-2 gap-x-6 gap-y-4 md:grid-cols-4">
               <Fact label="Stage used" value={<StageBadge stage={latestResult.stage} />} />
-              <Fact label="Remaining contractual months" value={<span className="tabular-nums">{latestResult.remainingContractualMonths}</span>} />
-              <Fact label="Horizon months" value={<span className="tabular-nums">{latestResult.horizonMonths}</span>} />
-              <Fact label="Discount convention" value={latestResult.discountConvention.replace(/_/g, ' ').toLowerCase()} />
+              <Fact
+                label="Remaining contractual months"
+                value={
+                  <span className="tabular-nums">{latestResult.remainingContractualMonths}</span>
+                }
+              />
+              <Fact
+                label="Horizon months"
+                value={<span className="tabular-nums">{latestResult.horizonMonths}</span>}
+              />
+              <Fact
+                label="Discount convention"
+                value={latestResult.discountConvention.replace(/_/g, ' ').toLowerCase()}
+              />
             </dl>
-            <p className="mt-3 rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-[11px] leading-relaxed text-slate-600">
+            <p className="mt-3 rounded-lg border border-line bg-surface-2 px-3 py-2 text-2xs leading-relaxed text-slate-600">
               {latestResult.horizonBasisNote}
             </p>
           </CardContent>
@@ -532,10 +652,26 @@ export function ExposureDetailPage() {
   const calculationTab = latestResult ? (
     <div className="space-y-4">
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        <MetricCard label="EAD at reporting date" value={moneyString(latestResult.eadAtReportingDate, { compact: true })} hint={latestResult.eadProfileLabel} />
-        <MetricCard label="Lifetime PD at reporting date" value={percentString(latestResult.lifetimePdAtReportingDate, 3)} hint={`PD source ${latestResult.pdSourceKind.toLowerCase()}`} />
-        <MetricCard label="Loss allowance" value={moneyString(latestResult.lossAllowance)} hint={`Coverage of gross ${percentString(latestResult.coverageRatio, 2)}`} />
-        <MetricCard label="Net carrying amount" value={moneyString(latestResult.netCarryingAmount)} hint="Gross carrying amount less loss allowance" />
+        <MetricCard
+          label="EAD at reporting date"
+          value={moneyString(latestResult.eadAtReportingDate, { compact: true })}
+          hint={latestResult.eadProfileLabel}
+        />
+        <MetricCard
+          label="Lifetime PD at reporting date"
+          value={percentString(latestResult.lifetimePdAtReportingDate, 3)}
+          hint={`PD source ${latestResult.pdSourceKind.toLowerCase()}`}
+        />
+        <MetricCard
+          label="Loss allowance"
+          value={moneyString(latestResult.lossAllowance)}
+          hint={`Coverage of gross ${percentString(latestResult.coverageRatio, 2)}`}
+        />
+        <MetricCard
+          label="Net carrying amount"
+          value={moneyString(latestResult.netCarryingAmount)}
+          hint="Gross carrying amount less loss allowance"
+        />
       </div>
 
       <Card>
@@ -546,7 +682,7 @@ export function ExposureDetailPage() {
         <CardContent>
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-slate-200 text-left text-[11px] uppercase tracking-wider text-slate-500">
+              <tr className="border-b border-line text-left text-2xs uppercase tracking-wider text-slate-500">
                 <th className="py-2 pr-3">Scenario</th>
                 <th className="py-2 pr-3 text-right">Weight</th>
                 <th className="py-2 pr-3 text-right">Cumulative PD</th>
@@ -556,19 +692,33 @@ export function ExposureDetailPage() {
             </thead>
             <tbody>
               {latestResult.scenarioResults.map((scenario) => (
-                <tr key={scenario.scenarioCode} className="border-b border-slate-100 last:border-b-0">
+                <tr
+                  key={scenario.scenarioCode}
+                  className="border-b border-line-soft last:border-b-0"
+                >
                   <td className="py-2 pr-3">
                     <p className="font-medium text-slate-800">{scenario.scenarioName}</p>
-                    <p className="text-[11px] text-slate-500">{scenario.scenarioCode}</p>
+                    <p className="text-2xs text-slate-500">{scenario.scenarioCode}</p>
                   </td>
-                  <td className="py-2 pr-3 text-right tabular-nums text-slate-600">{formatDecimalText(scenario.weight)}</td>
-                  <td className="py-2 pr-3 text-right tabular-nums text-slate-500">{formatDecimalText(scenario.cumulativePdInHorizon)}</td>
-                  <td className="py-2 pr-3 text-right tabular-nums text-slate-700">{moneyString(scenario.unweightedEcl)}</td>
-                  <td className="py-2 text-right tabular-nums font-medium text-slate-800">{moneyString(scenario.weightedEcl)}</td>
+                  <td className="py-2 pr-3 text-right tabular-nums text-slate-600">
+                    {formatDecimalText(scenario.weight)}
+                  </td>
+                  <td className="py-2 pr-3 text-right tabular-nums text-slate-500">
+                    {formatDecimalText(scenario.cumulativePdInHorizon)}
+                  </td>
+                  <td className="py-2 pr-3 text-right tabular-nums text-slate-700">
+                    {moneyString(scenario.unweightedEcl)}
+                  </td>
+                  <td className="py-2 text-right tabular-nums font-medium text-slate-800">
+                    {moneyString(scenario.weightedEcl)}
+                  </td>
                 </tr>
               ))}
               <tr>
-                <td colSpan={4} className="pt-3 text-right text-xs font-semibold uppercase tracking-wide text-slate-500">
+                <td
+                  colSpan={4}
+                  className="pt-3 text-right text-xs font-semibold uppercase tracking-wide text-slate-500"
+                >
                   Loss allowance (exact sum of the weighted contributions)
                 </td>
                 <td className="pt-3 text-right text-base font-semibold tabular-nums text-red-700">
@@ -578,16 +728,34 @@ export function ExposureDetailPage() {
             </tbody>
           </table>
           <div className="mt-3 grid gap-3 sm:grid-cols-3">
-            <Fact label="Coverage of gross carrying amount" value={<span className="tabular-nums">{percentString(latestResult.coverageRatio, 4)}</span>} />
-            <Fact label="Coverage of EAD" value={<span className="tabular-nums">{percentString(latestResult.coverageOfEad, 4)}</span>} />
-            <Fact label="Horizon" value={<span className="tabular-nums">{latestResult.horizonMonths} month(s)</span>} />
+            <Fact
+              label="Coverage of gross carrying amount"
+              value={
+                <span className="tabular-nums">{percentString(latestResult.coverageRatio, 4)}</span>
+              }
+            />
+            <Fact
+              label="Coverage of EAD"
+              value={
+                <span className="tabular-nums">{percentString(latestResult.coverageOfEad, 4)}</span>
+              }
+            />
+            <Fact
+              label="Horizon"
+              value={<span className="tabular-nums">{latestResult.horizonMonths} month(s)</span>}
+            />
           </div>
         </CardContent>
       </Card>
 
       {scenarioPeriods.length > 0 ? (
         scenarioPeriods.map((entry) => (
-          <ScenarioPanel key={entry.scenario.scenarioCode} scenario={entry.scenario} periods={entry.periods} moneyString={moneyString} />
+          <ScenarioPanel
+            key={entry.scenario.scenarioCode}
+            scenario={entry.scenario}
+            periods={entry.periods}
+            moneyString={moneyString}
+          />
         ))
       ) : (
         <Card>
@@ -595,7 +763,11 @@ export function ExposureDetailPage() {
             <EmptyState
               title="Period detail unavailable"
               description="The run result summary loaded but its calculation periods did not. Reload the page to fetch them again."
-              action={<Button size="sm" variant="secondary" onClick={() => void refetch()}>Reload</Button>}
+              action={
+                <Button size="sm" variant="secondary" onClick={() => void refetch()}>
+                  Reload
+                </Button>
+              }
             />
           </CardContent>
         </Card>
@@ -607,25 +779,44 @@ export function ExposureDetailPage() {
           description={latestResult.educationalApproximation.label}
         />
         <CardContent className="space-y-3">
-          <p className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-[11px] leading-relaxed text-amber-900">
-            The single-period PD × LGD × EAD shortcut is shown only to explain why the lifetime calculation differs.
-            The authoritative allowance is the scenario-weighted sum of the period table above.
+          <p className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-2xs leading-relaxed text-amber-900">
+            The single-period PD × LGD × EAD shortcut is shown only to explain why the lifetime
+            calculation differs. The authoritative allowance is the scenario-weighted sum of the
+            period table above.
           </p>
           <dl className="grid grid-cols-2 gap-x-6 gap-y-4 md:grid-cols-5">
-            <Fact label="Lump PD" value={<Numeric value={latestResult.educationalApproximation.lumpPd} />} />
-            <Fact label="LGD" value={<Numeric value={latestResult.educationalApproximation.lgd} />} />
-            <Fact label="EAD" value={<Numeric value={latestResult.educationalApproximation.eadAtReportingDate} />} />
-            <Fact label="Discount factor" value={<Numeric value={latestResult.educationalApproximation.discountFactor} />} />
-            <Fact label="Approximation" value={<Numeric value={latestResult.educationalApproximation.value} />} />
+            <Fact
+              label="Lump PD"
+              value={<Numeric value={latestResult.educationalApproximation.lumpPd} />}
+            />
+            <Fact
+              label="LGD"
+              value={<Numeric value={latestResult.educationalApproximation.lgd} />}
+            />
+            <Fact
+              label="EAD"
+              value={<Numeric value={latestResult.educationalApproximation.eadAtReportingDate} />}
+            />
+            <Fact
+              label="Discount factor"
+              value={<Numeric value={latestResult.educationalApproximation.discountFactor} />}
+            />
+            <Fact
+              label="Approximation"
+              value={<Numeric value={latestResult.educationalApproximation.value} />}
+            />
           </dl>
-          <code className="block whitespace-pre-wrap break-words rounded-md bg-slate-50 px-3 py-2 font-mono text-[11px] leading-relaxed text-navy-900">
+          <code className="block whitespace-pre-wrap break-words rounded-lg bg-surface-2 px-3 py-2 font-mono text-2xs leading-relaxed text-navy-900">
             {latestResult.educationalApproximation.formulaTrace}
           </code>
         </CardContent>
       </Card>
 
       <Card>
-        <CardHeader title="How this number was produced" description="The engine's own plain-language audit trail" />
+        <CardHeader
+          title="How this number was produced"
+          description="The engine's own plain-language audit trail"
+        />
         <CardContent>
           <ol className="space-y-2.5">
             {latestResult.explanation.map((step, index) => (
@@ -666,24 +857,30 @@ export function ExposureDetailPage() {
         />
         {overrideHistory.length === 0 ? (
           <CardContent>
-            <EmptyState title="No overrides" description="The stage shown is the model's own decision." />
+            <EmptyState
+              title="No overrides"
+              description="The stage shown is the model's own decision."
+            />
           </CardContent>
         ) : (
           <CardContent className="space-y-2">
             {overrideHistory.map((override) => (
-              <div key={override.id} className="rounded-md border border-slate-200 px-3 py-2">
+              <div key={override.id} className="rounded-lg border border-line px-3 py-2">
                 <div className="flex flex-wrap items-center gap-2">
                   <StageBadge stage={override.stageBefore} />
                   <span className="text-slate-400">→</span>
                   <StageBadge stage={override.stageAfter} />
-                  <Badge tone={REVIEWER_TONE[override.reviewerStatus] ?? 'neutral'}>{override.reviewerStatus.replace(/_/g, ' ')}</Badge>
-                  <span className="text-[11px] text-slate-500">
-                    {override.actorName} ({override.actorRole.replace(/_/g, ' ')}) · {formatDateTime(override.occurredAt)}
+                  <Badge tone={REVIEWER_TONE[override.reviewerStatus] ?? 'neutral'}>
+                    {override.reviewerStatus.replace(/_/g, ' ')}
+                  </Badge>
+                  <span className="text-2xs text-slate-500">
+                    {override.actorName} ({override.actorRole.replace(/_/g, ' ')}) ·{' '}
+                    {formatDateTime(override.occurredAt)}
                   </span>
                 </div>
                 <p className="mt-1.5 text-xs leading-relaxed text-slate-700">{override.reason}</p>
                 {override.reviewerName ? (
-                  <p className="mt-1 text-[11px] text-slate-500">
+                  <p className="mt-1 text-2xs text-slate-500">
                     Reviewed by {override.reviewerName}
                     {override.reviewedAt ? ` at ${formatDateTime(override.reviewedAt)}` : ''}
                     {override.reviewComment ? ` · “${override.reviewComment}”` : ''}
@@ -696,26 +893,42 @@ export function ExposureDetailPage() {
       </Card>
 
       <Card>
-        <CardHeader title="Exceptions raised on this exposure" description="Items in the exception queue that name this exposure" />
+        <CardHeader
+          title="Exceptions raised on this exposure"
+          description="Items in the exception queue that name this exposure"
+        />
         {exceptions.length === 0 ? (
           <CardContent>
-            <EmptyState title="No exceptions" description="Nothing in the queue references this exposure." />
+            <EmptyState
+              title="No exceptions"
+              description="Nothing in the queue references this exposure."
+            />
           </CardContent>
         ) : (
           <CardContent className="space-y-2">
             {exceptions.map((item) => (
-              <div key={item.id} className="rounded-md border border-slate-200 px-3 py-2">
+              <div key={item.id} className="rounded-lg border border-line px-3 py-2">
                 <div className="flex flex-wrap items-center gap-2">
                   <Badge tone={EXCEPTION_TONE[item.severity] ?? 'neutral'}>{item.severity}</Badge>
                   <Badge tone="neutral">{item.kind.replace(/_/g, ' ')}</Badge>
-                  <Badge tone={item.status === 'OPEN' ? 'danger' : item.status === 'RESOLVED' ? 'positive' : 'warning'}>
+                  <Badge
+                    tone={
+                      item.status === 'OPEN'
+                        ? 'danger'
+                        : item.status === 'RESOLVED'
+                          ? 'positive'
+                          : 'warning'
+                    }
+                  >
                     {item.status}
                   </Badge>
-                  <span className="text-[11px] text-slate-500">{formatDateTime(item.createdAt)}</span>
+                  <span className="text-2xs text-slate-500">{formatDateTime(item.createdAt)}</span>
                 </div>
                 <p className="mt-1.5 text-xs font-medium text-slate-800">{item.title}</p>
                 <p className="mt-0.5 text-xs leading-relaxed text-slate-600">{item.detail}</p>
-                {item.metric ? <p className="mt-1 font-mono text-[11px] text-slate-500">{item.metric}</p> : null}
+                {item.metric ? (
+                  <p className="mt-1 font-mono text-2xs text-slate-500">{item.metric}</p>
+                ) : null}
               </div>
             ))}
           </CardContent>
@@ -723,23 +936,28 @@ export function ExposureDetailPage() {
       </Card>
 
       <Card>
-        <CardHeader title="Audit trail" description="Append-only events recorded against this exposure" />
+        <CardHeader
+          title="Audit trail"
+          description="Append-only events recorded against this exposure"
+        />
         <DataTable
           columns={[
             auditColumn.accessor('occurredAt', {
               header: 'When',
-              cell: (info) => <span className="whitespace-nowrap">{formatDateTime(info.getValue())}</span>,
+              cell: (info) => (
+                <span className="whitespace-nowrap">{formatDateTime(info.getValue())}</span>
+              ),
             }),
             auditColumn.accessor('action', {
               header: 'Action',
-              cell: (info) => <code className="font-mono text-[11px]">{info.getValue()}</code>,
+              cell: (info) => <code className="font-mono text-2xs">{info.getValue()}</code>,
             }),
             auditColumn.accessor('userName', {
               header: 'Actor',
               cell: (info) => (
                 <span>
                   {info.getValue()}
-                  <span className="ml-1 text-[11px] text-slate-400">{info.row.original.role}</span>
+                  <span className="ml-1 text-2xs text-slate-400">{info.row.original.role}</span>
                 </span>
               ),
             }),
@@ -765,7 +983,10 @@ export function ExposureDetailPage() {
         {resultLineage ? (
           <>
             <dl className="grid grid-cols-2 gap-x-6 gap-y-4 md:grid-cols-3 lg:grid-cols-4">
-              <Fact label="Input version" value={<code className="font-mono text-xs">{resultLineage.inputVersion}</code>} />
+              <Fact
+                label="Input version"
+                value={<code className="font-mono text-xs">{resultLineage.inputVersion}</code>}
+              />
               <Fact label="Reporting date" value={formatDate(resultLineage.reportingDate)} />
               <Fact label="Calculated at" value={formatDateTime(resultLineage.calculatedAt)} />
               <Fact label="Actor" value={`${resultLineage.actorName} (${resultLineage.actorId})`} />
@@ -788,7 +1009,11 @@ export function ExposureDetailPage() {
               />
               <Fact
                 label="Staging rule set"
-                value={<code className="font-mono text-xs">{resultLineage.stagingRuleSetId} v{resultLineage.stagingRuleSetVersion}</code>}
+                value={
+                  <code className="font-mono text-xs">
+                    {resultLineage.stagingRuleSetId} v{resultLineage.stagingRuleSetVersion}
+                  </code>
+                }
               />
               <Fact
                 label="Scenario set"
@@ -807,16 +1032,32 @@ export function ExposureDetailPage() {
                   </span>
                 }
               />
-              <Fact label="Run" value={latestResult ? <Link to={`/ecl-runs/${latestResult.runId}`} className="text-navy-700 underline">{latestResult.runId}</Link> : '—'} />
+              <Fact
+                label="Run"
+                value={
+                  latestResult ? (
+                    <Link
+                      to={`/ecl-runs/${latestResult.runId}`}
+                      className="text-navy-700 underline"
+                    >
+                      {latestResult.runId}
+                    </Link>
+                  ) : (
+                    '—'
+                  )
+                }
+              />
             </dl>
-            <div className="flex items-start gap-2 rounded-md border border-navy-100 bg-navy-50/50 px-3 py-2 text-[11px] leading-relaxed text-navy-800">
+            <div className="flex items-start gap-2 rounded-lg border border-navy-100 bg-navy-50/50 px-3 py-2 text-2xs leading-relaxed text-navy-800">
               <GitBranch className="mt-0.5 h-3.5 w-3.5 shrink-0" />
-              These versions are frozen on the run. Editing an assumption creates a new version and cannot change this
-              historical result.
+              These versions are frozen on the run. Editing an assumption creates a new version and
+              cannot change this historical result.
             </div>
             <div>
-              <p className="mb-1 text-[11px] font-semibold uppercase tracking-wider text-slate-500">Rounding policy</p>
-              <p className="rounded-md bg-slate-50 px-3 py-2 text-[11px] leading-relaxed text-slate-600">
+              <p className="mb-1 text-2xs font-semibold uppercase tracking-wider text-slate-500">
+                Rounding policy
+              </p>
+              <p className="rounded-lg bg-surface-2 px-3 py-2 text-2xs leading-relaxed text-slate-600">
                 {resultLineage.roundingPolicy}
               </p>
             </div>
@@ -864,7 +1105,12 @@ export function ExposureDetailPage() {
         }
         actions={
           canOverride ? (
-            <Button variant="secondary" size="sm" icon={<UserCog className="h-3.5 w-3.5" />} onClick={() => setOverrideOpen(true)}>
+            <Button
+              variant="secondary"
+              size="sm"
+              icon={<UserCog className="h-3.5 w-3.5" />}
+              onClick={() => setOverrideOpen(true)}
+            >
               Request stage override
             </Button>
           ) : null
@@ -872,15 +1118,25 @@ export function ExposureDetailPage() {
       />
 
       <div className="mb-4 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        <MetricCard label="Gross carrying amount" value={moneyString(exposure.grossCarryingAmount, { compact: true })} hint={`${currency} · ${exposure.daysPastDue} day(s) past due`} />
+        <MetricCard
+          label="Gross carrying amount"
+          value={moneyString(exposure.grossCarryingAmount, { compact: true })}
+          hint={`${currency} · ${exposure.daysPastDue} day(s) past due`}
+        />
         <MetricCard
           label="Loss allowance"
-          value={latestResult ? moneyString(latestResult.lossAllowance, { compact: true }) : 'Not run'}
-          hint={latestResult ? `Run ${latestResult.runId}` : 'Execute a run to produce an allowance'}
+          value={
+            latestResult ? moneyString(latestResult.lossAllowance, { compact: true }) : 'Not run'
+          }
+          hint={
+            latestResult ? `Run ${latestResult.runId}` : 'Execute a run to produce an allowance'
+          }
         />
         <MetricCard
           label="Net carrying amount"
-          value={latestResult ? moneyString(latestResult.netCarryingAmount, { compact: true }) : '—'}
+          value={
+            latestResult ? moneyString(latestResult.netCarryingAmount, { compact: true }) : '—'
+          }
           hint="Gross less loss allowance"
         />
         <MetricCard
@@ -920,7 +1176,12 @@ export function ExposureDetailPage() {
         size="md"
         footer={
           <>
-            <Button variant="ghost" size="sm" onClick={() => setOverrideOpen(false)} disabled={overrideMutation.isPending}>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setOverrideOpen(false)}
+              disabled={overrideMutation.isPending}
+            >
               Cancel
             </Button>
             <Button
@@ -965,19 +1226,21 @@ export function ExposureDetailPage() {
                 setReasonError(null);
               }}
               placeholder="Explain the judgement behind this override…"
-              className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 shadow-sm focus:border-navy-500 focus:outline-none focus:ring-2 focus:ring-navy-500"
+              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 shadow-sm focus:border-navy-500 focus:outline-none focus:ring-2 focus:ring-navy-500"
             />
             {reasonError ? (
               <p className="text-xs text-red-600" role="alert">
                 {reasonError}
               </p>
             ) : (
-              <p className="text-xs text-slate-500">{reason.trim().length}/2000 characters, minimum 10.</p>
+              <p className="text-xs text-slate-500">
+                {reason.trim().length}/2000 characters, minimum 10.
+              </p>
             )}
           </div>
-          <p className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-[11px] leading-relaxed text-amber-900">
-            The override takes effect immediately and stays live until a second person reviews it. You will not be able
-            to review your own request.
+          <p className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-2xs leading-relaxed text-amber-900">
+            The override takes effect immediately and stays live until a second person reviews it.
+            You will not be able to review your own request.
           </p>
         </div>
       </Modal>

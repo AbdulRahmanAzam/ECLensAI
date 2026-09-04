@@ -13,7 +13,11 @@
  * that form's own button.
  */
 import { ArrowRight, Sparkles } from 'lucide-react';
-import type { AiImportMappingRequest, ImportMappingSuggestion, ImportMappingSuggestionSet } from '@eclens/shared';
+import type {
+  AiImportMappingRequest,
+  ImportMappingSuggestion,
+  ImportMappingSuggestionSet,
+} from '@eclens/shared';
 import { api } from '@/api/client';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
@@ -30,8 +34,14 @@ export interface ImportMappingPanelProps {
   onUseSuggestions: (suggestions: ImportMappingSuggestion[]) => void;
 }
 
-export function ImportMappingPanel({ batchId, batchLabel, onUseSuggestions }: ImportMappingPanelProps) {
-  const mapping = useAiFeature<AiImportMappingRequest, ImportMappingSuggestionSet>(api.ai.suggestImportMapping);
+export function ImportMappingPanel({
+  batchId,
+  batchLabel,
+  onUseSuggestions,
+}: ImportMappingPanelProps) {
+  const mapping = useAiFeature<AiImportMappingRequest, ImportMappingSuggestionSet>(
+    api.ai.suggestImportMapping,
+  );
 
   const ask = () => mapping.run({ batchId });
   const result = mapping.response?.result;
@@ -70,17 +80,18 @@ export function ImportMappingPanel({ batchId, batchLabel, onUseSuggestions }: Im
       onRetry={ask}
       idle={
         <p className="text-xs leading-relaxed text-slate-500">
-          Nothing has been suggested yet. Ask for a mapping of {batchLabel ?? 'this batch'} and each source column comes
-          back with the canonical field proposed for it, the unit the model read, its confidence, and the reasoning. A
-          column it cannot place is left unmapped rather than guessed at.
+          Nothing has been suggested yet. Ask for a mapping of {batchLabel ?? 'this batch'} and each
+          source column comes back with the canonical field proposed for it, the unit the model
+          read, its confidence, and the reasoning. A column it cannot place is left unmapped rather
+          than guessed at.
         </p>
       }
     >
       {(set) => (
         <>
-          <div className="overflow-x-auto rounded-md border border-slate-200">
+          <div className="overflow-x-auto rounded-lg border border-line">
             <table className="w-full min-w-[720px] text-left text-xs">
-              <thead className="border-b border-slate-200 bg-slate-50 text-[11px] uppercase tracking-wide text-slate-500">
+              <thead className="border-b border-line bg-surface-2 text-2xs uppercase tracking-wide text-slate-500">
                 <tr>
                   <th className="px-2.5 py-2 font-medium">Source column</th>
                   <th className="px-2.5 py-2 font-medium">Proposed field</th>
@@ -89,7 +100,7 @@ export function ImportMappingPanel({ batchId, batchLabel, onUseSuggestions }: Im
                   <th className="px-2.5 py-2 font-medium">Deterministic proposal</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody className="divide-y divide-line-soft">
                 {set.suggestions.map((suggestion) => {
                   const deterministic = set.deterministicSuggestions.find(
                     (entry) => entry.field === suggestion.targetField,
@@ -103,14 +114,18 @@ export function ImportMappingPanel({ batchId, batchLabel, onUseSuggestions }: Im
                     deterministic.header !== suggestion.sourceColumn;
                   return (
                     <tr key={suggestion.sourceColumn}>
-                      <td className="px-2.5 py-2 font-medium text-slate-800">{suggestion.sourceColumn}</td>
+                      <td className="px-2.5 py-2 font-medium text-slate-800">
+                        {suggestion.sourceColumn}
+                      </td>
                       <td className="px-2.5 py-2">
                         {suggestion.targetField ? (
-                          <code className="font-mono text-[11px] text-navy-800">{suggestion.targetField}</code>
+                          <code className="font-mono text-2xs text-navy-800">
+                            {suggestion.targetField}
+                          </code>
                         ) : (
-                          <span className="text-[11px] text-slate-400">left unmapped</span>
+                          <span className="text-2xs text-slate-400">left unmapped</span>
                         )}
-                        <span className="mt-0.5 block text-[11px] leading-relaxed text-slate-500">
+                        <span className="mt-0.5 block text-2xs leading-relaxed text-slate-500">
                           {suggestion.rationale}
                         </span>
                       </td>
@@ -118,16 +133,22 @@ export function ImportMappingPanel({ batchId, batchLabel, onUseSuggestions }: Im
                         <Badge tone={MAPPING_CONFIDENCE_TONE[suggestion.confidenceLevel]}>
                           {mappingConfidenceLabel(suggestion.confidenceLevel)}
                         </Badge>
-                        <span className="ml-1.5 tabular-nums text-[11px] text-slate-400">
+                        <span className="ml-1.5 tabular-nums text-2xs text-slate-400">
                           {(suggestion.confidence * 100).toFixed(0)}%
                         </span>
                       </td>
                       <td className="px-2.5 py-2">
-                        <code className="font-mono text-[11px] text-slate-600">{suggestion.detectedUnit}</code>
+                        <code className="font-mono text-2xs text-slate-600">
+                          {suggestion.detectedUnit}
+                        </code>
                       </td>
-                      <td className="px-2.5 py-2 text-[11px] text-slate-500">
+                      <td className="px-2.5 py-2 text-2xs text-slate-500">
                         {deterministic?.header ?? <span className="text-slate-400">none</span>}
-                        {disagrees ? <Badge tone="warning" className="ml-1.5">disagrees</Badge> : null}
+                        {disagrees ? (
+                          <Badge tone="warning" className="ml-1.5">
+                            disagrees
+                          </Badge>
+                        ) : null}
                       </td>
                     </tr>
                   );
@@ -151,15 +172,18 @@ export function ImportMappingPanel({ batchId, batchLabel, onUseSuggestions }: Im
           ) : null}
 
           {set.unmappedColumns.length > 0 ? (
-            <p className="text-[11px] leading-relaxed text-slate-500">
-              <span className="font-medium text-slate-600">Columns with no canonical counterpart:</span>{' '}
-              {set.unmappedColumns.join(', ')}. They are ignored on import; nothing is inferred from them.
+            <p className="text-2xs leading-relaxed text-slate-500">
+              <span className="font-medium text-slate-600">
+                Columns with no canonical counterpart:
+              </span>{' '}
+              {set.unmappedColumns.join(', ')}. They are ignored on import; nothing is inferred from
+              them.
             </p>
           ) : null}
 
           {set.missingRequiredFields.length > 0 ? (
             <p
-              className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-[11px] leading-relaxed text-red-700"
+              className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-2xs leading-relaxed text-red-700"
               role="alert"
             >
               Still missing required fields after this proposal:{' '}
@@ -169,16 +193,17 @@ export function ImportMappingPanel({ batchId, batchLabel, onUseSuggestions }: Im
                   <code className="font-mono">{field}</code>
                 </span>
               ))}
-              . The batch cannot be committed until a column supplies each of them — the AI does not fill gaps.
+              . The batch cannot be committed until a column supplies each of them — the AI does not
+              fill gaps.
             </p>
           ) : null}
 
           <AiCaveats items={set.caveats} />
 
-          <p className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-[11px] leading-relaxed text-amber-900">
-            Nothing has been mapped. “Use as a starting point” fills the column mapping form below, where every field
-            stays editable; the mapping is only written when you apply it yourself, and the batch is re-validated
-            against the real parser afterwards.
+          <p className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-2xs leading-relaxed text-amber-900">
+            Nothing has been mapped. “Use as a starting point” fills the column mapping form below,
+            where every field stays editable; the mapping is only written when you apply it
+            yourself, and the batch is re-validated against the real parser afterwards.
           </p>
         </>
       )}

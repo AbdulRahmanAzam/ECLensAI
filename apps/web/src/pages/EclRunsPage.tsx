@@ -89,17 +89,21 @@ export function EclRunsPage() {
 
   const configurations = useQuery({
     queryKey: ['model-configurations'],
-    queryFn: () => api.modelConfigurations.list({ page: 1, pageSize: 50, sortDir: 'desc', sortBy: 'createdAt' }),
+    queryFn: () =>
+      api.modelConfigurations.list({ page: 1, pageSize: 50, sortDir: 'desc', sortBy: 'createdAt' }),
     enabled: createOpen,
   });
 
   const scenarioSets = useQuery({
     queryKey: ['scenario-sets'],
-    queryFn: () => api.scenarios.list({ page: 1, pageSize: 50, sortDir: 'desc', sortBy: 'createdAt' }),
+    queryFn: () =>
+      api.scenarios.list({ page: 1, pageSize: 50, sortDir: 'desc', sortBy: 'createdAt' }),
     enabled: createOpen,
   });
   /** A run can only be created against a set someone has explicitly approved. */
-  const approvedScenarioSets = (scenarioSets.data?.items ?? []).filter((set) => set.approvalStatus === 'APPROVED');
+  const approvedScenarioSets = (scenarioSets.data?.items ?? []).filter(
+    (set) => set.approvalStatus === 'APPROVED',
+  );
 
   const create = useMutation({
     mutationFn: () =>
@@ -122,7 +126,8 @@ export function EclRunsPage() {
       void queryClient.invalidateQueries({ queryKey: ['ecl-runs'] });
       navigate(`/ecl-runs/${run.publicId}`);
     },
-    onError: (error) => push('error', 'Run not created', messageOf(error, 'The draft run could not be created.')),
+    onError: (error) =>
+      push('error', 'Run not created', messageOf(error, 'The draft run could not be created.')),
   });
 
   const canCreate = can('run:create');
@@ -136,11 +141,15 @@ export function EclRunsPage() {
     }),
     column.accessor('runDate', {
       header: 'Reporting date',
-      cell: (info) => <span className="whitespace-nowrap tabular-nums">{formatDate(info.getValue())}</span>,
+      cell: (info) => (
+        <span className="whitespace-nowrap tabular-nums">{formatDate(info.getValue())}</span>
+      ),
     }),
     column.accessor('status', {
       header: 'Status',
-      cell: (info) => <Badge tone={STATUS_TONE[info.getValue()]}>{info.getValue().toLowerCase()}</Badge>,
+      cell: (info) => (
+        <Badge tone={STATUS_TONE[info.getValue()]}>{info.getValue().toLowerCase()}</Badge>
+      ),
     }),
     column.accessor('totalLossAllowance', {
       header: 'Loss allowance',
@@ -149,7 +158,9 @@ export function EclRunsPage() {
         info.getValue() === null ? (
           <span className="tabular-nums text-slate-400">—</span>
         ) : (
-          <span className="font-medium tabular-nums text-red-700">{moneyString(info.getValue())}</span>
+          <span className="font-medium tabular-nums text-red-700">
+            {moneyString(info.getValue())}
+          </span>
         ),
     }),
     column.accessor('coverageRatio', {
@@ -187,7 +198,10 @@ export function EclRunsPage() {
   ];
 
   const draftValid =
-    ISO_DATE.test(runDate.trim()) && snapshotId !== '' && modelConfigurationId !== '' && scenarioSetId !== '';
+    ISO_DATE.test(runDate.trim()) &&
+    snapshotId !== '' &&
+    modelConfigurationId !== '' &&
+    scenarioSetId !== '';
 
   return (
     <div>
@@ -206,7 +220,11 @@ export function EclRunsPage() {
               Refresh
             </Button>
             {canCreate ? (
-              <Button size="sm" icon={<Plus className="h-4 w-4" />} onClick={() => setCreateOpen(true)}>
+              <Button
+                size="sm"
+                icon={<Plus className="h-4 w-4" />}
+                onClick={() => setCreateOpen(true)}
+              >
                 New run
               </Button>
             ) : null}
@@ -252,7 +270,9 @@ export function EclRunsPage() {
                 ) : undefined
               }
             />
-            {data ? <Pagination meta={data.meta} onPageChange={list.setPage} loading={isLoading} /> : null}
+            {data ? (
+              <Pagination meta={data.meta} onPageChange={list.setPage} loading={isLoading} />
+            ) : null}
           </>
         )}
       </Card>
@@ -268,7 +288,11 @@ export function EclRunsPage() {
             <Button variant="ghost" onClick={() => setCreateOpen(false)}>
               Cancel
             </Button>
-            <Button loading={create.isPending} disabled={!draftValid} onClick={() => create.mutate()}>
+            <Button
+              loading={create.isPending}
+              disabled={!draftValid}
+              onClick={() => create.mutate()}
+            >
               Create draft
             </Button>
           </>
@@ -295,8 +319,8 @@ export function EclRunsPage() {
               </option>
               {(snapshots.data ?? []).map((snapshot) => (
                 <option key={snapshot.id} value={snapshot.id}>
-                  {snapshot.label} — {formatDate(snapshot.asOfDate)} · {snapshot.exposureCount} exposure(s) ·{' '}
-                  {snapshot.source.toLowerCase()}
+                  {snapshot.label} — {formatDate(snapshot.asOfDate)} · {snapshot.exposureCount}{' '}
+                  exposure(s) · {snapshot.source.toLowerCase()}
                 </option>
               ))}
             </Select>
@@ -345,11 +369,12 @@ export function EclRunsPage() {
             onChange={(event) => setNotes(event.target.value)}
           />
 
-          <p className="flex items-start gap-2 rounded-md border border-navy-200 bg-navy-50 px-3 py-2 text-[11px] leading-relaxed text-navy-800">
+          <p className="flex items-start gap-2 rounded-lg border border-navy-200 bg-navy-50 px-3 py-2 text-2xs leading-relaxed text-navy-800">
             <Info className="mt-0.5 h-3.5 w-3.5 shrink-0" />
-            After the draft is created you will land on the run screen, which shows the readiness checks and the
-            Execute button. Execution is gated separately on <code className="mx-1">run:execute</code>, and an
-            approved run is locked — its results and versions are frozen.
+            After the draft is created you will land on the run screen, which shows the readiness
+            checks and the Execute button. Execution is gated separately on{' '}
+            <code className="mx-1">run:execute</code>, and an approved run is locked — its results
+            and versions are frozen.
           </p>
         </div>
       </Modal>

@@ -76,7 +76,10 @@ export function ExceptionsPage() {
   }>({});
 
   const [selected, setSelected] = useState<ExceptionItemRecord | null>(null);
-  const [triage, setTriage] = useState<{ item: ExceptionItemRecord; action: 'acknowledge' | 'resolve' } | null>(null);
+  const [triage, setTriage] = useState<{
+    item: ExceptionItemRecord;
+    action: 'acknowledge' | 'resolve';
+  } | null>(null);
   const [note, setNote] = useState('');
 
   const { data, isLoading, isError, refetch } = useQuery({
@@ -96,7 +99,15 @@ export function ExceptionsPage() {
   };
 
   const triageMutation = useMutation({
-    mutationFn: async ({ item, action, comment }: { item: ExceptionItemRecord; action: 'acknowledge' | 'resolve'; comment: string }) =>
+    mutationFn: async ({
+      item,
+      action,
+      comment,
+    }: {
+      item: ExceptionItemRecord;
+      action: 'acknowledge' | 'resolve';
+      comment: string;
+    }) =>
       action === 'acknowledge'
         ? api.exceptions.acknowledge(item.id, comment || undefined)
         : api.exceptions.resolve(item.id, comment || undefined),
@@ -113,7 +124,8 @@ export function ExceptionsPage() {
     },
     onError: (error: unknown) => {
       // A 409 here means somebody triaged the item first; show the server's reason.
-      const message = error instanceof ApiError ? error.message : 'The exception could not be updated.';
+      const message =
+        error instanceof ApiError ? error.message : 'The exception could not be updated.';
       push('error', 'Triage rejected', message);
       invalidate();
     },
@@ -139,39 +151,51 @@ export function ExceptionsPage() {
             >
               {publicId}
             </Link>
-            <p className="text-[11px] text-slate-500">{info.row.original.borrowerName ?? '—'}</p>
+            <p className="text-2xs text-slate-500">{info.row.original.borrowerName ?? '—'}</p>
           </div>
         );
       },
     }),
     column.accessor('kind', {
       header: 'Kind',
-      cell: (info) => <Badge tone={KIND_TONE[info.getValue()]}>{KIND_LABEL[info.getValue()]}</Badge>,
+      cell: (info) => (
+        <Badge tone={KIND_TONE[info.getValue()]}>{KIND_LABEL[info.getValue()]}</Badge>
+      ),
     }),
     column.accessor('severity', {
       header: 'Severity',
-      cell: (info) => <Badge tone={SEVERITY_TONE[info.getValue()]}>{info.getValue().toLowerCase()}</Badge>,
+      cell: (info) => (
+        <Badge tone={SEVERITY_TONE[info.getValue()]}>{info.getValue().toLowerCase()}</Badge>
+      ),
     }),
     column.accessor('title', {
       header: 'Finding',
       cell: (info) => (
         <div className="max-w-md">
           <p className="font-medium text-slate-800">{info.getValue()}</p>
-          <p className="truncate text-[11px] text-slate-500">{info.row.original.detail}</p>
+          <p className="truncate text-2xs text-slate-500">{info.row.original.detail}</p>
         </div>
       ),
     }),
     column.accessor('metric', {
       header: 'Metric',
-      cell: (info) => <span className="tabular-nums text-xs text-slate-600">{info.getValue() ?? '—'}</span>,
+      cell: (info) => (
+        <span className="tabular-nums text-xs text-slate-600">{info.getValue() ?? '—'}</span>
+      ),
     }),
     column.accessor('status', {
       header: 'Status',
-      cell: (info) => <Badge tone={STATUS_TONE[info.getValue()]}>{info.getValue().toLowerCase()}</Badge>,
+      cell: (info) => (
+        <Badge tone={STATUS_TONE[info.getValue()]}>{info.getValue().toLowerCase()}</Badge>
+      ),
     }),
     column.accessor('createdAt', {
       header: 'Raised',
-      cell: (info) => <span className="tabular-nums text-xs text-slate-500">{formatDateTime(info.getValue())}</span>,
+      cell: (info) => (
+        <span className="tabular-nums text-xs text-slate-500">
+          {formatDateTime(info.getValue())}
+        </span>
+      ),
     }),
     column.display({
       id: 'actions',
@@ -235,7 +259,10 @@ export function ExceptionsPage() {
             aria-label="Filter by kind"
             value={list.filters.kind ?? ''}
             onChange={(event) =>
-              list.setFilter('kind', event.target.value === '' ? undefined : (event.target.value as ExceptionKind))
+              list.setFilter(
+                'kind',
+                event.target.value === '' ? undefined : (event.target.value as ExceptionKind),
+              )
             }
           >
             <option value="">All kinds</option>
@@ -249,7 +276,10 @@ export function ExceptionsPage() {
             aria-label="Filter by severity"
             value={list.filters.severity ?? ''}
             onChange={(event) =>
-              list.setFilter('severity', event.target.value === '' ? undefined : (event.target.value as ExceptionSeverity))
+              list.setFilter(
+                'severity',
+                event.target.value === '' ? undefined : (event.target.value as ExceptionSeverity),
+              )
             }
           >
             <option value="">All severities</option>
@@ -261,7 +291,10 @@ export function ExceptionsPage() {
             aria-label="Filter by status"
             value={list.filters.status ?? ''}
             onChange={(event) =>
-              list.setFilter('status', event.target.value === '' ? undefined : (event.target.value as ExceptionStatus))
+              list.setFilter(
+                'status',
+                event.target.value === '' ? undefined : (event.target.value as ExceptionStatus),
+              )
             }
           >
             <option value="">All statuses</option>
@@ -317,19 +350,26 @@ export function ExceptionsPage() {
             }
           />
         )}
-        {data ? <Pagination meta={data.meta} onPageChange={list.setPage} loading={isLoading} /> : null}
+        {data ? (
+          <Pagination meta={data.meta} onPageChange={list.setPage} loading={isLoading} />
+        ) : null}
       </Card>
 
-      <p className="mt-3 flex items-center gap-1.5 text-[11px] text-slate-500">
+      <p className="mt-3 flex items-center gap-1.5 text-2xs text-slate-500">
         <ShieldAlert className="h-3.5 w-3.5" />
-        Triage moves in one direction only: open → acknowledged → resolved. A repeat transition is rejected by the API.
+        Triage moves in one direction only: open → acknowledged → resolved. A repeat transition is
+        rejected by the API.
       </p>
 
       <Drawer
         open={selected !== null}
         onClose={() => setSelected(null)}
         title={selected ? selected.title : ''}
-        description={selected ? `${KIND_LABEL[selected.kind]} · raised ${formatDateTime(selected.createdAt)}` : undefined}
+        description={
+          selected
+            ? `${KIND_LABEL[selected.kind]} · raised ${formatDateTime(selected.createdAt)}`
+            : undefined
+        }
         footer={
           selected && canTriage && selected.status !== 'RESOLVED' ? (
             <span className="flex justify-end gap-2">
@@ -346,24 +386,29 @@ export function ExceptionsPage() {
         {selected ? (
           <dl className="space-y-3 text-sm">
             <div className="flex items-center gap-2">
-              <Badge tone={SEVERITY_TONE[selected.severity]}>{selected.severity.toLowerCase()} severity</Badge>
+              <Badge tone={SEVERITY_TONE[selected.severity]}>
+                {selected.severity.toLowerCase()} severity
+              </Badge>
               <Badge tone={STATUS_TONE[selected.status]}>{selected.status.toLowerCase()}</Badge>
             </div>
             <div>
-              <dt className="text-[11px] uppercase tracking-wider text-slate-400">Finding</dt>
+              <dt className="text-2xs uppercase tracking-wider text-slate-400">Finding</dt>
               <dd className="mt-0.5 leading-relaxed text-slate-700">{selected.detail}</dd>
             </div>
             {selected.metric ? (
               <div>
-                <dt className="text-[11px] uppercase tracking-wider text-slate-400">Metric</dt>
+                <dt className="text-2xs uppercase tracking-wider text-slate-400">Metric</dt>
                 <dd className="mt-0.5 font-mono text-xs text-slate-700">{selected.metric}</dd>
               </div>
             ) : null}
             {selected.exposurePublicId ? (
               <div>
-                <dt className="text-[11px] uppercase tracking-wider text-slate-400">Exposure</dt>
+                <dt className="text-2xs uppercase tracking-wider text-slate-400">Exposure</dt>
                 <dd className="mt-0.5">
-                  <Link to={`/portfolio/${selected.exposurePublicId}`} className="font-medium text-navy-800 hover:underline">
+                  <Link
+                    to={`/portfolio/${selected.exposurePublicId}`}
+                    className="font-medium text-navy-800 hover:underline"
+                  >
                     {selected.exposurePublicId}
                   </Link>
                   <span className="ml-2 text-xs text-slate-500">{selected.borrowerName ?? ''}</span>
@@ -372,16 +417,16 @@ export function ExceptionsPage() {
             ) : null}
             {selected.acknowledgedBy ? (
               <div>
-                <dt className="text-[11px] uppercase tracking-wider text-slate-400">Acknowledged</dt>
+                <dt className="text-2xs uppercase tracking-wider text-slate-400">Acknowledged</dt>
                 <dd className="mt-0.5 text-xs text-slate-600">
                   {selected.acknowledgedBy} · {formatDateTime(selected.acknowledgedAt ?? '')}
                 </dd>
               </div>
             ) : null}
             {!canTriage ? (
-              <p className="rounded-md bg-slate-50 px-3 py-2 text-[11px] leading-relaxed text-slate-500">
-                Your role can read the queue but cannot triage it. Triage requires the <code>exposure:override</code>{' '}
-                permission.
+              <p className="rounded-lg bg-surface-2 px-3 py-2 text-2xs leading-relaxed text-slate-500">
+                Your role can read the queue but cannot triage it. Triage requires the{' '}
+                <code>exposure:override</code> permission.
               </p>
             ) : null}
           </dl>
@@ -394,7 +439,7 @@ export function ExceptionsPage() {
           the server exposes no tool that could supply one.
         */}
         {selected && canUseAi ? (
-          <div className="mt-4 border-t border-slate-200 pt-4">
+          <div className="mt-4 border-t border-line pt-4">
             <QualityInvestigationPanel
               request={{ exceptionId: selected.id }}
               subjectLabel={selected.exposurePublicId ?? 'this portfolio-level finding'}
@@ -415,11 +460,21 @@ export function ExceptionsPage() {
               Cancel
             </Button>
             <Button
-              icon={triage?.action === 'resolve' ? <CheckCircle2 className="h-4 w-4" /> : <MessageSquare className="h-4 w-4" />}
+              icon={
+                triage?.action === 'resolve' ? (
+                  <CheckCircle2 className="h-4 w-4" />
+                ) : (
+                  <MessageSquare className="h-4 w-4" />
+                )
+              }
               loading={triageMutation.isPending}
               onClick={() =>
                 triage
-                  ? triageMutation.mutate({ item: triage.item, action: triage.action, comment: note })
+                  ? triageMutation.mutate({
+                      item: triage.item,
+                      action: triage.action,
+                      comment: note,
+                    })
                   : undefined
               }
             >
@@ -433,7 +488,7 @@ export function ExceptionsPage() {
         </label>
         <textarea
           id="triage-note"
-          className="mt-1.5 w-full rounded-md border border-slate-200 px-3 py-2 text-sm focus:border-navy-400 focus:outline-none focus:ring-2 focus:ring-navy-100"
+          className="mt-1.5 w-full rounded-lg border border-line px-3 py-2 text-sm focus:border-navy-400 focus:outline-none focus:ring-2 focus:ring-navy-100"
           rows={4}
           maxLength={500}
           placeholder={

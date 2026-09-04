@@ -6,7 +6,12 @@ import { useGuidedDemo } from '@/providers/GuidedDemoProvider';
 export function StartGuidedDemoButton() {
   const { start } = useGuidedDemo();
   return (
-    <Button variant="secondary" size="sm" icon={<Sparkles className="h-3.5 w-3.5" />} onClick={start}>
+    <Button
+      variant="secondary"
+      size="sm"
+      icon={<Sparkles className="h-3.5 w-3.5" />}
+      onClick={start}
+    >
       Guided Demo
     </Button>
   );

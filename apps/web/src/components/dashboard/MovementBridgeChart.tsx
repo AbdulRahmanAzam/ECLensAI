@@ -57,25 +57,41 @@ export function MovementBridgeChart({ bridge, loading }: MovementBridgeChartProp
   return (
     <div>
       <p className="mb-3 text-xs text-slate-500">
-        Opening allowance {moneyString(bridge.from.lossAllowance, { compact: true })} on {bridge.from.reportingDate}{' '}
-        moved to {moneyString(bridge.to.lossAllowance, { compact: true })} on {bridge.to.reportingDate}
-        {bridge.changePercent ? ` (${Number(bridge.changePercent) >= 0 ? '+' : ''}${bridge.changePercent}%)` : ''}.
+        Opening allowance {moneyString(bridge.from.lossAllowance, { compact: true })} on{' '}
+        {bridge.from.reportingDate} moved to{' '}
+        {moneyString(bridge.to.lossAllowance, { compact: true })} on {bridge.to.reportingDate}
+        {bridge.changePercent
+          ? ` (${Number(bridge.changePercent) >= 0 ? '+' : ''}${bridge.changePercent}%)`
+          : ''}
+        .
       </p>
       <p className="sr-only">
-        Allowance movement from {moneyString(bridge.from.lossAllowance)} to {moneyString(bridge.to.lossAllowance)}, a
-        change of {moneyString(bridge.change)}. Components: {bridge.components
-          .map((component) => `${component.label} ${component.amount !== null ? moneyString(component.amount) : 'not measured'}`)
+        Allowance movement from {moneyString(bridge.from.lossAllowance)} to{' '}
+        {moneyString(bridge.to.lossAllowance)}, a change of {moneyString(bridge.change)}.
+        Components:{' '}
+        {bridge.components
+          .map(
+            (component) =>
+              `${component.label} ${component.amount !== null ? moneyString(component.amount) : 'not measured'}`,
+          )
           .join('; ')}
         .
       </p>
       <ul className="space-y-2">
         {bridge.components.map((component) => {
           const tone = signOf(component, component.code);
-          const amountNumber = component.amount === null ? 0 : decimalStringToNumber(component.amount);
-          const width = component.amount === null ? 0 : Math.max((Math.abs(amountNumber) / maxAbs) * 100, amountNumber === 0 ? 0 : 3);
+          const amountNumber =
+            component.amount === null ? 0 : decimalStringToNumber(component.amount);
+          const width =
+            component.amount === null
+              ? 0
+              : Math.max((Math.abs(amountNumber) / maxAbs) * 100, amountNumber === 0 ? 0 : 3);
           const Icon = tone === 'up' ? TrendingUp : tone === 'down' ? TrendingDown : Minus;
           return (
-            <li key={component.code} className="grid grid-cols-[9rem_1fr_9rem] items-center gap-3 text-xs">
+            <li
+              key={component.code}
+              className="grid grid-cols-[9rem_1fr_9rem] items-center gap-3 text-xs"
+            >
               <span className="truncate font-medium text-slate-700" title={component.label}>
                 {component.label}
               </span>
@@ -83,7 +99,10 @@ export function MovementBridgeChart({ bridge, loading }: MovementBridgeChartProp
                 {component.amount !== null ? (
                   <span
                     className={`block h-full rounded-full ${SIGN_TONE[tone]}`}
-                    style={{ width: `${width}%`, marginLeft: tone === 'down' ? undefined : undefined }}
+                    style={{
+                      width: `${width}%`,
+                      marginLeft: tone === 'down' ? undefined : undefined,
+                    }}
                   />
                 ) : (
                   <Tooltip content={component.note ?? 'Not measured for this book.'}>
@@ -94,18 +113,20 @@ export function MovementBridgeChart({ bridge, loading }: MovementBridgeChartProp
               <span className="flex items-center justify-end gap-1 font-medium tabular-nums text-slate-700">
                 {component.amount !== null ? (
                   <>
-                    <Icon className={`h-3 w-3 ${tone === 'up' ? 'text-emerald-600' : tone === 'down' ? 'text-red-600' : 'text-navy-500'}`} />
+                    <Icon
+                      className={`h-3 w-3 ${tone === 'up' ? 'text-emerald-600' : tone === 'down' ? 'text-red-600' : 'text-navy-500'}`}
+                    />
                     {moneyString(component.amount, { compact: true })}
                   </>
                 ) : (
-                  <span className="text-[11px] font-normal italic text-slate-400">not measured</span>
+                  <span className="text-2xs font-normal italic text-slate-400">not measured</span>
                 )}
               </span>
             </li>
           );
         })}
       </ul>
-      <div className="mt-3 flex items-center gap-4 border-t border-slate-100 pt-2 text-[11px] text-slate-500">
+      <div className="mt-3 flex items-center gap-4 border-t border-line-soft pt-2 text-2xs text-slate-500">
         <span className="inline-flex items-center gap-1">
           <span className="h-2 w-2 rounded-full bg-emerald-500" /> Increases allowance
         </span>
@@ -113,11 +134,13 @@ export function MovementBridgeChart({ bridge, loading }: MovementBridgeChartProp
           <span className="h-2 w-2 rounded-full bg-red-500" /> Decreases allowance
         </span>
         <span className="ml-auto">
-          {bridge.componentsSumToChange ? 'Components reconcile exactly to the change.' : 'Components do not sum to the change — see limitations.'}
+          {bridge.componentsSumToChange
+            ? 'Components reconcile exactly to the change.'
+            : 'Components do not sum to the change — see limitations.'}
         </span>
       </div>
       {bridge.limitations.length > 0 ? (
-        <ul className="mt-2 space-y-1 text-[11px] leading-relaxed text-slate-500">
+        <ul className="mt-2 space-y-1 text-2xs leading-relaxed text-slate-500">
           {bridge.limitations.map((limitation) => (
             <li key={limitation}>{limitation}</li>
           ))}

@@ -277,7 +277,8 @@ function sourcesBlock(refs: AiSourceRef[]): string | null {
   return [
     'Sources:',
     ...refs.map(
-      (ref) => `- ${refKindLabel(ref.kind)} ${refLabel(ref)}${ref.locator ? ` (${ref.locator})` : ''} [${ref.id}]`,
+      (ref) =>
+        `- ${refKindLabel(ref.kind)} ${refLabel(ref)}${ref.locator ? ` (${ref.locator})` : ''} [${ref.id}]`,
     ),
   ].join('\n');
 }
@@ -308,7 +309,9 @@ function movementLines(movements: CommentaryMovement[]): string[] {
   // The claim kind is written into the text rather than left to the badge, because
   // a pasted commentary has no badges and would otherwise read as uniformly
   // authoritative.
-  return movements.map((movement) => `- [${movement.claimKind}] ${movement.label} — ${movement.detail}`);
+  return movements.map(
+    (movement) => `- [${movement.claimKind}] ${movement.label} — ${movement.detail}`,
+  );
 }
 
 /**
@@ -328,11 +331,14 @@ export function commentaryToClipboardText(commentary: ExecutiveCommentary): stri
     ['Recommended actions', commentary.actions],
   ];
   for (const [heading, movements] of groups) {
-    if (movements.length > 0) sections.push([`${heading}:`, ...movementLines(movements)].join('\n'));
+    if (movements.length > 0)
+      sections.push([`${heading}:`, ...movementLines(movements)].join('\n'));
   }
 
   if (commentary.dataLimitations.length > 0) {
-    sections.push(['Data limitations:', ...commentary.dataLimitations.map((item) => `- ${item}`)].join('\n'));
+    sections.push(
+      ['Data limitations:', ...commentary.dataLimitations.map((item) => `- ${item}`)].join('\n'),
+    );
   }
 
   const sources = sourcesBlock(commentary.sourceRefs);

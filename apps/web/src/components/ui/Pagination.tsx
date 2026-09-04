@@ -20,15 +20,18 @@ export function Pagination({
   const lastItem = Math.min(meta.page * meta.pageSize, meta.totalItems);
 
   return (
-    <div className="flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 px-4 py-2.5 text-[11px] text-slate-500">
+    <div className="flex flex-wrap items-center justify-between gap-3 border-t border-line-soft bg-surface-2/60 px-4 py-2.5 text-xs text-slate-500">
       <span className="tabular-nums">
-        {firstItem}–{lastItem} of {meta.totalItems.toLocaleString('en-US')} · page {meta.page} of{' '}
+        <span className="font-medium text-slate-700">
+          {firstItem}–{lastItem}
+        </span>{' '}
+        of {meta.totalItems.toLocaleString('en-US')} · page {meta.page} of{' '}
         {Math.max(meta.totalPages, 1)}
       </span>
-      <span className="flex items-center gap-2">
+      <span className="flex items-center gap-1.5">
         <Button
-          variant="ghost"
-          size="sm"
+          variant="secondary"
+          size="xs"
           disabled={loading || meta.page <= 1}
           onClick={() => onPageChange(meta.page - 1)}
           aria-label="Previous page"
@@ -37,8 +40,8 @@ export function Pagination({
           Prev
         </Button>
         <Button
-          variant="ghost"
-          size="sm"
+          variant="secondary"
+          size="xs"
           disabled={loading || meta.page >= meta.totalPages}
           onClick={() => onPageChange(meta.page + 1)}
           aria-label="Next page"

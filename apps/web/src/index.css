@@ -1,3 +1,5 @@
+@import './styles/tokens.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -6,14 +8,40 @@
   html {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
   }
 
   body {
-    @apply bg-slate-100 text-slate-800;
+    @apply bg-canvas text-slate-700;
+    /* cv11 gives a single-storey `a`/`g`; ss01 tightens punctuation. Both are
+       Inter features and degrade silently on the fallback stack. */
+    font-feature-settings:
+      'cv11' 1,
+      'ss01' 1;
+  }
+
+  /* Financial figures must align vertically down a column, everywhere. */
+  th,
+  td,
+  input[type='number'] {
+    font-variant-numeric: tabular-nums;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    @apply text-slate-900;
+    letter-spacing: -0.018em;
   }
 
   :focus-visible {
-    @apply outline-none ring-2 ring-navy-500 ring-offset-1;
+    @apply outline-none ring-2 ring-brand/60 ring-offset-2;
+    --tw-ring-offset-color: rgb(var(--c-canvas));
+  }
+
+  ::selection {
+    @apply bg-brand/20 text-slate-900;
   }
 
   /* Compact, unobtrusive scrollbars for dense analyst tables */
@@ -23,11 +51,83 @@
   }
   ::-webkit-scrollbar-thumb {
     @apply rounded-full bg-slate-300;
+    background-clip: padding-box;
+    border: 2px solid transparent;
   }
   ::-webkit-scrollbar-thumb:hover {
     @apply bg-slate-400;
   }
   ::-webkit-scrollbar-track {
     @apply bg-transparent;
+  }
+
+  /* The theme flips instantly; only surfaces should cross-fade, never text
+     position, so the transition is scoped to colour properties. */
+  :root[data-theme-ready] body,
+  :root[data-theme-ready] body * {
+    transition:
+      background-color 0.18s ease,
+      border-color 0.18s ease;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+@layer components {
+  /* Faint blueprint grid behind the app frame — reads as engineered paper
+     rather than a flat grey wash, and costs no image request. */
+  .app-canvas {
+    background-image:
+      linear-gradient(to right, rgb(var(--c-slate-400) / 0.07) 1px, transparent 1px),
+      linear-gradient(to bottom, rgb(var(--c-slate-400) / 0.07) 1px, transparent 1px);
+    background-size: 34px 34px;
+  }
+
+  .ink-canvas {
+    background-image:
+      radial-gradient(60rem 40rem at 15% -10%, rgb(var(--c-navy-400) / 0.22), transparent 60%),
+      radial-gradient(40rem 30rem at 100% 0%, rgb(var(--c-teal-400) / 0.14), transparent 55%);
+  }
+
+  .hairline {
+    @apply border-line;
+  }
+
+  .gradient-text {
+    background-image: linear-gradient(
+      100deg,
+      rgb(var(--c-slate-900)),
+      rgb(var(--c-navy-600)) 65%,
+      rgb(var(--c-teal-600))
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .shimmer {
+    position: relative;
+    overflow: hidden;
+  }
+  .shimmer::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    transform: translateX(-100%);
+    background-image: linear-gradient(
+      90deg,
+      transparent,
+      rgb(var(--c-surface) / 0.65),
+      transparent
+    );
+    animation: shimmer 1.6s infinite;
   }
 }

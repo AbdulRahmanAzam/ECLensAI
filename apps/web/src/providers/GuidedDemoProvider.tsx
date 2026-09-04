@@ -1,4 +1,12 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+  type ReactNode,
+} from 'react';
 import { useNavigate } from 'react-router-dom';
 
 /**
@@ -26,47 +34,41 @@ export const DEMO_STEPS: DemoStep[] = [
   {
     id: 'portfolio-arrives',
     title: '1. A new portfolio arrives',
-    body:
-      'A risk analyst receives a new loan portfolio — 780 seeded exposures across consumer, SME, agriculture, microfinance and corporate. Imports start here: upload a CSV or XLSX, or use the seeded sample.',
+    body: 'A risk analyst receives a new loan portfolio — 780 seeded exposures across consumer, SME, agriculture, microfinance and corporate. Imports start here: upload a CSV or XLSX, or use the seeded sample.',
     route: '/imports',
     target: 'tour-imports-upload',
   },
   {
     id: 'map-and-validate',
     title: '2. Map columns, catch errors before calculation',
-    body:
-      'Column headers are mapped to the canonical data dictionary — Gemini suggests a mapping with a confidence score, which an analyst must confirm. Every row is validated; invalid rows are quarantined with a reason, never silently repaired.',
+    body: 'Column headers are mapped to the canonical data dictionary — Gemini suggests a mapping with a confidence score, which an analyst must confirm. Every row is validated; invalid rows are quarantined with a reason, never silently repaired.',
     route: '/imports',
     target: 'tour-imports-batches',
   },
   {
     id: 'deterministic-engine',
     title: '3. The deterministic engine stages and calculates',
-    body:
-      'Every exposure is staged with a machine-readable reason, then ECL is calculated per scenario and period — marginal PD × LGD × EAD × discount factor, never a shortcut. Every result carries the exact model, scenario and staging-rule versions it was calculated under.',
+    body: 'Every exposure is staged with a machine-readable reason, then ECL is calculated per scenario and period — marginal PD × LGD × EAD × discount factor, never a shortcut. Every result carries the exact model, scenario and staging-rule versions it was calculated under.',
     route: '/ecl-runs',
   },
   {
     id: 'ai-explains',
     title: '4. Gemini explains the change — without inventing figures',
-    body:
-      'The dashboard\'s executive commentary is drafted by Gemini, but every number in it is copied from this run\'s stored results — never recalculated or guessed. Ask the AI Copilot a follow-up question and watch it cite the same figures.',
+    body: "The dashboard's executive commentary is drafted by Gemini, but every number in it is copied from this run's stored results — never recalculated or guessed. Ask the AI Copilot a follow-up question and watch it cite the same figures.",
     route: '/dashboard',
     target: 'tour-executive-commentary',
   },
   {
     id: 'scenario-lab',
     title: '5. Build a downside scenario',
-    body:
-      'An analyst can draft a downside scenario from a macro narrative — Gemini proposes PD/LGD multipliers with a rationale, shown as a clearly-labelled proposal. Nothing takes effect until a person explicitly approves the new scenario version.',
+    body: 'An analyst can draft a downside scenario from a macro narrative — Gemini proposes PD/LGD multipliers with a rationale, shown as a clearly-labelled proposal. Nothing takes effect until a person explicitly approves the new scenario version.',
     route: '/scenarios',
     target: 'tour-scenario-draft',
   },
   {
     id: 'review-and-report',
     title: '6. Review, approve, download an audit-ready report',
-    body:
-      'A reviewer other than the run\'s creator checks the calculation trace and assumptions, then approves. Once approved, a real PDF report — totals, stage breakdown, scenario weights, movements, model assumptions and approval history — can be generated and downloaded from that run.',
+    body: "A reviewer other than the run's creator checks the calculation trace and assumptions, then approves. Once approved, a real PDF report — totals, stage breakdown, scenario weights, movements, model assumptions and approval history — can be generated and downloaded from that run.",
     route: '/ecl-runs',
     target: 'tour-run-report',
   },
@@ -86,7 +88,10 @@ function loadState(): GuidedDemoState {
     const parsed = JSON.parse(raw) as Partial<GuidedDemoState>;
     return {
       active: parsed.active === true,
-      stepIndex: typeof parsed.stepIndex === 'number' ? Math.min(Math.max(parsed.stepIndex, 0), DEMO_STEPS.length - 1) : 0,
+      stepIndex:
+        typeof parsed.stepIndex === 'number'
+          ? Math.min(Math.max(parsed.stepIndex, 0), DEMO_STEPS.length - 1)
+          : 0,
     };
   } catch {
     return { active: false, stepIndex: 0 };

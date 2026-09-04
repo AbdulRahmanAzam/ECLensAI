@@ -104,7 +104,8 @@ export function CopilotPage() {
 
   const threads = useQuery({
     queryKey: ['copilot-threads'],
-    queryFn: () => api.ai.listThreads({ page: 1, pageSize: 50, sortBy: 'updatedAt', sortDir: 'desc' }),
+    queryFn: () =>
+      api.ai.listThreads({ page: 1, pageSize: 50, sortBy: 'updatedAt', sortDir: 'desc' }),
     enabled: ai.permitted,
   });
 
@@ -127,7 +128,11 @@ export function CopilotPage() {
       }
     },
     onError: (error: unknown) => {
-      push('error', 'The question was not answered', error instanceof Error ? error.message : 'The request failed.');
+      push(
+        'error',
+        'The question was not answered',
+        error instanceof Error ? error.message : 'The request failed.',
+      );
     },
     onSettled: () => setAsked(null),
   });
@@ -185,7 +190,12 @@ export function CopilotPage() {
             ai.available ? (
               <div className="flex flex-wrap justify-center gap-2">
                 {STARTERS.slice(0, 3).map((starter) => (
-                  <Button key={starter} size="sm" variant="secondary" onClick={() => submit(starter)}>
+                  <Button
+                    key={starter}
+                    size="sm"
+                    variant="secondary"
+                    onClick={() => submit(starter)}
+                  >
                     {starter}
                   </Button>
                 ))}
@@ -210,7 +220,12 @@ export function CopilotPage() {
         {asked ? (
           <CopilotTurn
             key="asked"
-            turn={{ id: 'asked', role: 'user', content: asked, createdAt: new Date().toISOString() }}
+            turn={{
+              id: 'asked',
+              role: 'user',
+              content: asked,
+              createdAt: new Date().toISOString(),
+            }}
             threadId={threadId ?? ''}
             onAsk={submit}
           />
@@ -220,14 +235,15 @@ export function CopilotPage() {
             <span className="mt-1 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-navy-100 text-navy-700">
               <Loader2 className="h-4 w-4 animate-spin" />
             </span>
-            <div className="max-w-[86%] rounded-lg border border-slate-200 bg-slate-50 px-4 py-3">
+            <div className="max-w-[86%] rounded-lg border border-line bg-surface-2 px-4 py-3">
               <p className="flex items-center gap-2 text-xs text-slate-600">
                 <Loader2 className="h-3.5 w-3.5 animate-spin text-navy-500" />
                 Reading this organisation’s stored records…
               </p>
-              <p className="mt-1.5 text-[11px] leading-relaxed text-slate-500">
-                Answers arrive whole, after every figure in them has been checked against the records they cite.
-                Nothing is shown token by token, because an unchecked number should never reach the screen first.
+              <p className="mt-1.5 text-2xs leading-relaxed text-slate-500">
+                Answers arrive whole, after every figure in them has been checked against the
+                records they cite. Nothing is shown token by token, because an unchecked number
+                should never reach the screen first.
               </p>
             </div>
           </div>
@@ -245,7 +261,9 @@ export function CopilotPage() {
           ai.data ? (
             <span className="flex flex-wrap items-center gap-1.5">
               <Badge tone={ai.data.availability.available ? 'positive' : 'neutral'}>
-                {ai.data.availability.available ? `live · ${ai.data.availability.model}` : 'AI unavailable'}
+                {ai.data.availability.available
+                  ? `live · ${ai.data.availability.model}`
+                  : 'AI unavailable'}
               </Badge>
               {ai.data.streaming ? null : <Badge tone="neutral">answers arrive whole</Badge>}
             </span>
@@ -271,7 +289,7 @@ export function CopilotPage() {
 
       <div className="grid min-h-0 flex-1 gap-4 lg:grid-cols-[240px_1fr]">
         <Card className="flex max-h-[70vh] flex-col overflow-hidden">
-          <p className="border-b border-slate-100 px-3 py-2 text-[11px] font-medium uppercase tracking-wider text-slate-400">
+          <p className="border-b border-line-soft px-3 py-2 text-2xs font-medium uppercase tracking-wider text-slate-400">
             Your conversations
           </p>
           <div className="min-h-0 flex-1 overflow-y-auto">
@@ -282,25 +300,28 @@ export function CopilotPage() {
                 <Skeleton className="h-9" />
               </div>
             ) : (threads.data?.items.length ?? 0) === 0 ? (
-              <p className="px-3 py-4 text-[11px] leading-relaxed text-slate-500">
-                No conversations yet. Threads are yours alone — another analyst cannot open them, and neither can a
-                user at another organisation.
+              <p className="px-3 py-4 text-2xs leading-relaxed text-slate-500">
+                No conversations yet. Threads are yours alone — another analyst cannot open them,
+                and neither can a user at another organisation.
               </p>
             ) : (
-              <ul className="divide-y divide-slate-100">
+              <ul className="divide-y divide-line-soft">
                 {threads.data?.items.map((item) => (
                   <li key={item.id}>
                     <button
                       type="button"
                       onClick={() => openThread(item.id)}
                       className={cn(
-                        'block w-full px-3 py-2 text-left transition-colors hover:bg-slate-50',
+                        'block w-full px-3 py-2 text-left transition-colors hover:bg-surface-2',
                         item.id === threadId ? 'bg-navy-50' : '',
                       )}
                     >
-                      <span className="block truncate text-xs font-medium text-slate-800">{item.title}</span>
+                      <span className="block truncate text-xs font-medium text-slate-800">
+                        {item.title}
+                      </span>
                       <span className="mt-0.5 flex items-center gap-1.5 text-[10px] text-slate-400">
-                        {formatDateTime(item.updatedAt)} · {item.turnCount} turn{item.turnCount === 1 ? '' : 's'}
+                        {formatDateTime(item.updatedAt)} · {item.turnCount} turn
+                        {item.turnCount === 1 ? '' : 's'}
                         {item.hasDegradedTurn ? <Badge tone="warning">demo answer</Badge> : null}
                       </span>
                     </button>
@@ -310,7 +331,7 @@ export function CopilotPage() {
             )}
           </div>
           {threads.data && threads.data.meta.totalItems > threads.data.items.length ? (
-            <p className="border-t border-slate-100 px-3 py-2 text-[10px] text-slate-400">
+            <p className="border-t border-line-soft px-3 py-2 text-[10px] text-slate-400">
               Showing the {threads.data.items.length} most recent of {threads.data.meta.totalItems}.
             </p>
           ) : null}
@@ -321,15 +342,15 @@ export function CopilotPage() {
             {transcript()}
           </div>
 
-          <div className="border-t border-slate-100 px-4 py-3">
+          <div className="border-t border-line-soft px-4 py-3">
             {FOCUS_FIELDS.some((field) => focus[field]) ? (
               <div className="mb-2 flex flex-wrap items-center gap-1.5">
-                <span className="text-[11px] text-slate-500">Answering about:</span>
+                <span className="text-2xs text-slate-500">Answering about:</span>
                 {FOCUS_FIELDS.map((field) =>
                   focus[field] ? (
                     <span
                       key={field}
-                      className="inline-flex items-center gap-1 rounded border border-navy-200 bg-navy-50 px-1.5 py-0.5 text-[11px] text-navy-800"
+                      className="inline-flex items-center gap-1 rounded border border-navy-200 bg-navy-50 px-1.5 py-0.5 text-2xs text-navy-800"
                     >
                       {FOCUS_LABEL[field]} {focus[field]}
                       <button
@@ -353,7 +374,7 @@ export function CopilotPage() {
                   type="button"
                   onClick={() => submit(chip)}
                   disabled={!ai.permitted || ask.isPending}
-                  className="rounded-full border border-slate-200 bg-white px-2.5 py-1 text-[11px] text-slate-600 transition-colors hover:border-navy-300 hover:text-navy-800 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="rounded-full border border-line bg-surface px-2.5 py-1 text-2xs text-slate-600 transition-colors hover:border-navy-300 hover:text-navy-800 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {chip}
                 </button>
@@ -375,7 +396,7 @@ export function CopilotPage() {
                 placeholder="Ask about staging, scenarios, coverage, lineage or data quality…"
                 aria-label="Message the copilot"
                 disabled={!ai.permitted || ask.isPending}
-                className="flex-1 resize-none rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus:border-navy-500 focus:outline-none focus:ring-2 focus:ring-navy-500 disabled:bg-slate-50"
+                className="flex-1 resize-none rounded-lg border border-slate-300 bg-surface px-3 py-2 text-sm text-slate-900 shadow-sm focus:border-navy-500 focus:outline-none focus:ring-2 focus:ring-navy-500 disabled:bg-surface-2"
               />
               <Button
                 icon={<Send className="h-4 w-4" />}

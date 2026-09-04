@@ -12,8 +12,20 @@
  */
 import { useState } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { AlertTriangle, ClipboardCheck, FileDown, FileSpreadsheet, Info, ScrollText } from 'lucide-react';
-import type { EclRunSummaryRecord, ImportBatchRecord, RunStatus, TemplateDownloadRecord } from '@eclens/shared';
+import {
+  AlertTriangle,
+  ClipboardCheck,
+  FileDown,
+  FileSpreadsheet,
+  Info,
+  ScrollText,
+} from 'lucide-react';
+import type {
+  EclRunSummaryRecord,
+  ImportBatchRecord,
+  RunStatus,
+  TemplateDownloadRecord,
+} from '@eclens/shared';
 import { formatDate, formatDateTime } from '@eclens/shared';
 import { api } from '@/api/client';
 import { ApiError, saveBase64File, saveTextFile } from '@/api/http';
@@ -33,7 +45,8 @@ const TEMPLATE_COUNT_MAX = 5000;
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
 
 /** Only batches that actually produced issues are worth an error report. */
-const hasIssues = (batch: ImportBatchRecord): boolean => batch.errorCount > 0 || batch.warningCount > 0;
+const hasIssues = (batch: ImportBatchRecord): boolean =>
+  batch.errorCount > 0 || batch.warningCount > 0;
 
 /** Runs with persisted results — the only ones a PDF report can be generated for. */
 const REPORTABLE_STATUSES: RunStatus[] = ['COMPLETED', 'SUBMITTED', 'APPROVED', 'REJECTED'];
@@ -66,7 +79,8 @@ export function ReportsPage() {
   });
   const reportable = (runs?.items ?? []).filter((run) => REPORTABLE_STATUSES.includes(run.status));
   const [selectedRunId, setSelectedRunId] = useState('');
-  const selectedRun = reportable.find((run: EclRunSummaryRecord) => run.publicId === selectedRunId) ?? null;
+  const selectedRun =
+    reportable.find((run: EclRunSummaryRecord) => run.publicId === selectedRunId) ?? null;
 
   const runReport = useMutation({
     mutationFn: (runPublicId: string) => api.runs.report(runPublicId),
@@ -75,7 +89,11 @@ export function ReportsPage() {
       push('success', 'Report downloaded', `${download.fileName}. Recorded in the audit log.`);
     },
     onError: (error) => {
-      push('error', 'Report generation failed', error instanceof ApiError ? error.message : 'The report could not be generated.');
+      push(
+        'error',
+        'Report generation failed',
+        error instanceof ApiError ? error.message : 'The report could not be generated.',
+      );
     },
   });
 
@@ -109,7 +127,11 @@ export function ReportsPage() {
     mutationFn: (batchPublicId: string) => api.imports.issuesCsv(batchPublicId),
     onSuccess: (csv, batchPublicId) => {
       saveTextFile(`import-${batchPublicId}-issues.csv`, csv, 'text/csv;charset=utf-8');
-      push('success', 'Error report exported', 'The quarantined rows are in the CSV. Recorded in the audit log.');
+      push(
+        'success',
+        'Error report exported',
+        'The quarantined rows are in the CSV. Recorded in the audit log.',
+      );
     },
     onError: (error) => {
       push(
@@ -123,7 +145,9 @@ export function ReportsPage() {
   const countValue = Number(count);
   const templateValid =
     kind === 'blank' ||
-    (Number.isInteger(countValue) && countValue >= TEMPLATE_COUNT_MIN && countValue <= TEMPLATE_COUNT_MAX);
+    (Number.isInteger(countValue) &&
+      countValue >= TEMPLATE_COUNT_MIN &&
+      countValue <= TEMPLATE_COUNT_MAX);
   const reportingDateValid = reportingDate.trim() === '' || ISO_DATE.test(reportingDate.trim());
 
   return (
@@ -170,7 +194,7 @@ export function ReportsPage() {
                   ))}
                 </Select>
                 {selectedRun ? (
-                  <dl className="grid grid-cols-2 gap-x-4 gap-y-1.5 rounded-md bg-slate-50 px-3 py-2.5 text-xs">
+                  <dl className="grid grid-cols-2 gap-x-4 gap-y-1.5 rounded-lg bg-surface-2 px-3 py-2.5 text-xs">
                     <div>
                       <dt className="text-slate-500">Status</dt>
                       <dd className="font-medium text-slate-800">
@@ -197,11 +221,12 @@ export function ReportsPage() {
                 </Button>
               </>
             )}
-            <p className="flex items-start gap-2 text-[11px] leading-relaxed text-slate-500">
+            <p className="flex items-start gap-2 text-2xs leading-relaxed text-slate-500">
               <Info className="mt-0.5 h-3.5 w-3.5 shrink-0" />
-              The report includes totals, stage breakdown, scenario weights, movement since the prior period,
-              concentration, model assumptions and approval history — every figure copied from the run's own
-              persisted record. A run that is not yet approved is clearly watermarked as a draft.
+              The report includes totals, stage breakdown, scenario weights, movement since the
+              prior period, concentration, model assumptions and approval history — every figure
+              copied from the run's own persisted record. A run that is not yet approved is clearly
+              watermarked as a draft.
             </p>
           </CardContent>
         </Card>
@@ -243,7 +268,11 @@ export function ReportsPage() {
                   max={TEMPLATE_COUNT_MAX}
                   value={count}
                   onChange={(event) => setCount(event.target.value)}
-                  error={templateValid ? undefined : `Between ${TEMPLATE_COUNT_MIN} and ${TEMPLATE_COUNT_MAX}.`}
+                  error={
+                    templateValid
+                      ? undefined
+                      : `Between ${TEMPLATE_COUNT_MIN} and ${TEMPLATE_COUNT_MAX}.`
+                  }
                   hint="The generator is deterministic: the same date and row count reproduce byte-identical output."
                 />
               ) : null}
@@ -267,28 +296,30 @@ export function ReportsPage() {
             </Button>
 
             {fieldGuide ? (
-              <div className="border-t border-slate-100 pt-3">
+              <div className="border-t border-line-soft pt-3">
                 <p className="mb-2 text-xs font-medium text-slate-600">
                   Field guide — {fieldGuide.length} columns
                 </p>
-                <div className="max-h-64 overflow-y-auto rounded-md border border-slate-200">
+                <div className="max-h-64 overflow-y-auto rounded-lg border border-line">
                   <table className="w-full text-left text-xs">
-                    <thead className="sticky top-0 bg-slate-50 text-[11px] uppercase tracking-wide text-slate-500">
+                    <thead className="sticky top-0 bg-surface-2 text-2xs uppercase tracking-wide text-slate-500">
                       <tr>
                         <th className="px-2.5 py-1.5 font-medium">Column</th>
                         <th className="px-2.5 py-1.5 font-medium">Type</th>
                         <th className="px-2.5 py-1.5 font-medium">Meaning</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-100">
+                    <tbody className="divide-y divide-line-soft">
                       {fieldGuide.map((field) => (
                         <tr key={field.key} className="align-top">
                           <td className="whitespace-nowrap px-2.5 py-1.5">
-                            <code className="text-[11px] text-navy-800">{field.key}</code>
+                            <code className="text-2xs text-navy-800">{field.key}</code>
                             {field.required ? <Badge tone="warning">required</Badge> : null}
                             <span className="ml-1.5 block text-slate-500">{field.label}</span>
                           </td>
-                          <td className="whitespace-nowrap px-2.5 py-1.5 text-slate-500">{field.kind}</td>
+                          <td className="whitespace-nowrap px-2.5 py-1.5 text-slate-500">
+                            {field.kind}
+                          </td>
                           <td className="px-2.5 py-1.5 text-slate-600">{field.description}</td>
                         </tr>
                       ))}
@@ -312,10 +343,11 @@ export function ReportsPage() {
           />
           <CardContent className="space-y-4">
             {!canExport ? (
-              <p className="flex items-start gap-2 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800">
+              <p className="flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800">
                 <ScrollText className="mt-0.5 h-3.5 w-3.5 shrink-0" />
-                Your role does not carry <code className="mx-1">report:export</code>. The error report is still
-                readable on the Imports screen — only the CSV download is restricted.
+                Your role does not carry <code className="mx-1">report:export</code>. The error
+                report is still readable on the Imports screen — only the CSV download is
+                restricted.
               </p>
             ) : null}
 
@@ -338,13 +370,14 @@ export function ReportsPage() {
                   <option value="">Select a batch…</option>
                   {exportable.map((batch) => (
                     <option key={batch.publicId} value={batch.publicId}>
-                      {batch.fileName} — {batch.errorCount} error(s), {batch.warningCount} warning(s)
+                      {batch.fileName} — {batch.errorCount} error(s), {batch.warningCount}{' '}
+                      warning(s)
                     </option>
                   ))}
                 </Select>
 
                 {selectedBatch ? (
-                  <dl className="grid grid-cols-2 gap-x-4 gap-y-1.5 rounded-md bg-slate-50 px-3 py-2.5 text-xs">
+                  <dl className="grid grid-cols-2 gap-x-4 gap-y-1.5 rounded-lg bg-surface-2 px-3 py-2.5 text-xs">
                     <div>
                       <dt className="text-slate-500">Batch</dt>
                       <dd className="font-medium text-slate-800">
@@ -353,15 +386,21 @@ export function ReportsPage() {
                     </div>
                     <div>
                       <dt className="text-slate-500">Uploaded</dt>
-                      <dd className="font-medium text-slate-800">{formatDateTime(selectedBatch.uploadedAt)}</dd>
+                      <dd className="font-medium text-slate-800">
+                        {formatDateTime(selectedBatch.uploadedAt)}
+                      </dd>
                     </div>
                     <div>
                       <dt className="text-slate-500">Quarantined rows</dt>
-                      <dd className="tabular-nums font-medium text-slate-800">{selectedBatch.quarantinedRowCount}</dd>
+                      <dd className="tabular-nums font-medium text-slate-800">
+                        {selectedBatch.quarantinedRowCount}
+                      </dd>
                     </div>
                     <div>
                       <dt className="text-slate-500">Valid rows</dt>
-                      <dd className="tabular-nums font-medium text-slate-800">{selectedBatch.validRowCount}</dd>
+                      <dd className="tabular-nums font-medium text-slate-800">
+                        {selectedBatch.validRowCount}
+                      </dd>
                     </div>
                   </dl>
                 ) : null}
@@ -378,11 +417,12 @@ export function ReportsPage() {
               </>
             )}
 
-            <p className="flex items-start gap-2 text-[11px] leading-relaxed text-slate-500">
+            <p className="flex items-start gap-2 text-2xs leading-relaxed text-slate-500">
               <Info className="mt-0.5 h-3.5 w-3.5 shrink-0" />
-              The report carries one row per validation issue: row number, field, the raw value exactly as it was
-              uploaded, the issue code, severity and a suggested correction. Ambiguous values are never silently
-              repaired, so the file is the record of what was rejected and why.
+              The report carries one row per validation issue: row number, field, the raw value
+              exactly as it was uploaded, the issue code, severity and a suggested correction.
+              Ambiguous values are never silently repaired, so the file is the record of what was
+              rejected and why.
             </p>
           </CardContent>
         </Card>

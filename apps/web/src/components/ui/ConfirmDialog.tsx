@@ -33,13 +33,17 @@ export function ConfirmDialog({
           <Button variant="secondary" onClick={onCancel} disabled={loading}>
             Cancel
           </Button>
-          <Button variant={destructive ? 'danger' : 'primary'} onClick={onConfirm} loading={loading}>
+          <Button
+            variant={destructive ? 'danger' : 'primary'}
+            onClick={onConfirm}
+            loading={loading}
+          >
             {confirmLabel}
           </Button>
         </>
       }
     >
-      <p className="text-sm text-slate-600">{description}</p>
+      <p className="text-sm leading-relaxed text-slate-600">{description}</p>
     </Modal>
   );
 }

@@ -64,7 +64,10 @@ type AuditFilters = {
 };
 
 export function AuditLogPage() {
-  const list = useServerList<AuditFilters>({}, { sortBy: 'occurredAt', sortDir: 'desc', pageSize: 50 });
+  const list = useServerList<AuditFilters>(
+    {},
+    { sortBy: 'occurredAt', sortDir: 'desc', pageSize: 50 },
+  );
   const [selected, setSelected] = useState<AuditEventRecord | null>(null);
 
   const { data, isLoading, isError, refetch } = useQuery({
@@ -79,23 +82,31 @@ export function AuditLogPage() {
   const columns = [
     column.accessor('occurredAt', {
       header: 'When',
-      cell: (info) => <span className="whitespace-nowrap tabular-nums text-slate-600">{formatDateTime(info.getValue())}</span>,
+      cell: (info) => (
+        <span className="whitespace-nowrap tabular-nums text-slate-600">
+          {formatDateTime(info.getValue())}
+        </span>
+      ),
     }),
     column.accessor('userName', { header: 'User' }),
     column.accessor('role', {
       header: 'Role',
-      cell: (info) => <Badge tone={ROLE_TONE[info.getValue()]}>{ROLE_LABEL[info.getValue()]}</Badge>,
+      cell: (info) => (
+        <Badge tone={ROLE_TONE[info.getValue()]}>{ROLE_LABEL[info.getValue()]}</Badge>
+      ),
     }),
     column.accessor('action', {
       header: 'Action',
-      cell: (info) => <code className="font-mono text-[11px] font-medium text-navy-800">{info.getValue()}</code>,
+      cell: (info) => (
+        <code className="font-mono text-2xs font-medium text-navy-800">{info.getValue()}</code>
+      ),
     }),
     column.accessor('entityType', {
       header: 'Entity',
       cell: (info) => (
         <div>
           <p className="text-slate-700">{info.getValue()}</p>
-          <p className="font-mono text-[11px] text-slate-400">{info.row.original.entityId}</p>
+          <p className="font-mono text-2xs text-slate-400">{info.row.original.entityId}</p>
         </div>
       ),
     }),
@@ -118,7 +129,9 @@ export function AuditLogPage() {
       <PageHeader
         title="Audit log"
         description="An immutable record of every user and system action. Auditors can reproduce exactly who did what, and when."
-        tags={<Badge tone="neutral">{data?.meta.totalItems.toLocaleString('en-US') ?? 0} events</Badge>}
+        tags={
+          <Badge tone="neutral">{data?.meta.totalItems.toLocaleString('en-US') ?? 0} events</Badge>
+        }
       />
 
       <Card className="mb-4 p-4">
@@ -207,16 +220,23 @@ export function AuditLogPage() {
             emptyDescription="Actions taken in the workspace will be recorded here."
           />
         )}
-        {data ? <Pagination meta={data.meta} onPageChange={list.setPage} loading={isLoading} /> : null}
+        {data ? (
+          <Pagination meta={data.meta} onPageChange={list.setPage} loading={isLoading} />
+        ) : null}
       </Card>
 
-      <p className="mt-3 flex items-center gap-1.5 text-[11px] text-slate-500">
+      <p className="mt-3 flex items-center gap-1.5 text-2xs text-slate-500">
         <ScrollText className="h-3.5 w-3.5" />
-        Events are append-only. The API exposes no update or delete route, so the trail cannot be edited by anyone who
-        can reach it — including administrators.
+        Events are append-only. The API exposes no update or delete route, so the trail cannot be
+        edited by anyone who can reach it — including administrators.
       </p>
 
-      <Drawer open={selected !== null} onClose={() => setSelected(null)} title="Audit event" description={selected?.action}>
+      <Drawer
+        open={selected !== null}
+        onClose={() => setSelected(null)}
+        title="Audit event"
+        description={selected?.action}
+      >
         {selected ? (
           <dl className="space-y-3 text-sm">
             {(
@@ -231,16 +251,22 @@ export function AuditLogPage() {
                 ['Request id', selected.requestId ?? '—'],
               ] as [string, string][]
             ).map(([label, value]) => (
-              <div key={label} className="border-b border-slate-100 pb-2 last:border-0">
-                <dt className="text-[11px] font-medium uppercase tracking-wide text-slate-400">{label}</dt>
+              <div key={label} className="border-b border-line-soft pb-2 last:border-0">
+                <dt className="text-2xs font-medium uppercase tracking-wide text-slate-400">
+                  {label}
+                </dt>
                 <dd className="mt-0.5 break-all font-mono text-xs text-slate-800">{value}</dd>
               </div>
             ))}
             <div>
-              <dt className="text-[11px] font-medium uppercase tracking-wide text-slate-400">Detail</dt>
-              <dd className="mt-0.5 whitespace-pre-wrap text-sm text-slate-700">{selected.detail}</dd>
+              <dt className="text-2xs font-medium uppercase tracking-wide text-slate-400">
+                Detail
+              </dt>
+              <dd className="mt-0.5 whitespace-pre-wrap text-sm text-slate-700">
+                {selected.detail}
+              </dd>
             </div>
-            <p className="flex items-center gap-1.5 border-t border-slate-100 pt-3 text-[11px] text-slate-400">
+            <p className="flex items-center gap-1.5 border-t border-line-soft pt-3 text-2xs text-slate-400">
               <ScrollText className="h-3.5 w-3.5 shrink-0" />
               This record is immutable — there is no route that can edit or delete it.
             </p>

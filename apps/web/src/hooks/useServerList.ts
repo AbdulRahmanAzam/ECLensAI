@@ -69,7 +69,8 @@ export function useServerList<TFilters extends Record<string, unknown>>(
   };
 
   const hasActiveFilters = useMemo(
-    () => Object.values(filters).some((value) => value !== '' && value != null) || search.trim() !== '',
+    () =>
+      Object.values(filters).some((value) => value !== '' && value != null) || search.trim() !== '',
     [filters, search],
   );
 

@@ -42,7 +42,7 @@ function Fact({ label, value }: { label: string; value: React.ReactNode }) {
 
 /** The engine renders digits verbatim, trailing zeros included, so a trace can be replayed exactly. */
 function Numeric({ value }: { value: string }) {
-  return <span className="font-mono text-[11px]">{formatDecimalText(value)}</span>;
+  return <span className="font-mono text-2xs">{formatDecimalText(value)}</span>;
 }
 
 function PeriodTable({ periods, scenarioCode }: { periods: PeriodDto[]; scenarioCode: string }) {
@@ -54,11 +54,11 @@ function PeriodTable({ periods, scenarioCode }: { periods: PeriodDto[]; scenario
   const visible = showAll ? periods : periods.slice(0, 12);
 
   return (
-    <div className="overflow-x-auto rounded-md border border-slate-200">
+    <div className="overflow-x-auto rounded-lg border border-line">
       <table className="w-full border-collapse text-xs">
         <caption className="sr-only">Calculation periods for scenario {scenarioCode}</caption>
         <thead>
-          <tr className="border-b border-slate-200 bg-slate-50 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500">
+          <tr className="border-b border-line bg-surface-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500">
             <th className="w-8 px-2 py-1.5" aria-label="Expand period" />
             <th className="px-2 py-1.5">Period</th>
             <th className="px-2 py-1.5">Window</th>
@@ -76,35 +76,48 @@ function PeriodTable({ periods, scenarioCode }: { periods: PeriodDto[]; scenario
             return (
               <Fragment key={period.period}>
                 <tr
-                  className="cursor-pointer border-b border-slate-100 transition-colors hover:bg-navy-50/40"
+                  className="cursor-pointer border-b border-line-soft transition-colors hover:bg-navy-50/40"
                   onClick={() => setExpanded(isOpen ? null : period.period)}
                   aria-expanded={isOpen}
                 >
                   <td className="px-2 py-1.5 text-slate-400">
-                    {isOpen ? <ChevronDown className="h-3.5 w-3.5" /> : <ChevronRight className="h-3.5 w-3.5" />}
+                    {isOpen ? (
+                      <ChevronDown className="h-3.5 w-3.5" />
+                    ) : (
+                      <ChevronRight className="h-3.5 w-3.5" />
+                    )}
                   </td>
-                  <td className="px-2 py-1.5 font-medium tabular-nums text-navy-800">{period.period}</td>
+                  <td className="px-2 py-1.5 font-medium tabular-nums text-navy-800">
+                    {period.period}
+                  </td>
                   <td className="whitespace-nowrap px-2 py-1.5 tabular-nums text-slate-500">
                     {formatDate(period.periodStart)} – {formatDate(period.periodEnd)}
                   </td>
-                  <td className="px-2 py-1.5 text-right tabular-nums">{formatDecimalText(period.marginalPd)}</td>
+                  <td className="px-2 py-1.5 text-right tabular-nums">
+                    {formatDecimalText(period.marginalPd)}
+                  </td>
                   <td className="px-2 py-1.5 text-right tabular-nums text-slate-500">
                     {formatDecimalText(period.cumulativePd)}
                   </td>
-                  <td className="px-2 py-1.5 text-right tabular-nums">{formatDecimalText(period.lgd)}</td>
+                  <td className="px-2 py-1.5 text-right tabular-nums">
+                    {formatDecimalText(period.lgd)}
+                  </td>
                   <td className="px-2 py-1.5 text-right tabular-nums">{moneyString(period.ead)}</td>
-                  <td className="px-2 py-1.5 text-right tabular-nums">{formatDecimalText(period.discountFactor)}</td>
+                  <td className="px-2 py-1.5 text-right tabular-nums">
+                    {formatDecimalText(period.discountFactor)}
+                  </td>
                   <td className="px-2 py-1.5 text-right font-medium tabular-nums text-red-700">
                     {moneyString(period.expectedLoss)}
                   </td>
                 </tr>
                 {isOpen ? (
-                  <tr className="border-b border-slate-100 bg-slate-50/70">
+                  <tr className="border-b border-line-soft bg-surface-2/70">
                     <td colSpan={9} className="px-3 py-2">
                       <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">
-                        Formula trace · {period.monthsFromReportingDate} month(s) from the reporting date
+                        Formula trace · {period.monthsFromReportingDate} month(s) from the reporting
+                        date
                       </p>
-                      <code className="mt-1 block whitespace-pre-wrap break-words font-mono text-[11px] leading-relaxed text-navy-900">
+                      <code className="mt-1 block whitespace-pre-wrap break-words font-mono text-2xs leading-relaxed text-navy-900">
                         {period.formulaTrace}
                       </code>
                     </td>
@@ -116,7 +129,7 @@ function PeriodTable({ periods, scenarioCode }: { periods: PeriodDto[]; scenario
         </tbody>
       </table>
       {periods.length > 12 ? (
-        <div className="border-t border-slate-100 px-3 py-2">
+        <div className="border-t border-line-soft px-3 py-2">
           <Button size="sm" variant="ghost" onClick={() => setShowAll((current) => !current)}>
             {showAll ? 'Show first 12 periods' : `Show all ${periods.length} periods`}
           </Button>
@@ -180,18 +193,20 @@ export function RunResultDrawer({
             <StageBadge stage={result.stage} />
             <Badge tone="neutral">{result.staging.primaryRuleCode}</Badge>
             {result.staging.hasOverride ? <Badge tone="warning">analyst override</Badge> : null}
-            <span className="font-medium tabular-nums text-red-700">{moneyString(result.lossAllowance)}</span>
+            <span className="font-medium tabular-nums text-red-700">
+              {moneyString(result.lossAllowance)}
+            </span>
             <span className="text-xs text-slate-500">
               coverage {percentString(result.coverageRatio)} of gross ·{' '}
               {percentString(result.coverageOfEad)} of EAD
             </span>
           </div>
 
-          <p className="rounded-md border border-navy-200 bg-navy-50 px-3 py-2 text-[11px] leading-relaxed text-navy-800">
+          <p className="rounded-lg border border-navy-200 bg-navy-50 px-3 py-2 text-2xs leading-relaxed text-navy-800">
             {result.horizonBasisNote}
           </p>
 
-          <dl className="grid grid-cols-2 gap-x-4 gap-y-3 rounded-md border border-slate-200 bg-slate-50 px-3 py-2.5 sm:grid-cols-4">
+          <dl className="grid grid-cols-2 gap-x-4 gap-y-3 rounded-lg border border-line bg-surface-2 px-3 py-2.5 sm:grid-cols-4">
             <Fact label="Remaining contractual months" value={result.remainingContractualMonths} />
             <Fact label="Horizon used" value={`${result.horizonMonths} month(s)`} />
             <Fact label="Gross carrying amount" value={moneyString(result.grossCarryingAmount)} />
@@ -218,9 +233,9 @@ export function RunResultDrawer({
                 id: 'scenarios',
                 label: 'Scenario contributions',
                 content: (
-                  <div className="overflow-x-auto rounded-md border border-slate-200">
+                  <div className="overflow-x-auto rounded-lg border border-line">
                     <table className="w-full text-left text-xs">
-                      <thead className="bg-slate-50 text-[10px] uppercase tracking-wider text-slate-500">
+                      <thead className="bg-surface-2 text-[10px] uppercase tracking-wider text-slate-500">
                         <tr>
                           <th className="px-2.5 py-1.5 font-medium">Scenario</th>
                           <th className="px-2.5 py-1.5 text-right font-medium">Weight</th>
@@ -232,11 +247,13 @@ export function RunResultDrawer({
                           <th className="px-2.5 py-1.5 text-right font-medium">Weighted</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-slate-100">
+                      <tbody className="divide-y divide-line-soft">
                         {data.scenarioPeriods.map((entry) => (
                           <tr key={entry.scenario.scenarioCode}>
                             <td className="px-2.5 py-1.5">
-                              <span className="font-medium text-navy-800">{entry.scenario.scenarioName}</span>
+                              <span className="font-medium text-navy-800">
+                                {entry.scenario.scenarioName}
+                              </span>
                               <span className="ml-1.5 text-[10px] text-slate-400">
                                 {entry.scenario.scenarioCode}
                               </span>
@@ -264,7 +281,7 @@ export function RunResultDrawer({
                             </td>
                           </tr>
                         ))}
-                        <tr className="bg-slate-50 font-semibold">
+                        <tr className="bg-surface-2 font-semibold">
                           <td className="px-2.5 py-1.5" colSpan={7}>
                             Loss allowance — exact sum of the weighted contributions
                           </td>
@@ -282,13 +299,14 @@ export function RunResultDrawer({
                 label: 'Calculation periods',
                 content: (
                   <div className="space-y-4">
-                    <p className="flex items-start gap-2 rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-[11px] leading-relaxed text-slate-600">
+                    <p className="flex items-start gap-2 rounded-lg border border-line bg-surface-2 px-3 py-2 text-2xs leading-relaxed text-slate-600">
                       <Info className="mt-0.5 h-3 w-3 shrink-0" />
-                      The four factors below are the engine&apos;s display-rounded digits; the expected loss is
-                      computed at 40-digit precision and rounded once. Multiplying the shown numbers by hand can
-                      therefore land a few paisa away from the stored figure. What reconciles exactly is the column
-                      total: each scenario&apos;s period losses sum to its unweighted ECL, and the weighted
-                      contributions sum to the loss allowance.
+                      The four factors below are the engine&apos;s display-rounded digits; the
+                      expected loss is computed at 40-digit precision and rounded once. Multiplying
+                      the shown numbers by hand can therefore land a few paisa away from the stored
+                      figure. What reconciles exactly is the column total: each scenario&apos;s
+                      period losses sum to its unweighted ECL, and the weighted contributions sum to
+                      the loss allowance.
                     </p>
                     {data.scenarioPeriods.map((entry) => (
                       <div key={entry.scenario.scenarioCode}>
@@ -296,7 +314,8 @@ export function RunResultDrawer({
                           {entry.scenario.scenarioName}{' '}
                           <span className="font-normal text-slate-400">
                             · {entry.scenario.scenarioCode} · weight{' '}
-                            {formatDecimalPercent(entry.scenario.weight, 2)} · {entry.periods.length} period(s)
+                            {formatDecimalPercent(entry.scenario.weight, 2)} ·{' '}
+                            {entry.periods.length} period(s)
                           </span>
                         </p>
                         {entry.periods.length === 0 ? (
@@ -305,7 +324,10 @@ export function RunResultDrawer({
                             description="The engine produced no calculation periods for this scenario."
                           />
                         ) : (
-                          <PeriodTable periods={entry.periods} scenarioCode={entry.scenario.scenarioCode} />
+                          <PeriodTable
+                            periods={entry.periods}
+                            scenarioCode={entry.scenario.scenarioCode}
+                          />
                         )}
                       </div>
                     ))}
@@ -317,17 +339,25 @@ export function RunResultDrawer({
                 label: 'Approximation & lineage',
                 content: (
                   <div className="space-y-3">
-                    <p className="flex items-start gap-2 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-[11px] leading-relaxed text-amber-900">
+                    <p className="flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-2xs leading-relaxed text-amber-900">
                       <Info className="mt-0.5 h-3 w-3 shrink-0" />
-                      {result.educationalApproximation.label} The authoritative allowance is the scenario-weighted
-                      sum of the period table — never this shortcut.
+                      {result.educationalApproximation.label} The authoritative allowance is the
+                      scenario-weighted sum of the period table — never this shortcut.
                     </p>
                     <dl className="grid grid-cols-2 gap-x-4 gap-y-3 sm:grid-cols-5">
-                      <Fact label="Lump PD" value={<Numeric value={result.educationalApproximation.lumpPd} />} />
-                      <Fact label="LGD" value={<Numeric value={result.educationalApproximation.lgd} />} />
+                      <Fact
+                        label="Lump PD"
+                        value={<Numeric value={result.educationalApproximation.lumpPd} />}
+                      />
+                      <Fact
+                        label="LGD"
+                        value={<Numeric value={result.educationalApproximation.lgd} />}
+                      />
                       <Fact
                         label="EAD"
-                        value={<Numeric value={result.educationalApproximation.eadAtReportingDate} />}
+                        value={
+                          <Numeric value={result.educationalApproximation.eadAtReportingDate} />
+                        }
                       />
                       <Fact
                         label="Discount factor"
@@ -338,7 +368,7 @@ export function RunResultDrawer({
                         value={moneyString(result.educationalApproximation.value)}
                       />
                     </dl>
-                    <code className="block whitespace-pre-wrap break-words rounded-md bg-slate-50 px-3 py-2 font-mono text-[11px] text-navy-900">
+                    <code className="block whitespace-pre-wrap break-words rounded-lg bg-surface-2 px-3 py-2 font-mono text-2xs text-navy-900">
                       {result.educationalApproximation.formulaTrace}
                     </code>
 
@@ -346,8 +376,11 @@ export function RunResultDrawer({
                       <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-wider text-slate-500">
                         Lineage
                       </p>
-                      <dl className="grid grid-cols-2 gap-x-4 gap-y-2 rounded-md border border-slate-200 px-3 py-2.5 sm:grid-cols-3">
-                        <Fact label="Input version" value={<code>{result.lineage.inputVersion}</code>} />
+                      <dl className="grid grid-cols-2 gap-x-4 gap-y-2 rounded-lg border border-line px-3 py-2.5 sm:grid-cols-3">
+                        <Fact
+                          label="Input version"
+                          value={<code>{result.lineage.inputVersion}</code>}
+                        />
                         <Fact
                           label="Model configuration"
                           value={formatVersionedRef(
@@ -372,10 +405,16 @@ export function RunResultDrawer({
                             result.lineage.scenarioSetVersion,
                           )}
                         />
-                        <Fact label="Reporting date" value={formatDate(result.lineage.reportingDate)} />
-                        <Fact label="Actor" value={`${result.lineage.actorName} (${result.lineage.actorId})`} />
+                        <Fact
+                          label="Reporting date"
+                          value={formatDate(result.lineage.reportingDate)}
+                        />
+                        <Fact
+                          label="Actor"
+                          value={`${result.lineage.actorName} (${result.lineage.actorId})`}
+                        />
                       </dl>
-                      <p className="mt-1.5 text-[11px] leading-relaxed text-slate-500">
+                      <p className="mt-1.5 text-2xs leading-relaxed text-slate-500">
                         {result.lineage.roundingPolicy}
                       </p>
                     </div>
@@ -386,7 +425,7 @@ export function RunResultDrawer({
                       </p>
                       <ul className="space-y-1">
                         {result.explanation.map((line) => (
-                          <li key={line} className="text-[11px] leading-relaxed text-slate-600">
+                          <li key={line} className="text-2xs leading-relaxed text-slate-600">
                             {line}
                           </li>
                         ))}

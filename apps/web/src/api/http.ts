@@ -76,7 +76,10 @@ async function toApiError(response: Response): Promise<ApiError> {
   const error = body?.error;
   return new ApiError(
     response.status,
-    error ?? { code: `HTTP_${response.status}`, message: response.statusText || 'The request failed.' },
+    error ?? {
+      code: `HTTP_${response.status}`,
+      message: response.statusText || 'The request failed.',
+    },
   );
 }
 
@@ -110,7 +113,9 @@ export async function request<T>(path: string, options: RequestOptions = {}): Pr
 
 /** Downloads a binary or text attachment without the JSON envelope. */
 export async function downloadText(path: string, query?: Record<string, unknown>): Promise<string> {
-  const response = await fetch(`${API_BASE}${path}${toQueryString(query)}`, { credentials: 'include' });
+  const response = await fetch(`${API_BASE}${path}${toQueryString(query)}`, {
+    credentials: 'include',
+  });
   if (!response.ok) throw await toApiError(response);
   return response.text();
 }

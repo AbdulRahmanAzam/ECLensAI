@@ -39,14 +39,14 @@ export function CommandPalette({ open, onClose }: { open: boolean; onClose: () =
 
   const items = useMemo<CommandItem[]>(() => {
     const q = search.toLowerCase();
-    const pageItems: CommandItem[] = NAV_ITEMS.filter((item) => !q || item.label.toLowerCase().includes(q)).map(
-      (item) => ({
-        id: item.to,
-        label: item.label,
-        hint: 'Page',
-        action: () => navigate(item.to),
-      }),
-    );
+    const pageItems: CommandItem[] = NAV_ITEMS.filter(
+      (item) => !q || item.label.toLowerCase().includes(q),
+    ).map((item) => ({
+      id: item.to,
+      label: item.label,
+      hint: 'Page',
+      action: () => navigate(item.to),
+    }));
     const exposureItems: CommandItem[] = (data?.items ?? []).map((exposure) => ({
       id: exposure.id,
       label: `${exposure.publicId} — ${exposure.borrowerName}`,
@@ -75,23 +75,25 @@ export function CommandPalette({ open, onClose }: { open: boolean; onClose: () =
               if (event.key === 'Enter' && items.length > 0) go(items[0]);
             }}
             placeholder="Search pages or exposures (e.g. EX-1007)…"
-            className="h-9 w-full rounded-md border border-slate-300 bg-white pl-9 pr-3 text-sm focus:outline-none focus:ring-2 focus:ring-navy-500"
+            className="h-10 w-full rounded-lg border border-line bg-surface-2 pl-9 pr-3 text-sm text-slate-900 placeholder:text-slate-400 focus:border-brand focus:bg-surface focus:outline-none focus:ring-2 focus:ring-brand/25"
             aria-label="Search pages or exposures"
           />
         </div>
-        <ul className="max-h-72 divide-y divide-slate-100 overflow-y-auto rounded-md border border-slate-100">
+        <ul className="max-h-72 divide-y divide-line-soft overflow-y-auto rounded-xl border border-line">
           {items.length === 0 ? (
-            <li className="px-3 py-6 text-center text-xs text-slate-500">No matches for “{query}”.</li>
+            <li className="px-3 py-6 text-center text-xs text-slate-500">
+              No matches for “{query}”.
+            </li>
           ) : (
             items.map((item) => (
               <li key={item.id}>
                 <button
                   type="button"
                   onClick={() => go(item)}
-                  className="flex w-full items-center justify-between gap-2 px-3 py-2 text-left text-sm text-slate-700 transition-colors hover:bg-navy-50/50"
+                  className="flex w-full items-center justify-between gap-2 px-3 py-2.5 text-left text-sm text-slate-600 transition-colors hover:bg-surface-2 hover:text-slate-900"
                 >
                   <span className="truncate">{item.label}</span>
-                  <span className="flex shrink-0 items-center gap-1.5 text-[10px] uppercase tracking-wide text-slate-400">
+                  <span className="flex shrink-0 items-center gap-1.5 text-[10px] font-medium uppercase tracking-wider text-slate-400">
                     {item.hint}
                     <CornerDownLeft className="h-3 w-3" />
                   </span>

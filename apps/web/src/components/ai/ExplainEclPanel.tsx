@@ -52,12 +52,19 @@ export function ExplainEclPanel({ exposureId, runId, subjectLabel }: ExplainEclP
         </Button>
       }
       onRetry={ask}
-      tags={explain.response?.result ? <AiConfidenceBadge label={explain.response.result.confidenceLabel} /> : undefined}
+      tags={
+        explain.response?.result ? (
+          <AiConfidenceBadge label={explain.response.result.confidenceLabel} />
+        ) : undefined
+      }
       idle={
         <p className="text-xs leading-relaxed text-slate-500">
           Nothing has been asked yet.
-          {subjectLabel ? ` Explain the allowance for ${subjectLabel}` : ' Explain the allowance for this exposure'} and
-          the answer will be written from the stored trace, with the run and exposure it came from cited underneath.
+          {subjectLabel
+            ? ` Explain the allowance for ${subjectLabel}`
+            : ' Explain the allowance for this exposure'}{' '}
+          and the answer will be written from the stored trace, with the run and exposure it came
+          from cited underneath.
         </p>
       }
     >

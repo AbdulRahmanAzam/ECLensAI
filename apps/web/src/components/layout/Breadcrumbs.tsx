@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { ChevronRight } from 'lucide-react';
+import { ChevronRight, Home } from 'lucide-react';
 import { ROUTE_TITLES } from '@/routes/nav';
 
 /** Path-derived breadcrumbs; unknown segments (IDs) render verbatim. */
@@ -14,11 +14,15 @@ export function Breadcrumbs() {
   });
 
   return (
-    <nav aria-label="Breadcrumb" className="mb-4">
+    <nav aria-label="Breadcrumb" className="mb-5">
       <ol className="flex flex-wrap items-center gap-1 text-xs text-slate-500">
         <li>
-          <Link to="/dashboard" className="transition-colors hover:text-navy-700">
-            Home
+          <Link
+            to="/dashboard"
+            className="flex items-center gap-1 rounded px-1 py-0.5 transition-colors hover:text-slate-800"
+          >
+            <Home className="h-3 w-3" aria-hidden />
+            <span className="sr-only sm:not-sr-only">Home</span>
           </Link>
         </li>
         {crumbs.map((crumb, index) => {
@@ -27,9 +31,12 @@ export function Breadcrumbs() {
             <li key={crumb.path} className="flex items-center gap-1">
               <ChevronRight className="h-3 w-3 text-slate-300" aria-hidden />
               {isLast ? (
-                <span className="font-medium text-navy-900">{crumb.label}</span>
+                <span className="font-medium text-slate-800">{crumb.label}</span>
               ) : (
-                <Link to={crumb.path} className="transition-colors hover:text-navy-700">
+                <Link
+                  to={crumb.path}
+                  className="rounded px-1 py-0.5 transition-colors hover:text-slate-800"
+                >
                   {crumb.label}
                 </Link>
               )}

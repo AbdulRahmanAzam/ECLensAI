@@ -25,7 +25,11 @@ import { stagingCodeLabel } from '@/lib/staging';
 import { useSettings } from '@/providers/SettingsProvider';
 
 type PortfolioFilterKey = 'segment' | 'stage' | 'region';
-const FILTER_LABEL: Record<PortfolioFilterKey, string> = { segment: 'Segment', stage: 'Stage', region: 'Region' };
+const FILTER_LABEL: Record<PortfolioFilterKey, string> = {
+  segment: 'Segment',
+  stage: 'Stage',
+  region: 'Region',
+};
 
 const column = createColumnHelper<ExposureRecord>();
 
@@ -53,10 +57,12 @@ export function PortfolioPage() {
     region: searchParams.get('region') ?? undefined,
   });
 
-  const list = useServerList<{ segment?: string; stage?: Stage; region?: string; industry?: string }>(
-    initialFiltersRef.current,
-    { sortBy: 'grossCarryingAmount', sortDir: 'desc', pageSize: 25 },
-  );
+  const list = useServerList<{
+    segment?: string;
+    stage?: Stage;
+    region?: string;
+    industry?: string;
+  }>(initialFiltersRef.current, { sortBy: 'grossCarryingAmount', sortDir: 'desc', pageSize: 25 });
 
   // Written back so the address bar always reproduces the current filters —
   // never read from again here, which is what keeps this a one-way mirror
@@ -80,9 +86,18 @@ export function PortfolioPage() {
     onSuccess: (csv) => {
       const rowCount = csv.split('\r\n').length - 1;
       saveTextFile(`portfolio-export-${rowCount}-rows.csv`, csv, 'text/csv;charset=utf-8');
-      push('success', 'Export ready', `${rowCount} row(s) matching the current filters. Recorded in the audit log.`);
+      push(
+        'success',
+        'Export ready',
+        `${rowCount} row(s) matching the current filters. Recorded in the audit log.`,
+      );
     },
-    onError: (error) => push('error', 'Export failed', error instanceof ApiError ? error.message : 'The export could not be generated.'),
+    onError: (error) =>
+      push(
+        'error',
+        'Export failed',
+        error instanceof ApiError ? error.message : 'The export could not be generated.',
+      ),
   });
 
   const { data: summary } = useQuery({
@@ -90,7 +105,10 @@ export function PortfolioPage() {
     queryFn: () => api.portfolio.summary(),
   });
 
-  const segments = useMemo(() => summary?.segmentBreakdown.map((row) => row.segment) ?? [], [summary]);
+  const segments = useMemo(
+    () => summary?.segmentBreakdown.map((row) => row.segment) ?? [],
+    [summary],
+  );
   const regions = useMemo(
     () => Array.from(new Set((data?.items ?? []).map((row) => row.region).filter(Boolean))).sort(),
     [data],
@@ -103,7 +121,7 @@ export function PortfolioPage() {
         cell: (info) => (
           <div>
             <p className="font-medium text-navy-800">{info.getValue()}</p>
-            <p className="text-[11px] text-slate-400">{info.row.original.borrowerId}</p>
+            <p className="text-2xs text-slate-400">{info.row.original.borrowerId}</p>
           </div>
         ),
       }),
@@ -112,7 +130,7 @@ export function PortfolioPage() {
         cell: (info) => (
           <div>
             <p className="font-medium text-slate-800">{info.row.original.borrowerName}</p>
-            <p className="text-[11px] text-slate-500">
+            <p className="text-2xs text-slate-500">
               {info.getValue()} · {info.row.original.productType}
             </p>
           </div>
@@ -139,14 +157,16 @@ export function PortfolioPage() {
         header: 'Primary driver',
         enableSorting: false,
         cell: (info) => (
-          <span className="text-[11px] text-slate-500">
+          <span className="text-2xs text-slate-500">
             {stagingCodeLabel(info.row.original.stageRuleCodes[0] ?? '') || info.getValue()}
           </span>
         ),
       }),
       column.accessor('grossCarryingAmount', {
         header: 'Gross carrying amount',
-        cell: (info) => <span className="tabular-nums">{moneyString(info.getValue(), { compact: true })}</span>,
+        cell: (info) => (
+          <span className="tabular-nums">{moneyString(info.getValue(), { compact: true })}</span>
+        ),
       }),
       column.accessor('daysPastDue', {
         header: 'DPD',
@@ -160,7 +180,9 @@ export function PortfolioPage() {
       column.accessor('currentCreditRating', { header: 'Rating' }),
       column.accessor('lgd', {
         header: 'LGD',
-        cell: (info) => <span className="tabular-nums">{formatDecimalPercent(info.getValue(), 1)}</span>,
+        cell: (info) => (
+          <span className="tabular-nums">{formatDecimalPercent(info.getValue(), 1)}</span>
+        ),
       }),
       column.accessor('latestLossAllowance', {
         header: 'Loss allowance',
@@ -203,7 +225,13 @@ export function PortfolioPage() {
         tags={<SyntheticBadge />}
         actions={
           <>
-            <Button variant="secondary" size="sm" icon={<Download className="h-3.5 w-3.5" />} loading={exportCsv.isPending} onClick={() => exportCsv.mutate()}>
+            <Button
+              variant="secondary"
+              size="sm"
+              icon={<Download className="h-3.5 w-3.5" />}
+              loading={exportCsv.isPending}
+              onClick={() => exportCsv.mutate()}
+            >
               Export CSV
             </Button>
             <Button variant="secondary" size="sm" onClick={() => navigate('/imports')}>
@@ -214,7 +242,7 @@ export function PortfolioPage() {
       />
 
       {totals ? (
-        <div className="mb-4 flex flex-wrap items-center gap-x-6 gap-y-2 rounded-lg border border-slate-200 bg-white px-4 py-3 text-xs text-slate-600">
+        <div className="mb-4 flex flex-wrap items-center gap-x-6 gap-y-2 rounded-lg border border-line bg-surface px-4 py-3 text-xs text-slate-600">
           <span>
             Exposures{' '}
             <strong className="font-semibold tabular-nums text-navy-900">
@@ -234,10 +262,14 @@ export function PortfolioPage() {
             </strong>
           </span>
           <span>
-            Coverage <strong className="font-semibold tabular-nums text-navy-900">{formatDecimalPercent(totals.coverageRatio)}</strong>
+            Coverage{' '}
+            <strong className="font-semibold tabular-nums text-navy-900">
+              {formatDecimalPercent(totals.coverageRatio)}
+            </strong>
           </span>
           <span className="text-slate-400">
-            Net carrying {moneyString(totals.totalNetCarryingAmount, { compact: true })} · display currency {currency}
+            Net carrying {moneyString(totals.totalNetCarryingAmount, { compact: true })} · display
+            currency {currency}
           </span>
         </div>
       ) : null}
@@ -253,7 +285,9 @@ export function PortfolioPage() {
           <Select
             aria-label="Filter by segment"
             value={list.filters.segment ?? ''}
-            onChange={(event) => list.setFilter('segment', event.target.value === '' ? undefined : event.target.value)}
+            onChange={(event) =>
+              list.setFilter('segment', event.target.value === '' ? undefined : event.target.value)
+            }
           >
             <option value="">All segments</option>
             {segments.map((segment) => (
@@ -266,7 +300,10 @@ export function PortfolioPage() {
             aria-label="Filter by stage"
             value={list.filters.stage === undefined ? '' : String(list.filters.stage)}
             onChange={(event) =>
-              list.setFilter('stage', event.target.value === '' ? undefined : (Number(event.target.value) as Stage))
+              list.setFilter(
+                'stage',
+                event.target.value === '' ? undefined : (Number(event.target.value) as Stage),
+              )
             }
           >
             <option value="">All stages</option>
@@ -277,7 +314,9 @@ export function PortfolioPage() {
           <Select
             aria-label="Filter by region"
             value={list.filters.region ?? ''}
-            onChange={(event) => list.setFilter('region', event.target.value === '' ? undefined : event.target.value)}
+            onChange={(event) =>
+              list.setFilter('region', event.target.value === '' ? undefined : event.target.value)
+            }
           >
             <option value="">All regions</option>
             {regions.map((region) => (
@@ -300,12 +339,17 @@ export function PortfolioPage() {
         </div>
       </Card>
 
-      {(['segment', 'stage', 'region'] as PortfolioFilterKey[]).some((key) => list.filters[key] !== undefined) ? (
+      {(['segment', 'stage', 'region'] as PortfolioFilterKey[]).some(
+        (key) => list.filters[key] !== undefined,
+      ) ? (
         <div className="mb-4">
           <FilterChips
             chips={(['segment', 'stage', 'region'] as PortfolioFilterKey[])
               .filter((key) => list.filters[key] !== undefined)
-              .map((key) => ({ key, label: `${FILTER_LABEL[key]}: ${key === 'stage' ? `Stage ${list.filters.stage}` : list.filters[key]}` }))}
+              .map((key) => ({
+                key,
+                label: `${FILTER_LABEL[key]}: ${key === 'stage' ? `Stage ${list.filters.stage}` : list.filters[key]}`,
+              }))}
             onRemove={(key) => list.setFilter(key as PortfolioFilterKey, undefined)}
             onClearAll={list.reset}
           />
@@ -313,9 +357,12 @@ export function PortfolioPage() {
       ) : null}
 
       {selectedIds.length > 0 ? (
-        <div className="mb-3 flex items-center gap-2 rounded-md border border-navy-200 bg-navy-50 px-3 py-2 text-xs text-navy-800">
+        <div className="mb-3 flex items-center gap-2 rounded-lg border border-navy-200 bg-navy-50 px-3 py-2 text-xs text-navy-800">
           <span className="font-medium">{selectedIds.length} row(s) selected</span>
-          <span className="text-navy-500">— export currently downloads every row matching the active filters, not only the selection.</span>
+          <span className="text-navy-500">
+            — export currently downloads every row matching the active filters, not only the
+            selection.
+          </span>
         </div>
       ) : null}
 
@@ -355,13 +402,19 @@ export function PortfolioPage() {
             }
           />
         )}
-        {data ? <Pagination meta={data.meta} onPageChange={list.setPage} loading={isLoading} /> : null}
+        {data ? (
+          <Pagination meta={data.meta} onPageChange={list.setPage} loading={isLoading} />
+        ) : null}
       </Card>
 
-      <p className="mt-3 text-[11px] text-slate-500">
-        Only the columns the API whitelists are sortable; the rest are display-only so a header click never implies an
-        ordering the server does not perform. Loss allowance and coverage come from each exposure's most recent
-        result-bearing run — {rows.length > 0 && rows[0].latestRunId === null ? 'no run has covered this page yet' : 'hover a value for the exact digits'}.
+      <p className="mt-3 text-2xs text-slate-500">
+        Only the columns the API whitelists are sortable; the rest are display-only so a header
+        click never implies an ordering the server does not perform. Loss allowance and coverage
+        come from each exposure's most recent result-bearing run —{' '}
+        {rows.length > 0 && rows[0].latestRunId === null
+          ? 'no run has covered this page yet'
+          : 'hover a value for the exact digits'}
+        .
       </p>
 
       <div className="mt-2 flex flex-wrap gap-2">

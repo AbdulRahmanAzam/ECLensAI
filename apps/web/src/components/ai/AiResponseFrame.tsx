@@ -62,16 +62,18 @@ export function AiResponseFrame<TResult>({
   const answered = response !== null && response.result !== null;
 
   const header = (
-    <div className="flex flex-wrap items-start justify-between gap-2 border-b border-slate-100 px-4 py-3">
+    <div className="flex flex-wrap items-start justify-between gap-2 border-b border-line-soft px-4 py-3">
       <div className="min-w-0">
         <p className="text-sm font-semibold text-navy-950">{title}</p>
-        {description ? <p className="mt-0.5 text-[11px] leading-relaxed text-slate-500">{description}</p> : null}
+        {description ? (
+          <p className="mt-0.5 text-2xs leading-relaxed text-slate-500">{description}</p>
+        ) : null}
       </div>
       <div className="flex shrink-0 flex-wrap items-center gap-1.5">
         {response ? (
           <>
             <Badge tone={STATUS_TONE[response.status]}>{statusLabel(response.status)}</Badge>
-            <span className="tabular-nums text-[11px] text-slate-400">{response.latencyMs} ms</span>
+            <span className="tabular-nums text-2xs text-slate-400">{response.latencyMs} ms</span>
           </>
         ) : null}
         {tags}
@@ -96,7 +98,7 @@ export function AiResponseFrame<TResult>({
     // availability record to show, because no envelope ever came back.
     body = (
       <div className="px-4 py-4">
-        <div className="rounded-md border border-red-200 bg-red-50 px-3 py-2.5">
+        <div className="rounded-lg border border-red-200 bg-red-50 px-3 py-2.5">
           <p className="flex items-center gap-2 text-sm font-medium text-red-800">
             <Ban className="h-4 w-4" />
             The AI request was refused
@@ -118,7 +120,7 @@ export function AiResponseFrame<TResult>({
         {response.status === 'UNAVAILABLE' ? (
           <AiAvailabilityNotice availability={response.availability} />
         ) : (
-          <div className="rounded-md border border-slate-200 bg-slate-50 px-3 py-2.5">
+          <div className="rounded-lg border border-line bg-surface-2 px-3 py-2.5">
             <p className="flex items-center gap-2 text-sm font-medium text-slate-800">
               <Info className="h-4 w-4 text-slate-500" />
               No answer to show
@@ -128,7 +130,9 @@ export function AiResponseFrame<TResult>({
                 detail a reviewer needs. */}
             <p className="mt-1 text-xs leading-relaxed text-slate-600">{response.message}</p>
             {response.aiRequestId ? (
-              <p className="mt-1.5 font-mono text-[11px] text-slate-400">AI request {response.aiRequestId}</p>
+              <p className="mt-1.5 font-mono text-2xs text-slate-400">
+                AI request {response.aiRequestId}
+              </p>
             ) : null}
           </div>
         )}
@@ -144,7 +148,7 @@ export function AiResponseFrame<TResult>({
     body = (
       <div className="space-y-3 px-4 py-4">
         {children(response.result as TResult, response)}
-        <div className="border-t border-slate-100 pt-3">
+        <div className="border-t border-line-soft pt-3">
           <AiToolTrail activity={response.toolActivity} />
         </div>
       </div>
@@ -155,7 +159,7 @@ export function AiResponseFrame<TResult>({
     <Card className={cn(!isPending && !failure && !answered && 'border-dashed')}>
       {header}
       {body}
-      <div className="border-t border-slate-100 px-4 py-3">
+      <div className="border-t border-line-soft px-4 py-3">
         <AiDisclaimer />
       </div>
     </Card>

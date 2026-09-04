@@ -63,7 +63,11 @@ import {
 // Fixtures
 // ---------------------------------------------------------------------------
 
-const ref = (kind: AiSourceRefKind, id: string, extra?: Partial<AiSourceRef>): AiSourceRef => ({ kind, id, ...extra });
+const ref = (kind: AiSourceRefKind, id: string, extra?: Partial<AiSourceRef>): AiSourceRef => ({
+  kind,
+  id,
+  ...extra,
+});
 
 const movement = (claimKind: CommentaryClaimKind, label: string): CommentaryMovement => ({
   label,
@@ -97,7 +101,9 @@ const suggestion = (
   warnings: [],
 });
 
-const adjustment = (overrides: Partial<ScenarioAdjustmentProposal>): ScenarioAdjustmentProposal => ({
+const adjustment = (
+  overrides: Partial<ScenarioAdjustmentProposal>,
+): ScenarioAdjustmentProposal => ({
   code: 'BASE',
   name: 'Base case',
   kind: 'BASE',
@@ -122,8 +128,13 @@ const proposal = (overrides: Partial<ScenarioProposal>): ScenarioProposal => ({
 });
 
 /** A mapping draft with every canonical field present, as the Imports page builds it. */
-const draftOf = (overrides: Partial<Record<PortfolioField, string>> = {}): Record<PortfolioField, string> =>
-  Object.fromEntries(PORTFOLIO_FIELDS.map((field) => [field, overrides[field] ?? ''])) as Record<PortfolioField, string>;
+const draftOf = (
+  overrides: Partial<Record<PortfolioField, string>> = {},
+): Record<PortfolioField, string> =>
+  Object.fromEntries(PORTFOLIO_FIELDS.map((field) => [field, overrides[field] ?? ''])) as Record<
+    PortfolioField,
+    string
+  >;
 
 // ---------------------------------------------------------------------------
 // Citations must never link somewhere that does not exist
@@ -190,7 +201,11 @@ describe('answerToClipboardText', () => {
   });
 
   it('omits the source and caveat blocks when there is nothing to put in them', () => {
-    const text = answerToClipboardText({ answer: 'Nothing stored yet.', sourceRefs: [], caveats: [] });
+    const text = answerToClipboardText({
+      answer: 'Nothing stored yet.',
+      sourceRefs: [],
+      caveats: [],
+    });
     expect(text).toBe('Nothing stored yet.');
   });
 
@@ -232,7 +247,13 @@ describe('commentaryToClipboardText', () => {
   });
 
   it('survives an empty commentary without inventing sections', () => {
-    const text = commentaryToClipboardText({ ...commentary(), keyMovements: [], riskConcentrations: [], actions: [], dataLimitations: [] });
+    const text = commentaryToClipboardText({
+      ...commentary(),
+      keyMovements: [],
+      riskConcentrations: [],
+      actions: [],
+      dataLimitations: [],
+    });
     expect(text).not.toContain('Key movements:');
     expect(text).not.toContain('Data limitations:');
     expect(text).toContain('Drafted by an AI assistant');
@@ -312,7 +333,11 @@ describe('labels cover the whole wire contract', () => {
   });
 
   it('labels and tones every proposed adjustment direction', () => {
-    const directions: ScenarioAdjustmentProposal['direction'][] = ['INCREASE', 'DECREASE', 'UNCHANGED'];
+    const directions: ScenarioAdjustmentProposal['direction'][] = [
+      'INCREASE',
+      'DECREASE',
+      'UNCHANGED',
+    ];
     for (const direction of directions) {
       expect(directionLabel(direction), direction).toBeTruthy();
       expect(directionTone(direction), direction).toBeTruthy();
@@ -340,7 +365,9 @@ describe('scenarioProposalToDraftForm', () => {
   it('defaults absent multipliers to neutral rather than to a stressed value', () => {
     const form = scenarioProposalToDraftForm(
       proposal({
-        proposedAdjustments: [adjustment({ proposedPdMultiplier: null, proposedLgdMultiplier: null })],
+        proposedAdjustments: [
+          adjustment({ proposedPdMultiplier: null, proposedLgdMultiplier: null }),
+        ],
       }),
     );
     expect(form.scenarios[0]?.pdMultiplier).toBe('1');
@@ -352,7 +379,12 @@ describe('scenarioProposalToDraftForm', () => {
       proposal({
         proposedAdjustments: [
           adjustment({ code: 'BASE', proposedWeight: '0.5' }),
-          adjustment({ code: 'DOWN', name: 'Downturn', direction: 'INCREASE', proposedWeight: '0.5' }),
+          adjustment({
+            code: 'DOWN',
+            name: 'Downturn',
+            direction: 'INCREASE',
+            proposedWeight: '0.5',
+          }),
         ],
       }),
     );
@@ -372,7 +404,9 @@ describe('scenarioProposalToDraftForm', () => {
   });
 
   it('leaves a name that already fits untouched', () => {
-    const form = scenarioProposalToDraftForm(proposal({ name: 'Downturn draft', narrative: 'Short.' }));
+    const form = scenarioProposalToDraftForm(
+      proposal({ name: 'Downturn draft', narrative: 'Short.' }),
+    );
     expect(form.name).toBe('Downturn draft');
     expect(form.description).toBe('Short.');
   });
@@ -397,7 +431,10 @@ describe('mergeAiMappingSuggestions', () => {
 
   it('leaves a column the model could not place alone', () => {
     const current = draftOf({ grossCarryingAmount: 'Amount' });
-    const { draft, changes } = mergeAiMappingSuggestions([suggestion('Free-form notes', null)], current);
+    const { draft, changes } = mergeAiMappingSuggestions(
+      [suggestion('Free-form notes', null)],
+      current,
+    );
     expect(draft).toEqual(current);
     expect(changes).toEqual([]);
   });
@@ -431,7 +468,11 @@ describe('mergeAiMappingSuggestions', () => {
   it('applies several suggestions and reports each one separately', () => {
     const current = draftOf({ exposureId: '', lgd: 'Loss Rate' });
     const { draft, changes } = mergeAiMappingSuggestions(
-      [suggestion('Loan Number', 'exposureId'), suggestion('Recovery Severity', 'lgd'), suggestion('Notes', null)],
+      [
+        suggestion('Loan Number', 'exposureId'),
+        suggestion('Recovery Severity', 'lgd'),
+        suggestion('Notes', null),
+      ],
       current,
     );
     expect(draft.exposureId).toBe('Loan Number');

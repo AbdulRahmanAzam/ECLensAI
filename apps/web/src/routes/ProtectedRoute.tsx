@@ -1,15 +1,14 @@
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { Loader2 } from 'lucide-react';
 import { useAuth } from '@/providers/AuthProvider';
+import { BrandMark } from '@/components/layout/BrandMark';
 
 function FullScreenLoader() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-slate-100">
+    <div className="app-canvas flex min-h-screen items-center justify-center bg-canvas">
       <div className="flex flex-col items-center gap-3">
-        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-navy-950 text-lg font-bold text-teal-400">
-          E
-        </div>
-        <Loader2 className="h-5 w-5 animate-spin text-navy-500" aria-label="Restoring session" />
+        <BrandMark className="h-11 w-11" />
+        <Loader2 className="h-5 w-5 animate-spin text-brand" aria-label="Restoring session" />
         <p className="text-xs text-slate-500">Restoring your session…</p>
       </div>
     </div>

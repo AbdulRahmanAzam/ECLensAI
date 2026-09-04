@@ -43,25 +43,25 @@ function ColumnVisibilityMenu({
         onClick={() => setOpen((value) => !value)}
         aria-haspopup="true"
         aria-expanded={open}
-        className="inline-flex h-7 items-center gap-1.5 rounded-md border border-slate-200 px-2 text-[11px] font-medium text-slate-600 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-navy-500"
+        className="inline-flex h-7 items-center gap-1.5 rounded-lg border border-line bg-surface px-2.5 text-2xs font-medium text-slate-600 transition-colors hover:border-slate-300 hover:text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/50"
       >
         <Columns3 className="h-3.5 w-3.5" /> Columns
       </button>
       {open ? (
         <div
           role="menu"
-          className="absolute right-0 z-20 mt-1 w-52 rounded-md border border-slate-200 bg-white p-1.5 shadow-pop"
+          className="absolute right-0 z-20 mt-1.5 w-52 animate-scale-in rounded-xl border border-line bg-surface p-1.5 shadow-pop"
         >
           {columns.map((column) => (
             <label
               key={column.id}
-              className="flex cursor-pointer items-center gap-2 rounded px-2 py-1.5 text-xs text-slate-700 hover:bg-slate-50"
+              className="flex cursor-pointer items-center gap-2 rounded-lg px-2 py-1.5 text-xs text-slate-600 transition-colors hover:bg-surface-2 hover:text-slate-900"
             >
               <input
                 type="checkbox"
                 checked={visibility[column.id] !== false}
                 onChange={() => onToggle(column.id)}
-                className="h-3.5 w-3.5 rounded border-slate-300 text-navy-700 focus:ring-navy-500"
+                className="h-3.5 w-3.5 rounded border-slate-300 bg-surface text-brand focus:ring-brand/50"
               />
               {column.label}
             </label>
@@ -128,7 +128,9 @@ export function DataTable<TData>({
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const sorting = manualSorting ? (controlledSorting ?? []) : internalSorting;
   const emitSorting = manualSorting ? (onSortingChange ?? setInternalSorting) : setInternalSorting;
-  const handleSortingChange = (updater: SortingState | ((previous: SortingState) => SortingState)) => {
+  const handleSortingChange = (
+    updater: SortingState | ((previous: SortingState) => SortingState),
+  ) => {
     emitSorting(typeof updater === 'function' ? updater(sorting) : updater);
   };
 
@@ -143,11 +145,12 @@ export function DataTable<TData>({
               aria-label="Select all rows"
               checked={tbl.getIsAllRowsSelected()}
               ref={(el) => {
-                if (el) el.indeterminate = tbl.getIsSomeRowsSelected() && !tbl.getIsAllRowsSelected();
+                if (el)
+                  el.indeterminate = tbl.getIsSomeRowsSelected() && !tbl.getIsAllRowsSelected();
               }}
               onChange={tbl.getToggleAllRowsSelectedHandler()}
               onClick={(event) => event.stopPropagation()}
-              className="h-3.5 w-3.5 rounded border-slate-300 text-navy-700 focus:ring-navy-500"
+              className="h-3.5 w-3.5 rounded border-slate-300 bg-surface text-brand focus:ring-brand/50"
             />
           ),
           cell: ({ row }) => (
@@ -157,7 +160,7 @@ export function DataTable<TData>({
               checked={row.getIsSelected()}
               onChange={row.getToggleSelectedHandler()}
               onClick={(event) => event.stopPropagation()}
-              className="h-3.5 w-3.5 rounded border-slate-300 text-navy-700 focus:ring-navy-500"
+              className="h-3.5 w-3.5 rounded border-slate-300 bg-surface text-brand focus:ring-brand/50"
             />
           ),
           enableSorting: false,
@@ -194,9 +197,9 @@ export function DataTable<TData>({
 
   if (loading) {
     return (
-      <div className="space-y-2 p-4" role="status" aria-label="Loading table">
+      <div className="space-y-2.5 p-4" role="status" aria-label="Loading table">
         {Array.from({ length: 6 }).map((_, index) => (
-          <Skeleton key={index} className="h-8 w-full" />
+          <Skeleton key={index} className="h-9 w-full" />
         ))}
       </div>
     );
@@ -209,7 +212,7 @@ export function DataTable<TData>({
   return (
     <div>
       {enableColumnVisibility ? (
-        <div className="flex justify-end border-b border-slate-100 px-3 py-1.5">
+        <div className="flex justify-end border-b border-line-soft px-3 py-2">
           <ColumnVisibilityMenu
             columns={toggleableColumns}
             visibility={columnVisibility}
@@ -221,15 +224,16 @@ export function DataTable<TData>({
         <table className="w-full border-collapse text-sm">
           <thead>
             {table.getHeaderGroups().map((headerGroup) => (
-              <tr key={headerGroup.id} className="border-b border-slate-200 bg-slate-50">
+              <tr key={headerGroup.id} className="border-b border-line bg-surface-2">
                 {headerGroup.headers.map((header) => {
                   const sorted = header.column.getIsSorted();
                   return (
                     <th
                       key={header.id}
                       className={cn(
-                        'px-3 py-2 text-left text-[11px] font-semibold uppercase tracking-wider text-slate-500',
-                        header.column.getCanSort() && 'cursor-pointer select-none hover:text-slate-700',
+                        'sticky top-0 z-10 bg-surface-2 px-3 py-2.5 text-left text-2xs font-semibold uppercase tracking-[0.07em] text-slate-500',
+                        header.column.getCanSort() &&
+                          'cursor-pointer select-none transition-colors hover:text-slate-800',
                       )}
                       onClick={header.column.getToggleSortingHandler()}
                     >
@@ -256,14 +260,14 @@ export function DataTable<TData>({
               <tr
                 key={row.id}
                 className={cn(
-                  'border-b border-slate-100 last:border-b-0',
-                  row.getIsSelected() && 'bg-navy-50/60',
-                  onRowClick && 'cursor-pointer transition-colors hover:bg-navy-50/40',
+                  'border-b border-line-soft transition-colors last:border-b-0',
+                  row.getIsSelected() && 'bg-brand-soft',
+                  onRowClick && 'cursor-pointer hover:bg-surface-2',
                 )}
                 onClick={onRowClick ? () => onRowClick(row.original) : undefined}
               >
                 {row.getVisibleCells().map((cell) => (
-                  <td key={cell.id} className="px-3 py-2 align-middle text-slate-700">
+                  <td key={cell.id} className="px-3 py-2.5 align-middle text-slate-600">
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </td>
                 ))}

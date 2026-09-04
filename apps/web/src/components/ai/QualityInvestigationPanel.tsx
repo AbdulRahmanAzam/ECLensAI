@@ -28,11 +28,19 @@ export interface QualityInvestigationPanelProps {
   subjectLabel?: string;
 }
 
-export function QualityInvestigationPanel({ request, title, subjectLabel }: QualityInvestigationPanelProps) {
+export function QualityInvestigationPanel({
+  request,
+  title,
+  subjectLabel,
+}: QualityInvestigationPanelProps) {
   const [focus, setFocus] = useState('');
-  const investigate = useAiFeature<InvestigateQualityRequest, DataQualityInvestigation>(api.ai.investigateQuality);
+  const investigate = useAiFeature<InvestigateQualityRequest, DataQualityInvestigation>(
+    api.ai.investigateQuality,
+  );
 
-  const input: InvestigateQualityRequest = focus.trim() ? { ...request, focus: focus.trim() } : request;
+  const input: InvestigateQualityRequest = focus.trim()
+    ? { ...request, focus: focus.trim() }
+    : request;
   const ask = () => investigate.run(input);
 
   return (
@@ -62,11 +70,12 @@ export function QualityInvestigationPanel({ request, title, subjectLabel }: Qual
       idle={
         <div className="space-y-3">
           <p className="text-xs leading-relaxed text-slate-500">
-            Nothing has been investigated yet. Ask about {subjectLabel ?? 'these records'} and the answer will group the
-            stored data quality issues into patterns, each with the count it affects and a bounded sample of examples.
+            Nothing has been investigated yet. Ask about {subjectLabel ?? 'these records'} and the
+            answer will group the stored data quality issues into patterns, each with the count it
+            affects and a bounded sample of examples.
           </p>
           <label className="block">
-            <span className="text-[11px] font-medium uppercase tracking-wider text-slate-400">
+            <span className="text-2xs font-medium uppercase tracking-wider text-slate-400">
               Focus the investigation (optional)
             </span>
             <input
@@ -74,7 +83,7 @@ export function QualityInvestigationPanel({ request, title, subjectLabel }: Qual
               onChange={(event) => setFocus(event.target.value)}
               maxLength={1000}
               placeholder="e.g. why are so many PDs arriving as whole numbers?"
-              className="mt-1 w-full rounded-md border border-slate-300 px-2.5 py-1.5 text-xs text-slate-700 focus:border-navy-500 focus:outline-none focus:ring-1 focus:ring-navy-500"
+              className="mt-1 w-full rounded-lg border border-slate-300 px-2.5 py-1.5 text-xs text-slate-700 focus:border-navy-500 focus:outline-none focus:ring-1 focus:ring-navy-500"
             />
           </label>
         </div>
@@ -86,25 +95,37 @@ export function QualityInvestigationPanel({ request, title, subjectLabel }: Qual
 
           {result.patterns.length > 0 ? (
             <div>
-              <p className="mb-1.5 text-[11px] font-medium uppercase tracking-wider text-slate-400">Patterns</p>
+              <p className="mb-1.5 text-2xs font-medium uppercase tracking-wider text-slate-400">
+                Patterns
+              </p>
               <ul className="space-y-2">
                 {result.patterns.map((pattern) => (
-                  <li key={pattern.code} className="rounded-md border border-slate-200 bg-white px-3 py-2">
+                  <li
+                    key={pattern.code}
+                    className="rounded-lg border border-line bg-surface px-3 py-2"
+                  >
                     <div className="flex flex-wrap items-center gap-1.5">
-                      <Badge tone={SEVERITY_TONE[pattern.severity]}>{pattern.severity.toLowerCase()}</Badge>
+                      <Badge tone={SEVERITY_TONE[pattern.severity]}>
+                        {pattern.severity.toLowerCase()}
+                      </Badge>
                       <span className="text-xs font-medium text-navy-900">{pattern.title}</span>
-                      <span className="tabular-nums text-[11px] text-slate-500">
+                      <span className="tabular-nums text-2xs text-slate-500">
                         {pattern.affectedCount} record{pattern.affectedCount === 1 ? '' : 's'}
                       </span>
-                      <code className="ml-auto font-mono text-[10px] text-slate-400">{pattern.code}</code>
+                      <code className="ml-auto font-mono text-[10px] text-slate-400">
+                        {pattern.code}
+                      </code>
                     </div>
                     <p className="mt-1 whitespace-pre-wrap text-xs leading-relaxed text-slate-600">
                       {pattern.explanation}
                     </p>
                     {pattern.examples.length > 0 ? (
-                      <ul className="mt-1.5 space-y-0.5 border-l-2 border-slate-200 pl-2">
+                      <ul className="mt-1.5 space-y-0.5 border-l-2 border-line pl-2">
                         {pattern.examples.map((example, index) => (
-                          <li key={index} className="font-mono text-[11px] leading-relaxed text-slate-500">
+                          <li
+                            key={index}
+                            className="font-mono text-2xs leading-relaxed text-slate-500"
+                          >
                             {example}
                           </li>
                         ))}
@@ -117,14 +138,17 @@ export function QualityInvestigationPanel({ request, title, subjectLabel }: Qual
           ) : null}
 
           {result.suggestedCorrections.length > 0 ? (
-            <div className="rounded-md border border-slate-200 bg-slate-50 px-3 py-2.5">
-              <p className="mb-1.5 flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-wider text-slate-500">
+            <div className="rounded-lg border border-line bg-surface-2 px-3 py-2.5">
+              <p className="mb-1.5 flex items-center gap-1.5 text-2xs font-medium uppercase tracking-wider text-slate-500">
                 <AlertTriangle className="h-3 w-3" />
                 Suggested corrections — read only
               </p>
               <ul className="space-y-2">
                 {result.suggestedCorrections.map((correction, index) => (
-                  <li key={`${correction.patternCode}-${index}`} className="text-xs leading-relaxed text-slate-700">
+                  <li
+                    key={`${correction.patternCode}-${index}`}
+                    className="text-xs leading-relaxed text-slate-700"
+                  >
                     <span className="font-medium">{correction.field}</span>
                     {correction.destructive ? (
                       <Badge tone="danger" className="ml-1.5">
@@ -133,7 +157,7 @@ export function QualityInvestigationPanel({ request, title, subjectLabel }: Qual
                     ) : null}
                     <span className="text-slate-400"> · pattern {correction.patternCode}</span>
                     <p className="mt-0.5">{correction.suggestedCorrection}</p>
-                    <p className="mt-0.5 text-[11px] text-slate-500">{correction.rationale}</p>
+                    <p className="mt-0.5 text-2xs text-slate-500">{correction.rationale}</p>
                   </li>
                 ))}
               </ul>
@@ -142,10 +166,10 @@ export function QualityInvestigationPanel({ request, title, subjectLabel }: Qual
                 the absence of a button. An unexplained missing affordance reads as
                 a bug; a named one reads as policy.
               */}
-              <p className="mt-2 border-t border-slate-200 pt-2 text-[11px] leading-relaxed text-slate-500">
-                These cannot be applied from here, by design. Correct the source file and re-import it so the change is
-                visible in the batch, or triage each record individually — either way a person makes the change and the
-                audit trail records who.
+              <p className="mt-2 border-t border-line pt-2 text-2xs leading-relaxed text-slate-500">
+                These cannot be applied from here, by design. Correct the source file and re-import
+                it so the change is visible in the batch, or triage each record individually —
+                either way a person makes the change and the audit trail records who.
               </p>
             </div>
           ) : null}

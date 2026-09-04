@@ -13,14 +13,26 @@ export function ErrorState({
   onRetry,
 }: ErrorStateProps) {
   return (
-    <div className="flex flex-col items-center justify-center gap-2 px-6 py-12 text-center" role="alert">
-      <span className="text-red-400">
-        <AlertTriangle className="h-8 w-8" />
+    <div
+      className="flex flex-col items-center justify-center gap-3 px-6 py-14 text-center"
+      role="alert"
+    >
+      <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-red-50 text-red-600 ring-1 ring-inset ring-red-500/20">
+        <AlertTriangle className="h-5 w-5" />
       </span>
-      <h3 className="text-sm font-semibold text-slate-800">{title}</h3>
-      <p className="max-w-sm text-xs text-slate-500">{description}</p>
+      <div>
+        <h3 className="text-sm font-semibold text-slate-800">{title}</h3>
+        <p className="mx-auto mt-1 max-w-sm text-xs leading-relaxed text-slate-500">
+          {description}
+        </p>
+      </div>
       {onRetry ? (
-        <Button variant="secondary" size="sm" onClick={onRetry} icon={<RotateCcw className="h-3.5 w-3.5" />}>
+        <Button
+          variant="secondary"
+          size="sm"
+          onClick={onRetry}
+          icon={<RotateCcw className="h-3.5 w-3.5" />}
+        >
           Retry
         </Button>
       ) : null}

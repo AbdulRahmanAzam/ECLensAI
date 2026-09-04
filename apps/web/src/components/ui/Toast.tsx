@@ -1,11 +1,4 @@
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useRef,
-  useState,
-  type ReactNode,
-} from 'react';
+import { createContext, useCallback, useContext, useRef, useState, type ReactNode } from 'react';
 import { AlertCircle, CheckCircle2, Info, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -24,10 +17,10 @@ interface ToastContextValue {
 
 const ToastContext = createContext<ToastContextValue | undefined>(undefined);
 
-const KIND_STYLES: Record<ToastKind, { icon: ReactNode; accent: string }> = {
-  success: { icon: <CheckCircle2 className="h-4 w-4 text-emerald-500" />, accent: 'border-l-emerald-500' },
-  error: { icon: <AlertCircle className="h-4 w-4 text-red-500" />, accent: 'border-l-red-500' },
-  info: { icon: <Info className="h-4 w-4 text-navy-500" />, accent: 'border-l-navy-500' },
+const KIND_STYLES: Record<ToastKind, { icon: ReactNode; rail: string }> = {
+  success: { icon: <CheckCircle2 className="h-4 w-4 text-emerald-600" />, rail: 'bg-emerald-500' },
+  error: { icon: <AlertCircle className="h-4 w-4 text-red-600" />, rail: 'bg-red-500' },
+  info: { icon: <Info className="h-4 w-4 text-brand" />, rail: 'bg-brand' },
 };
 
 export function ToastProvider({ children }: { children: ReactNode }) {
@@ -56,21 +49,24 @@ export function ToastProvider({ children }: { children: ReactNode }) {
           <div
             key={toast.id}
             role="status"
-            className={cn(
-              'pointer-events-auto flex items-start gap-2.5 rounded-md border border-slate-200 border-l-4 bg-white p-3 shadow-pop',
-              KIND_STYLES[toast.kind].accent,
-            )}
+            className="pointer-events-auto relative flex animate-slide-in-right items-start gap-2.5 overflow-hidden rounded-xl border border-line bg-surface p-3 pl-4 shadow-pop"
           >
+            <span
+              className={cn('absolute left-0 top-0 h-full w-1', KIND_STYLES[toast.kind].rail)}
+              aria-hidden
+            />
             <span className="mt-0.5">{KIND_STYLES[toast.kind].icon}</span>
             <div className="min-w-0 flex-1">
               <p className="text-sm font-medium text-slate-900">{toast.title}</p>
-              {toast.description ? <p className="mt-0.5 text-xs text-slate-500">{toast.description}</p> : null}
+              {toast.description ? (
+                <p className="mt-0.5 text-xs leading-relaxed text-slate-500">{toast.description}</p>
+              ) : null}
             </div>
             <button
               type="button"
               aria-label="Dismiss notification"
               onClick={() => dismiss(toast.id)}
-              className="rounded p-0.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700"
+              className="rounded-lg p-0.5 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700"
             >
               <X className="h-3.5 w-3.5" />
             </button>

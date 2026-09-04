@@ -19,7 +19,15 @@ const SIZE_CLASSES = {
   lg: 'max-w-2xl',
 } as const;
 
-export function Modal({ open, onClose, title, description, children, footer, size = 'md' }: ModalProps) {
+export function Modal({
+  open,
+  onClose,
+  title,
+  description,
+  children,
+  footer,
+  size = 'md',
+}: ModalProps) {
   useEffect(() => {
     if (!open) return;
     const onKey = (event: KeyboardEvent) => {
@@ -33,30 +41,39 @@ export function Modal({ open, onClose, title, description, children, footer, siz
 
   return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-navy-950/45" onClick={onClose} aria-hidden />
+      <div
+        className="absolute inset-0 animate-fade-in bg-ink/50 backdrop-blur-sm"
+        onClick={onClose}
+        aria-hidden
+      />
       <div
         role="dialog"
         aria-modal="true"
         aria-label={title}
-        className={cn('relative w-full rounded-lg bg-white shadow-pop', SIZE_CLASSES[size])}
+        className={cn(
+          'relative w-full animate-scale-in rounded-2xl border border-line bg-surface shadow-pop',
+          SIZE_CLASSES[size],
+        )}
       >
-        <div className="flex items-start justify-between gap-4 border-b border-slate-100 px-5 py-4">
+        <div className="flex items-start justify-between gap-4 border-b border-line-soft px-5 py-4">
           <div>
-            <h2 className="text-sm font-semibold text-navy-950">{title}</h2>
+            <h2 className="text-sm font-semibold tracking-tight text-slate-900">{title}</h2>
             {description ? <p className="mt-0.5 text-xs text-slate-500">{description}</p> : null}
           </div>
           <button
             type="button"
             onClick={onClose}
             aria-label="Close dialog"
-            className="rounded p-1 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700"
+            className="-mr-1 rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700"
           >
             <X className="h-4 w-4" />
           </button>
         </div>
         {children ? <div className="px-5 py-4">{children}</div> : null}
         {footer ? (
-          <div className="flex justify-end gap-2 border-t border-slate-100 px-5 py-3">{footer}</div>
+          <div className="flex justify-end gap-2 rounded-b-2xl border-t border-line-soft bg-surface-2 px-5 py-3">
+            {footer}
+          </div>
         ) : null}
       </div>
     </div>,

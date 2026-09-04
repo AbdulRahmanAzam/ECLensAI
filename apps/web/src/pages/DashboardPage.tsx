@@ -11,7 +11,17 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
-import { AlertTriangle, Banknote, Clock, GitCompare, Layers, Percent, ShieldAlert, Target, Wallet } from 'lucide-react';
+import {
+  AlertTriangle,
+  Banknote,
+  Clock,
+  GitCompare,
+  Layers,
+  Percent,
+  ShieldAlert,
+  Target,
+  Wallet,
+} from 'lucide-react';
 import type { AnalyticsFilter, ConcentrationDimension, DriverExposure } from '@eclens/shared';
 import {
   decimalStringToNumber,
@@ -37,6 +47,7 @@ import { Select } from '@/components/ui/Select';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { Tabs } from '@/components/ui/Tabs';
 import { useSettings } from '@/providers/SettingsProvider';
+import { tooltipStyle, useChartTheme } from '@/lib/chartTheme';
 
 const driverColumn = createColumnHelper<DriverExposure>();
 
@@ -48,7 +59,15 @@ const CONCENTRATION_LABEL: Record<ConcentrationDimension, string> = {
   rating: 'Rating',
 };
 
-const FILTER_KEYS = ['snapshotId', 'segment', 'productType', 'region', 'industry', 'rating', 'stage'] as const;
+const FILTER_KEYS = [
+  'snapshotId',
+  'segment',
+  'productType',
+  'region',
+  'industry',
+  'rating',
+  'stage',
+] as const;
 type FilterKey = (typeof FILTER_KEYS)[number];
 
 /**
@@ -62,6 +81,7 @@ type FilterKey = (typeof FILTER_KEYS)[number];
 export function DashboardPage() {
   const navigate = useNavigate();
   const { moneyString, percentString } = useSettings();
+  const chart = useChartTheme();
   const [searchParams, setSearchParams] = useSearchParams();
 
   const getParam = (key: FilterKey): string | undefined => searchParams.get(key) ?? undefined;
@@ -82,7 +102,15 @@ export function DashboardPage() {
   const stageParam = getParam('stage');
   const stage = stageParam ? (Number(stageParam) as 1 | 2 | 3) : undefined;
 
-  const fullFilter: AnalyticsFilter = { snapshotId, segment, productType, region, industry, rating, stage };
+  const fullFilter: AnalyticsFilter = {
+    snapshotId,
+    segment,
+    productType,
+    region,
+    industry,
+    rating,
+    stage,
+  };
   // The movement and trend endpoints reject a `stage`/`snapshotId` key outright
   // (a filtered bridge or a single-period trend would contradict what each
   // measures) — the key must be genuinely absent, not merely `undefined`.
@@ -164,14 +192,21 @@ export function DashboardPage() {
       cell: (info) => (
         <div>
           <p className="font-medium text-navy-800">{info.getValue()}</p>
-          <p className="text-[11px] text-slate-500">{info.row.original.borrowerName}</p>
+          <p className="text-2xs text-slate-500">{info.row.original.borrowerName}</p>
         </div>
       ),
     }),
-    driverColumn.accessor('stage', { header: 'Stage', cell: (info) => <StageBadge stage={info.getValue()} /> }),
+    driverColumn.accessor('stage', {
+      header: 'Stage',
+      cell: (info) => <StageBadge stage={info.getValue()} />,
+    }),
     driverColumn.accessor('lossAllowance', {
       header: 'Allowance',
-      cell: (info) => <span className="font-medium text-red-700">{moneyString(info.getValue(), { compact: true })}</span>,
+      cell: (info) => (
+        <span className="font-medium text-red-700">
+          {moneyString(info.getValue(), { compact: true })}
+        </span>
+      ),
     }),
     driverColumn.accessor('shareOfTotalAllowancePercent', {
       header: 'Share',
@@ -183,7 +218,9 @@ export function DashboardPage() {
     }),
   ];
 
-  const activePeriod = filtersQuery.data?.periods.find((period) => period.snapshotId === (snapshotId ?? filtersQuery.data?.periods[0]?.snapshotId));
+  const activePeriod = filtersQuery.data?.periods.find(
+    (period) => period.snapshotId === (snapshotId ?? filtersQuery.data?.periods[0]?.snapshotId),
+  );
 
   return (
     <div>
@@ -222,7 +259,12 @@ export function DashboardPage() {
               </option>
             ))}
           </Select>
-          <Select label="Segment" value={segment ?? ''} onChange={(event) => setParam('segment', event.target.value || undefined)} className="w-36">
+          <Select
+            label="Segment"
+            value={segment ?? ''}
+            onChange={(event) => setParam('segment', event.target.value || undefined)}
+            className="w-36"
+          >
             <option value="">All segments</option>
             {(filtersQuery.data?.segments ?? []).map((option) => (
               <option key={option.value} value={option.value}>
@@ -230,7 +272,12 @@ export function DashboardPage() {
               </option>
             ))}
           </Select>
-          <Select label="Product" value={productType ?? ''} onChange={(event) => setParam('productType', event.target.value || undefined)} className="w-36">
+          <Select
+            label="Product"
+            value={productType ?? ''}
+            onChange={(event) => setParam('productType', event.target.value || undefined)}
+            className="w-36"
+          >
             <option value="">All products</option>
             {(filtersQuery.data?.productTypes ?? []).map((option) => (
               <option key={option.value} value={option.value}>
@@ -238,7 +285,12 @@ export function DashboardPage() {
               </option>
             ))}
           </Select>
-          <Select label="Region" value={region ?? ''} onChange={(event) => setParam('region', event.target.value || undefined)} className="w-36">
+          <Select
+            label="Region"
+            value={region ?? ''}
+            onChange={(event) => setParam('region', event.target.value || undefined)}
+            className="w-36"
+          >
             <option value="">All regions</option>
             {(filtersQuery.data?.regions ?? []).map((option) => (
               <option key={option.value} value={option.value}>
@@ -246,7 +298,12 @@ export function DashboardPage() {
               </option>
             ))}
           </Select>
-          <Select label="Industry" value={industry ?? ''} onChange={(event) => setParam('industry', event.target.value || undefined)} className="w-36">
+          <Select
+            label="Industry"
+            value={industry ?? ''}
+            onChange={(event) => setParam('industry', event.target.value || undefined)}
+            className="w-36"
+          >
             <option value="">All industries</option>
             {(filtersQuery.data?.industries ?? []).map((option) => (
               <option key={option.value} value={option.value}>
@@ -254,7 +311,12 @@ export function DashboardPage() {
               </option>
             ))}
           </Select>
-          <Select label="Rating" value={rating ?? ''} onChange={(event) => setParam('rating', event.target.value || undefined)} className="w-28">
+          <Select
+            label="Rating"
+            value={rating ?? ''}
+            onChange={(event) => setParam('rating', event.target.value || undefined)}
+            className="w-28"
+          >
             <option value="">All ratings</option>
             {(filtersQuery.data?.ratings ?? []).map((option) => (
               <option key={option.value} value={option.value}>
@@ -262,7 +324,12 @@ export function DashboardPage() {
               </option>
             ))}
           </Select>
-          <Select label="Stage" value={stageParam ?? ''} onChange={(event) => setParam('stage', event.target.value || undefined)} className="w-28">
+          <Select
+            label="Stage"
+            value={stageParam ?? ''}
+            onChange={(event) => setParam('stage', event.target.value || undefined)}
+            className="w-28"
+          >
             <option value="">All stages</option>
             {(filtersQuery.data?.stages ?? []).map((option) => (
               <option key={option.stage} value={option.stage}>
@@ -271,15 +338,21 @@ export function DashboardPage() {
             ))}
           </Select>
           {activePeriod ? (
-            <span className="ml-auto flex items-center gap-1.5 text-[11px] text-slate-400">
+            <span className="ml-auto flex items-center gap-1.5 text-2xs text-slate-400">
               <Clock className="h-3.5 w-3.5" />
-              {activePeriod.hasResults ? `Calculated as of ${formatDate(activePeriod.reportingDate)}` : 'No completed run for this period'}
+              {activePeriod.hasResults
+                ? `Calculated as of ${formatDate(activePeriod.reportingDate)}`
+                : 'No completed run for this period'}
             </span>
           ) : null}
         </CardContent>
         {chips.length > 0 ? (
-          <CardContent className="border-t border-slate-100 py-2.5">
-            <FilterChips chips={chips} onRemove={(key) => setParam(key as FilterKey, undefined)} onClearAll={clearAll} />
+          <CardContent className="border-t border-line-soft py-2.5">
+            <FilterChips
+              chips={chips}
+              onRemove={(key) => setParam(key as FilterKey, undefined)}
+              onClearAll={clearAll}
+            />
           </CardContent>
         ) : null}
       </Card>
@@ -303,7 +376,11 @@ export function DashboardPage() {
         <MetricCard
           label="ECL loss allowance"
           value={moneyString(totals?.lossAllowance, { compact: true })}
-          hint={movementQuery.data ? `vs. ${formatDate(movementQuery.data.from.reportingDate)}` : 'Scenario-weighted'}
+          hint={
+            movementQuery.data
+              ? `vs. ${formatDate(movementQuery.data.from.reportingDate)}`
+              : 'Scenario-weighted'
+          }
           delta={movementDelta}
           icon={<Layers className="h-4 w-4" />}
           loading={isLoading}
@@ -316,7 +393,9 @@ export function DashboardPage() {
           loading={isLoading}
         />
         <Card className="p-4">
-          <p className="text-xs font-medium uppercase tracking-wide text-slate-500">Stage share (gross)</p>
+          <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
+            Stage share (gross)
+          </p>
           {isLoading || !summary ? (
             <div className="mt-2 h-7 w-32 animate-pulse rounded bg-slate-200" />
           ) : (
@@ -324,7 +403,9 @@ export function DashboardPage() {
               {summary.stages.map((row) => (
                 <div key={row.stage} className="flex items-center justify-between text-xs">
                   <StageBadge stage={row.stage} />
-                  <span className="font-semibold tabular-nums text-navy-950">{percentString(row.shareOfGrossPercent, 0)}</span>
+                  <span className="font-semibold tabular-nums text-navy-950">
+                    {percentString(row.shareOfGrossPercent, 0)}
+                  </span>
                 </div>
               ))}
             </div>
@@ -342,13 +423,19 @@ export function DashboardPage() {
       {/* Movement bridge + trend -------------------------------------------- */}
       <div className="mt-4 grid gap-4 lg:grid-cols-2">
         <Card>
-          <CardHeader title="Allowance movement" description="What moved the allowance between the two most recent reporting periods" />
+          <CardHeader
+            title="Allowance movement"
+            description="What moved the allowance between the two most recent reporting periods"
+          />
           <CardContent>
             <MovementBridgeChart bridge={movementQuery.data} loading={movementQuery.isLoading} />
           </CardContent>
         </Card>
         <Card>
-          <CardHeader title="ECL and coverage trend" description="Allowance and coverage ratio across every reporting period" />
+          <CardHeader
+            title="ECL and coverage trend"
+            description="Allowance and coverage ratio across every reporting period"
+          />
           <CardContent>
             {trendQuery.isLoading || trendPoints.length === 0 ? (
               <Skeleton className="h-[260px] w-full" />
@@ -356,29 +443,39 @@ export function DashboardPage() {
               <>
                 <p className="sr-only">
                   {trendPoints
-                    .map((point) => `${point.label}: allowance ${point.allowanceText}, coverage ${point.coverageRatioText}`)
+                    .map(
+                      (point) =>
+                        `${point.label}: allowance ${point.allowanceText}, coverage ${point.coverageRatioText}`,
+                    )
                     .join('. ')}
                 </p>
                 <ResponsiveContainer width="100%" height={230}>
                   <AreaChart data={trendPoints} margin={{ top: 8, right: 8, bottom: 0, left: 0 }}>
                     <defs>
                       <linearGradient id="allowanceFill" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="#2c4a6f" stopOpacity={0.25} />
-                        <stop offset="100%" stopColor="#2c4a6f" stopOpacity={0.02} />
+                        <stop offset="0%" stopColor={chart.brand} stopOpacity={0.28} />
+                        <stop offset="100%" stopColor={chart.brand} stopOpacity={0.02} />
                       </linearGradient>
                     </defs>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
+                    <CartesianGrid strokeDasharray="3 3" stroke={chart.grid} vertical={false} />
                     <XAxis
                       dataKey="reportingDate"
-                      tickFormatter={(value: string) => new Date(value).toLocaleDateString('en-GB', { month: 'short', timeZone: 'UTC' })}
-                      tick={{ fontSize: 11, fill: '#64748b' }}
+                      tickFormatter={(value: string) =>
+                        new Date(value).toLocaleDateString('en-GB', {
+                          month: 'short',
+                          timeZone: 'UTC',
+                        })
+                      }
+                      tick={{ fontSize: 11, fill: chart.axis }}
                       axisLine={false}
                       tickLine={false}
                     />
                     <YAxis
                       yAxisId="allowance"
-                      tickFormatter={(value: number) => moneyString(String(value), { compact: true })}
-                      tick={{ fontSize: 11, fill: '#64748b' }}
+                      tickFormatter={(value: number) =>
+                        moneyString(String(value), { compact: true })
+                      }
+                      tick={{ fontSize: 11, fill: chart.axis }}
                       axisLine={false}
                       tickLine={false}
                       width={56}
@@ -387,27 +484,60 @@ export function DashboardPage() {
                       yAxisId="coverage"
                       orientation="right"
                       tickFormatter={(value: number) => `${(value * 100).toFixed(1)}%`}
-                      tick={{ fontSize: 11, fill: '#64748b' }}
+                      tick={{ fontSize: 11, fill: chart.axis }}
                       axisLine={false}
                       tickLine={false}
                       width={44}
                     />
                     <ChartTooltip
-                      formatter={(_value: number, name: string, item: { payload?: (typeof trendPoints)[number] }) =>
+                      formatter={(
+                        _value: number,
+                        name: string,
+                        item: { payload?: (typeof trendPoints)[number] },
+                      ) =>
                         name === 'allowance'
                           ? [moneyString(item.payload?.allowanceText), 'Allowance']
-                          : [formatDecimalPercent(item.payload?.coverageRatioText), 'Coverage ratio']
+                          : [
+                              formatDecimalPercent(item.payload?.coverageRatioText),
+                              'Coverage ratio',
+                            ]
                       }
                       labelFormatter={(label: string) => formatDate(String(label))}
-                      contentStyle={{ fontSize: 12, borderRadius: 8, borderColor: '#e2e8f0' }}
+                      contentStyle={tooltipStyle(chart)}
                     />
-                    <Area yAxisId="allowance" type="monotone" dataKey="allowance" stroke="#2c4a6f" strokeWidth={2} fill="url(#allowanceFill)" />
-                    <Line yAxisId="coverage" type="monotone" dataKey="coverageRatio" stroke="#dc2626" strokeWidth={2} dot={false} />
+                    <Area
+                      yAxisId="allowance"
+                      type="monotone"
+                      dataKey="allowance"
+                      stroke={chart.brand}
+                      strokeWidth={2}
+                      fill="url(#allowanceFill)"
+                    />
+                    <Line
+                      yAxisId="coverage"
+                      type="monotone"
+                      dataKey="coverageRatio"
+                      stroke={chart.danger}
+                      strokeWidth={2}
+                      dot={false}
+                    />
                   </AreaChart>
                 </ResponsiveContainer>
-                <div className="mt-1 flex gap-4 text-[11px] text-slate-500">
-                  <span className="inline-flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-navy-700" /> Allowance</span>
-                  <span className="inline-flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-red-600" /> Coverage ratio</span>
+                <div className="mt-1 flex gap-4 text-2xs text-slate-500">
+                  <span className="inline-flex items-center gap-1.5">
+                    <span
+                      className="h-2 w-2 rounded-full"
+                      style={{ backgroundColor: chart.brand }}
+                    />{' '}
+                    Allowance
+                  </span>
+                  <span className="inline-flex items-center gap-1.5">
+                    <span
+                      className="h-2 w-2 rounded-full"
+                      style={{ backgroundColor: chart.danger }}
+                    />{' '}
+                    Coverage ratio
+                  </span>
                 </div>
               </>
             )}
@@ -418,7 +548,10 @@ export function DashboardPage() {
       {/* Stage distribution + migration --------------------------------------- */}
       <div className="mt-4 grid gap-4 lg:grid-cols-2">
         <Card>
-          <CardHeader title="Stage distribution" description="EAD and ECL allowance by IFRS 9 stage" />
+          <CardHeader
+            title="Stage distribution"
+            description="EAD and ECL allowance by IFRS 9 stage"
+          />
           <CardContent className="space-y-4">
             {isLoading || !summary ? (
               <div className="space-y-3">
@@ -428,8 +561,12 @@ export function DashboardPage() {
               </div>
             ) : (
               summary.stages.map((row) => {
-                const barColor = row.stage === 1 ? 'bg-teal-500' : row.stage === 2 ? 'bg-amber-500' : 'bg-red-500';
-                const width = Math.max(decimalStringToNumber(row.shareOfGrossPercent ?? '0'), row.exposureCount > 0 ? 1 : 0);
+                const barColor =
+                  row.stage === 1 ? 'bg-teal-500' : row.stage === 2 ? 'bg-amber-500' : 'bg-red-500';
+                const width = Math.max(
+                  decimalStringToNumber(row.shareOfGrossPercent ?? '0'),
+                  row.exposureCount > 0 ? 1 : 0,
+                );
                 return (
                   <div key={row.stage}>
                     <div className="flex items-center justify-between text-xs">
@@ -437,12 +574,17 @@ export function DashboardPage() {
                         <StageBadge stage={row.stage} />
                         <span className="text-slate-500">{row.exposureCount} exposures</span>
                       </span>
-                      <span className="text-slate-500">{percentString(row.coverageRatio, 1)} coverage</span>
+                      <span className="text-slate-500">
+                        {percentString(row.coverageRatio, 1)} coverage
+                      </span>
                     </div>
                     <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-slate-100">
-                      <div className={`h-full rounded-full ${barColor}`} style={{ width: `${width}%` }} />
+                      <div
+                        className={`h-full rounded-full ${barColor}`}
+                        style={{ width: `${width}%` }}
+                      />
                     </div>
-                    <div className="mt-1 flex justify-between text-[11px] text-slate-500">
+                    <div className="mt-1 flex justify-between text-2xs text-slate-500">
                       <span>Gross {moneyString(row.grossCarryingAmount, { compact: true })}</span>
                       <span>EAD {moneyString(row.ead, { compact: true })}</span>
                       <span>ECL {moneyString(row.lossAllowance, { compact: true })}</span>
@@ -451,17 +593,25 @@ export function DashboardPage() {
                 );
               })
             )}
-            <p className="border-t border-slate-100 pt-3 text-[11px] leading-relaxed text-slate-500">
-              Stage 1 recognises 12-month ECL. Stages 2 and 3 recognise lifetime ECL over the remaining contractual
-              horizon; Stage 3 net carrying amount is gross carrying amount less the allowance.
+            <p className="border-t border-line-soft pt-3 text-2xs leading-relaxed text-slate-500">
+              Stage 1 recognises 12-month ECL. Stages 2 and 3 recognise lifetime ECL over the
+              remaining contractual horizon; Stage 3 net carrying amount is gross carrying amount
+              less the allowance.
             </p>
           </CardContent>
         </Card>
 
         <Card>
-          <CardHeader title="Stage migration" description="Movement between the two most recent reporting periods" icon={<GitCompare className="h-4 w-4 text-navy-500" />} />
+          <CardHeader
+            title="Stage migration"
+            description="Movement between the two most recent reporting periods"
+            icon={<GitCompare className="h-4 w-4 text-navy-500" />}
+          />
           <CardContent>
-            <StageMigrationMatrix migration={migrationQuery.data} loading={migrationQuery.isLoading} />
+            <StageMigrationMatrix
+              migration={migrationQuery.data}
+              loading={migrationQuery.isLoading}
+            />
           </CardContent>
         </Card>
       </div>
@@ -469,24 +619,39 @@ export function DashboardPage() {
       {/* Scenario comparison + executive insight ------------------------------ */}
       <div className="mt-4 grid gap-4 lg:grid-cols-2">
         <Card>
-          <CardHeader title="Scenario contribution" description="Base, upside and downside impact on the reported allowance" />
+          <CardHeader
+            title="Scenario contribution"
+            description="Base, upside and downside impact on the reported allowance"
+          />
           <CardContent>
             {scenariosQuery.isError ? (
-              <EmptyState title="No scenario split available" description="This period has no completed run to split by scenario." />
+              <EmptyState
+                title="No scenario split available"
+                description="This period has no completed run to split by scenario."
+              />
             ) : (
-              <ScenarioComparisonChart scenarios={scenariosQuery.data} loading={scenariosQuery.isLoading} />
+              <ScenarioComparisonChart
+                scenarios={scenariosQuery.data}
+                loading={scenariosQuery.isLoading}
+              />
             )}
           </CardContent>
         </Card>
         {summary?.run ? (
           <div data-tour="tour-executive-commentary">
-            <ExecutiveCommentaryPanel runId={summary.run.publicId} runLabel={summary.run.publicId} />
+            <ExecutiveCommentaryPanel
+              runId={summary.run.publicId}
+              runLabel={summary.run.publicId}
+            />
           </div>
         ) : (
           <Card>
             <CardHeader title="Executive commentary" />
             <CardContent>
-              <EmptyState title="No completed run" description="Executive commentary needs a completed run to summarise." />
+              <EmptyState
+                title="No completed run"
+                description="Executive commentary needs a completed run to summarise."
+              />
             </CardContent>
           </Card>
         )}
@@ -494,7 +659,10 @@ export function DashboardPage() {
 
       {/* Concentration -------------------------------------------------------- */}
       <Card className="mt-4">
-        <CardHeader title="Risk concentration" description="Where the allowance is concentrated, ranked largest first" />
+        <CardHeader
+          title="Risk concentration"
+          description="Where the allowance is concentrated, ranked largest first"
+        />
         <CardContent>
           {concentrationQuery.isLoading || !concentrationQuery.data ? (
             <Skeleton className="h-48 w-full" />
@@ -506,7 +674,7 @@ export function DashboardPage() {
                 content: (
                   <table className="w-full text-sm">
                     <thead>
-                      <tr className="border-b border-slate-200 text-left text-[11px] uppercase tracking-wider text-slate-500">
+                      <tr className="border-b border-line text-left text-2xs uppercase tracking-wider text-slate-500">
                         <th className="py-2">{CONCENTRATION_LABEL[slice.dimension]}</th>
                         <th className="py-2 text-right">Exposures</th>
                         <th className="py-2 text-right">Gross</th>
@@ -515,15 +683,26 @@ export function DashboardPage() {
                       </tr>
                     </thead>
                     <tbody>
-                      {[...slice.buckets, ...(slice.otherBucket ? [slice.otherBucket] : [])].map((bucket) => (
-                        <tr key={bucket.key} className="border-b border-slate-100 last:border-b-0">
-                          <td className="py-2 font-medium text-navy-800">{bucket.key}</td>
-                          <td className="py-2 text-right tabular-nums">{bucket.exposureCount}</td>
-                          <td className="py-2 text-right tabular-nums">{moneyString(bucket.grossCarryingAmount, { compact: true })}</td>
-                          <td className="py-2 text-right tabular-nums text-red-700">{moneyString(bucket.lossAllowance, { compact: true })}</td>
-                          <td className="py-2 text-right tabular-nums">{percentString(bucket.shareOfAllowancePercent, 1)}</td>
-                        </tr>
-                      ))}
+                      {[...slice.buckets, ...(slice.otherBucket ? [slice.otherBucket] : [])].map(
+                        (bucket) => (
+                          <tr
+                            key={bucket.key}
+                            className="border-b border-line-soft last:border-b-0"
+                          >
+                            <td className="py-2 font-medium text-navy-800">{bucket.key}</td>
+                            <td className="py-2 text-right tabular-nums">{bucket.exposureCount}</td>
+                            <td className="py-2 text-right tabular-nums">
+                              {moneyString(bucket.grossCarryingAmount, { compact: true })}
+                            </td>
+                            <td className="py-2 text-right tabular-nums text-red-700">
+                              {moneyString(bucket.lossAllowance, { compact: true })}
+                            </td>
+                            <td className="py-2 text-right tabular-nums">
+                              {percentString(bucket.shareOfAllowancePercent, 1)}
+                            </td>
+                          </tr>
+                        ),
+                      )}
                     </tbody>
                   </table>
                 ),
@@ -542,7 +721,9 @@ export function DashboardPage() {
             icon={<Target className="h-4 w-4 text-navy-500" />}
             actions={
               <Link to="/portfolio">
-                <Button variant="ghost" size="sm">Open portfolio</Button>
+                <Button variant="ghost" size="sm">
+                  Open portfolio
+                </Button>
               </Link>
             }
           />
@@ -562,7 +743,9 @@ export function DashboardPage() {
             icon={<ShieldAlert className="h-4 w-4 text-navy-500" />}
             actions={
               <Link to="/exceptions">
-                <Button variant="ghost" size="sm">Open queue</Button>
+                <Button variant="ghost" size="sm">
+                  Open queue
+                </Button>
               </Link>
             }
           />
@@ -575,15 +758,25 @@ export function DashboardPage() {
               <div className="space-y-2">
                 <p className="text-2xl font-semibold text-navy-950">{exceptionsQuery.data.open}</p>
                 <p className="text-xs text-slate-500">open exceptions across the book</p>
-                <div className="space-y-1.5 border-t border-slate-100 pt-2">
-                  {(Object.entries(exceptionsQuery.data.bySeverity) as [string, number][]).map(([severity, count]) => (
-                    <div key={severity} className="flex items-center justify-between text-xs">
-                      <Badge tone={severity === 'HIGH' ? 'danger' : severity === 'MEDIUM' ? 'warning' : 'neutral'}>
-                        {severity}
-                      </Badge>
-                      <span className="font-medium text-slate-700">{count}</span>
-                    </div>
-                  ))}
+                <div className="space-y-1.5 border-t border-line-soft pt-2">
+                  {(Object.entries(exceptionsQuery.data.bySeverity) as [string, number][]).map(
+                    ([severity, count]) => (
+                      <div key={severity} className="flex items-center justify-between text-xs">
+                        <Badge
+                          tone={
+                            severity === 'HIGH'
+                              ? 'danger'
+                              : severity === 'MEDIUM'
+                                ? 'warning'
+                                : 'neutral'
+                          }
+                        >
+                          {severity}
+                        </Badge>
+                        <span className="font-medium text-slate-700">{count}</span>
+                      </div>
+                    ),
+                  )}
                 </div>
               </div>
             )}
@@ -599,19 +792,25 @@ export function DashboardPage() {
             <Skeleton className="h-24 w-full" />
           ) : summary?.run ? (
             <dl className="grid gap-x-6 gap-y-2 text-sm sm:grid-cols-2">
-              <div className="flex justify-between gap-4 border-b border-slate-100 pb-1.5">
+              <div className="flex justify-between gap-4 border-b border-line-soft pb-1.5">
                 <dt className="text-slate-500">Model configuration</dt>
-                <dd className="text-right font-medium text-slate-800">v{summary.run.modelConfigurationVersion ?? '—'}</dd>
+                <dd className="text-right font-medium text-slate-800">
+                  v{summary.run.modelConfigurationVersion ?? '—'}
+                </dd>
               </div>
-              <div className="flex justify-between gap-4 border-b border-slate-100 pb-1.5">
+              <div className="flex justify-between gap-4 border-b border-line-soft pb-1.5">
                 <dt className="text-slate-500">Scenario set</dt>
-                <dd className="text-right font-medium text-slate-800">v{summary.run.scenarioSetVersion ?? '—'}</dd>
+                <dd className="text-right font-medium text-slate-800">
+                  v{summary.run.scenarioSetVersion ?? '—'}
+                </dd>
               </div>
-              <div className="flex justify-between gap-4 border-b border-slate-100 pb-1.5">
+              <div className="flex justify-between gap-4 border-b border-line-soft pb-1.5">
                 <dt className="text-slate-500">Reporting date</dt>
-                <dd className="text-right font-medium text-slate-800">{formatDate(summary.reportingDate)}</dd>
+                <dd className="text-right font-medium text-slate-800">
+                  {formatDate(summary.reportingDate)}
+                </dd>
               </div>
-              <div className="flex justify-between gap-4 border-b border-slate-100 pb-1.5">
+              <div className="flex justify-between gap-4 border-b border-line-soft pb-1.5">
                 <dt className="text-slate-500">Calculated at</dt>
                 <dd className="text-right font-medium text-slate-800">
                   {summary.run.completedAt ? formatDateTime(summary.run.completedAt) : '—'}
@@ -619,11 +818,13 @@ export function DashboardPage() {
               </div>
             </dl>
           ) : (
-            <p className="text-sm text-slate-500">No completed run yet, so there is no lineage to report.</p>
+            <p className="text-sm text-slate-500">
+              No completed run yet, so there is no lineage to report.
+            </p>
           )}
-          <p className="mt-3 flex items-start gap-2 text-[11px] leading-relaxed text-slate-500">
-            These versions are frozen on the run. Editing an assumption creates a new version and cannot change a
-            completed historical result.
+          <p className="mt-3 flex items-start gap-2 text-2xs leading-relaxed text-slate-500">
+            These versions are frozen on the run. Editing an assumption creates a new version and
+            cannot change a completed historical result.
           </p>
         </CardContent>
       </Card>

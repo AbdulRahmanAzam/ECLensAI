@@ -17,7 +17,12 @@ import { api } from '@/api/client';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { useAiFeature } from '@/hooks/useAi';
-import { directionLabel, directionTone, scenarioProposalToDraftForm, type ScenarioDraftForm } from '@/lib/ai';
+import {
+  directionLabel,
+  directionTone,
+  scenarioProposalToDraftForm,
+  type ScenarioDraftForm,
+} from '@/lib/ai';
 import { AiLineList, AiProse, AiSourceRefs } from './AiChrome';
 import { AiResponseFrame } from './AiResponseFrame';
 
@@ -46,7 +51,8 @@ export function ScenarioDraftPanel({ scenarioSetId, onUseDraft }: ScenarioDraftP
   // A weight the model left null arrives as '0', so the total below is the honest
   // one the reviewer will meet in the form — not a number rounded up to look ready.
   const proposedWeightSum = (proposal?.proposedAdjustments ?? []).reduce(
-    (total, adjustment) => total + (adjustment.proposedWeight ? decimalStringToNumber(adjustment.proposedWeight) : 0),
+    (total, adjustment) =>
+      total + (adjustment.proposedWeight ? decimalStringToNumber(adjustment.proposedWeight) : 0),
     0,
   );
 
@@ -75,7 +81,7 @@ export function ScenarioDraftPanel({ scenarioSetId, onUseDraft }: ScenarioDraftP
       idle={
         <div className="space-y-2">
           <label className="block">
-            <span className="text-[11px] font-medium uppercase tracking-wider text-slate-400">
+            <span className="text-2xs font-medium uppercase tracking-wider text-slate-400">
               Macroeconomic narrative
             </span>
             <textarea
@@ -84,11 +90,11 @@ export function ScenarioDraftPanel({ scenarioSetId, onUseDraft }: ScenarioDraftP
               rows={4}
               maxLength={MAX_NARRATIVE}
               placeholder="e.g. Policy rate held at 15% through the year, inflation easing to 9%, GDP growth of 1.5%, with the textile export segment under pressure from weaker EU demand."
-              className="mt-1 w-full resize-y rounded-md border border-slate-300 px-2.5 py-2 text-xs leading-relaxed text-slate-700 focus:border-navy-500 focus:outline-none focus:ring-1 focus:ring-navy-500"
+              className="mt-1 w-full resize-y rounded-lg border border-slate-300 px-2.5 py-2 text-xs leading-relaxed text-slate-700 focus:border-navy-500 focus:outline-none focus:ring-1 focus:ring-navy-500"
             />
           </label>
           <div className="flex items-center justify-between gap-2">
-            <p className="text-[11px] text-slate-500">
+            <p className="text-2xs text-slate-500">
               {askable
                 ? 'A draft is written against the active scenario set and this organisation’s governance documents.'
                 : `Describe the narrative in at least ${MIN_NARRATIVE} characters.`}
@@ -109,7 +115,7 @@ export function ScenarioDraftPanel({ scenarioSetId, onUseDraft }: ScenarioDraftP
         <>
           <div className="flex flex-wrap items-center gap-2">
             <p className="text-base font-semibold text-navy-950">{result.name}</p>
-            <span className="tabular-nums text-[11px] text-slate-500">
+            <span className="tabular-nums text-2xs text-slate-500">
               proposed weights total {(proposedWeightSum * 100).toFixed(1)}%
             </span>
             {Math.abs(proposedWeightSum - 1) < 1e-9 ? (
@@ -123,12 +129,12 @@ export function ScenarioDraftPanel({ scenarioSetId, onUseDraft }: ScenarioDraftP
 
           {result.proposedAdjustments.length > 0 ? (
             <div>
-              <p className="mb-1.5 text-[11px] font-medium uppercase tracking-wider text-slate-400">
+              <p className="mb-1.5 text-2xs font-medium uppercase tracking-wider text-slate-400">
                 Proposed adjustments
               </p>
-              <div className="overflow-x-auto rounded-md border border-slate-200">
+              <div className="overflow-x-auto rounded-lg border border-line">
                 <table className="w-full min-w-[640px] text-left text-xs">
-                  <thead className="border-b border-slate-200 bg-slate-50 text-[11px] uppercase tracking-wide text-slate-500">
+                  <thead className="border-b border-line bg-surface-2 text-2xs uppercase tracking-wide text-slate-500">
                     <tr>
                       <th className="px-2.5 py-2 font-medium">Scenario</th>
                       <th className="px-2.5 py-2 font-medium">Direction</th>
@@ -137,15 +143,17 @@ export function ScenarioDraftPanel({ scenarioSetId, onUseDraft }: ScenarioDraftP
                       <th className="px-2.5 py-2 font-medium">LGD ×</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-100">
+                  <tbody className="divide-y divide-line-soft">
                     {result.proposedAdjustments.map((adjustment) => (
                       <tr key={adjustment.code}>
                         <td className="px-2.5 py-2">
-                          <span className="block font-medium text-slate-800">{adjustment.name}</span>
-                          <code className="block font-mono text-[11px] text-slate-400">
+                          <span className="block font-medium text-slate-800">
+                            {adjustment.name}
+                          </span>
+                          <code className="block font-mono text-2xs text-slate-400">
                             {adjustment.code} · {adjustment.kind.toLowerCase()}
                           </code>
-                          <span className="mt-0.5 block text-[11px] leading-relaxed text-slate-500">
+                          <span className="mt-0.5 block text-2xs leading-relaxed text-slate-500">
                             {adjustment.rationale}
                           </span>
                         </td>
@@ -155,9 +163,13 @@ export function ScenarioDraftPanel({ scenarioSetId, onUseDraft }: ScenarioDraftP
                           </Badge>
                         </td>
                         <td className="px-2.5 py-2 tabular-nums text-slate-700">
-                          {adjustment.proposedWeight ?? <span className="text-red-600">not proposed</span>}
+                          {adjustment.proposedWeight ?? (
+                            <span className="text-red-600">not proposed</span>
+                          )}
                         </td>
-                        <td className="px-2.5 py-2 tabular-nums text-slate-700">{adjustment.proposedPdMultiplier ?? '—'}</td>
+                        <td className="px-2.5 py-2 tabular-nums text-slate-700">
+                          {adjustment.proposedPdMultiplier ?? '—'}
+                        </td>
                         <td className="px-2.5 py-2 tabular-nums text-slate-700">
                           {adjustment.proposedLgdMultiplier ?? '—'}
                         </td>
@@ -174,10 +186,11 @@ export function ScenarioDraftPanel({ scenarioSetId, onUseDraft }: ScenarioDraftP
           <AiLineList title="Assumptions" items={result.assumptions} />
           <AiSourceRefs refs={result.sourceRefs} />
 
-          <p className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-[11px] leading-relaxed text-amber-900">
-            Nothing has been created or changed. “Use in new version” copies this draft into the scenario form, where
-            every field is editable and the set is only published when you submit it — an AI draft can never activate a
-            scenario, alter a weighting in force, or run the engine.
+          <p className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-2xs leading-relaxed text-amber-900">
+            Nothing has been created or changed. “Use in new version” copies this draft into the
+            scenario form, where every field is editable and the set is only published when you
+            submit it — an AI draft can never activate a scenario, alter a weighting in force, or
+            run the engine.
           </p>
         </>
       )}

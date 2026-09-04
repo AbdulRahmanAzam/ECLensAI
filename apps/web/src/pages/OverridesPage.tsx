@@ -54,10 +54,16 @@ export function OverridesPage() {
   const { user, can } = useAuth();
   const canReview = can('override:review');
 
-  const list = useServerList<{ status?: ReviewerStatus }>({}, { sortBy: 'occurredAt', sortDir: 'desc' });
+  const list = useServerList<{ status?: ReviewerStatus }>(
+    {},
+    { sortBy: 'occurredAt', sortDir: 'desc' },
+  );
 
   const [selected, setSelected] = useState<StageOverrideListItem | null>(null);
-  const [review, setReview] = useState<{ item: StageOverrideListItem; decision: 'REVIEWED' | 'REJECTED' } | null>(null);
+  const [review, setReview] = useState<{
+    item: StageOverrideListItem;
+    decision: 'REVIEWED' | 'REJECTED';
+  } | null>(null);
   const [comment, setComment] = useState('');
   const [commentError, setCommentError] = useState<string | null>(null);
 
@@ -72,8 +78,15 @@ export function OverridesPage() {
   };
 
   const reviewMutation = useMutation({
-    mutationFn: ({ item, decision, note }: { item: StageOverrideListItem; decision: 'REVIEWED' | 'REJECTED'; note: string }) =>
-      api.overrides.review(item.id, { decision, comment: note }),
+    mutationFn: ({
+      item,
+      decision,
+      note,
+    }: {
+      item: StageOverrideListItem;
+      decision: 'REVIEWED' | 'REJECTED';
+      note: string;
+    }) => api.overrides.review(item.id, { decision, comment: note }),
     onSuccess: (override, variables) => {
       push(
         variables.decision === 'REVIEWED' ? 'success' : 'info',
@@ -118,7 +131,7 @@ export function OverridesPage() {
           >
             {info.getValue()}
           </Link>
-          <p className="text-[11px] text-slate-500">
+          <p className="text-2xs text-slate-500">
             {info.row.original.borrowerName} · {info.row.original.segment}
           </p>
         </div>
@@ -136,20 +149,26 @@ export function OverridesPage() {
     }),
     column.accessor('reason', {
       header: 'Reason',
-      cell: (info) => <span className="line-clamp-2 max-w-sm text-xs text-slate-600">{info.getValue()}</span>,
+      cell: (info) => (
+        <span className="line-clamp-2 max-w-sm text-xs text-slate-600">{info.getValue()}</span>
+      ),
     }),
     column.accessor('actorName', {
       header: 'Requested by',
       cell: (info) => (
         <div>
           <p className="text-slate-700">{info.getValue()}</p>
-          <p className="text-[11px] text-slate-400">{ROLE_LABEL[info.row.original.actorRole]}</p>
+          <p className="text-2xs text-slate-400">{ROLE_LABEL[info.row.original.actorRole]}</p>
         </div>
       ),
     }),
     column.accessor('occurredAt', {
       header: 'Requested',
-      cell: (info) => <span className="tabular-nums text-xs text-slate-500">{formatDateTime(info.getValue())}</span>,
+      cell: (info) => (
+        <span className="tabular-nums text-xs text-slate-500">
+          {formatDateTime(info.getValue())}
+        </span>
+      ),
     }),
     column.accessor('reviewerStatus', {
       header: 'Review',
@@ -158,8 +177,12 @@ export function OverridesPage() {
         const item = info.row.original;
         return (
           <div>
-            <Badge tone={STATUS_TONE[status]}>{status === 'PENDING_REVIEW' ? 'pending' : status.toLowerCase()}</Badge>
-            {item.reviewerName ? <p className="mt-0.5 text-[11px] text-slate-400">{item.reviewerName}</p> : null}
+            <Badge tone={STATUS_TONE[status]}>
+              {status === 'PENDING_REVIEW' ? 'pending' : status.toLowerCase()}
+            </Badge>
+            {item.reviewerName ? (
+              <p className="mt-0.5 text-2xs text-slate-400">{item.reviewerName}</p>
+            ) : null}
           </div>
         );
       },
@@ -207,7 +230,10 @@ export function OverridesPage() {
             aria-label="Filter by review status"
             value={list.filters.status ?? ''}
             onChange={(event) =>
-              list.setFilter('status', event.target.value === '' ? undefined : (event.target.value as ReviewerStatus))
+              list.setFilter(
+                'status',
+                event.target.value === '' ? undefined : (event.target.value as ReviewerStatus),
+              )
             }
           >
             <option value="">All review states</option>
@@ -258,19 +284,25 @@ export function OverridesPage() {
             }
           />
         )}
-        {data ? <Pagination meta={data.meta} onPageChange={list.setPage} loading={isLoading} /> : null}
+        {data ? (
+          <Pagination meta={data.meta} onPageChange={list.setPage} loading={isLoading} />
+        ) : null}
       </Card>
 
-      <p className="mt-3 flex items-center gap-1.5 text-[11px] text-slate-500">
+      <p className="mt-3 flex items-center gap-1.5 text-2xs text-slate-500">
         <GitCompareArrows className="h-3.5 w-3.5" />
-        Four-eyes control: the analyst who requested an override cannot review it. Both the request and the decision are
-        written to the immutable audit trail.
+        Four-eyes control: the analyst who requested an override cannot review it. Both the request
+        and the decision are written to the immutable audit trail.
       </p>
 
       <Drawer
         open={selected !== null}
         onClose={() => setSelected(null)}
-        title={selected ? `${selected.exposurePublicId} · stage ${selected.stageBefore} → ${selected.stageAfter}` : ''}
+        title={
+          selected
+            ? `${selected.exposurePublicId} · stage ${selected.stageBefore} → ${selected.stageAfter}`
+            : ''
+        }
         description={selected ? `${selected.borrowerName} · ${selected.segment}` : undefined}
         footer={
           selected && canReview && selected.reviewerStatus === 'PENDING_REVIEW' ? (
@@ -290,38 +322,47 @@ export function OverridesPage() {
               <ArrowRight className="h-3 w-3 text-slate-400" />
               <StageBadge stage={selected.stageAfter} />
               <Badge tone={STATUS_TONE[selected.reviewerStatus]}>
-                {selected.reviewerStatus === 'PENDING_REVIEW' ? 'pending review' : selected.reviewerStatus.toLowerCase()}
+                {selected.reviewerStatus === 'PENDING_REVIEW'
+                  ? 'pending review'
+                  : selected.reviewerStatus.toLowerCase()}
               </Badge>
             </div>
             <div>
-              <dt className="text-[11px] uppercase tracking-wider text-slate-400">Reason given by the analyst</dt>
+              <dt className="text-2xs uppercase tracking-wider text-slate-400">
+                Reason given by the analyst
+              </dt>
               <dd className="mt-0.5 leading-relaxed text-slate-700">{selected.reason}</dd>
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <dt className="text-[11px] uppercase tracking-wider text-slate-400">Requested by</dt>
+                <dt className="text-2xs uppercase tracking-wider text-slate-400">Requested by</dt>
                 <dd className="mt-0.5 text-xs text-slate-600">
                   {selected.actorName}
                   <span className="block text-slate-400">{ROLE_LABEL[selected.actorRole]}</span>
                 </dd>
               </div>
               <div>
-                <dt className="text-[11px] uppercase tracking-wider text-slate-400">Requested at</dt>
-                <dd className="mt-0.5 text-xs tabular-nums text-slate-600">{formatDateTime(selected.occurredAt)}</dd>
+                <dt className="text-2xs uppercase tracking-wider text-slate-400">Requested at</dt>
+                <dd className="mt-0.5 text-xs tabular-nums text-slate-600">
+                  {formatDateTime(selected.occurredAt)}
+                </dd>
               </div>
             </div>
             {selected.reviewerName ? (
               <div>
-                <dt className="text-[11px] uppercase tracking-wider text-slate-400">Reviewed</dt>
+                <dt className="text-2xs uppercase tracking-wider text-slate-400">Reviewed</dt>
                 <dd className="mt-0.5 text-xs text-slate-600">
                   {selected.reviewerName} · {formatDateTime(selected.reviewedAt ?? '')}
-                  {selected.reviewComment ? <span className="mt-1 block text-slate-500">“{selected.reviewComment}”</span> : null}
+                  {selected.reviewComment ? (
+                    <span className="mt-1 block text-slate-500">“{selected.reviewComment}”</span>
+                  ) : null}
                 </dd>
               </div>
             ) : null}
             {selected.actorId === user?.id ? (
-              <p className="rounded-md bg-slate-50 px-3 py-2 text-[11px] leading-relaxed text-slate-500">
-                You requested this override, so you cannot review it. Ask another reviewer to confirm or reject it.
+              <p className="rounded-lg bg-surface-2 px-3 py-2 text-2xs leading-relaxed text-slate-500">
+                You requested this override, so you cannot review it. Ask another reviewer to
+                confirm or reject it.
               </p>
             ) : null}
           </dl>
@@ -349,10 +390,16 @@ export function OverridesPage() {
               onClick={() => {
                 if (!review) return;
                 if (comment.trim().length < 3) {
-                  setCommentError('A review comment of at least 3 characters is required for the audit trail.');
+                  setCommentError(
+                    'A review comment of at least 3 characters is required for the audit trail.',
+                  );
                   return;
                 }
-                reviewMutation.mutate({ item: review.item, decision: review.decision, note: comment.trim() });
+                reviewMutation.mutate({
+                  item: review.item,
+                  decision: review.decision,
+                  note: comment.trim(),
+                });
               }}
             >
               {review?.decision === 'REJECTED' ? 'Reject' : 'Confirm'}
@@ -365,7 +412,7 @@ export function OverridesPage() {
         </label>
         <textarea
           id="review-comment"
-          className="mt-1.5 w-full rounded-md border border-slate-200 px-3 py-2 text-sm focus:border-navy-400 focus:outline-none focus:ring-2 focus:ring-navy-100"
+          className="mt-1.5 w-full rounded-lg border border-line px-3 py-2 text-sm focus:border-navy-400 focus:outline-none focus:ring-2 focus:ring-navy-100"
           rows={4}
           maxLength={2000}
           placeholder={
@@ -379,7 +426,7 @@ export function OverridesPage() {
             setCommentError(null);
           }}
         />
-        {commentError ? <p className="mt-1.5 text-[11px] text-red-600">{commentError}</p> : null}
+        {commentError ? <p className="mt-1.5 text-2xs text-red-600">{commentError}</p> : null}
       </Modal>
     </div>
   );

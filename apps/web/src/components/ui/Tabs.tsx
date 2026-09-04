@@ -14,6 +14,7 @@ export interface TabsProps {
   defaultTab?: string;
 }
 
+/** Segmented control. The active pill is a filled surface, not an underline. */
 export function Tabs({ tabs, value, onChange, defaultTab }: TabsProps) {
   const [internal, setInternal] = useState(defaultTab ?? tabs[0]?.id ?? '');
   const active = value ?? internal;
@@ -27,7 +28,10 @@ export function Tabs({ tabs, value, onChange, defaultTab }: TabsProps) {
 
   return (
     <div>
-      <div role="tablist" className="flex gap-1 border-b border-slate-200">
+      <div
+        role="tablist"
+        className="inline-flex max-w-full flex-wrap gap-1 rounded-xl border border-line bg-surface-2 p-1"
+      >
         {tabs.map((tab) => (
           <button
             key={tab.id}
@@ -36,17 +40,18 @@ export function Tabs({ tabs, value, onChange, defaultTab }: TabsProps) {
             aria-selected={tab.id === activeTab?.id}
             onClick={() => select(tab.id)}
             className={cn(
-              '-mb-px border-b-2 px-3 py-2 text-sm font-medium transition-colors',
+              'rounded-lg px-3 py-1.5 text-xs font-medium transition-all duration-150',
+              'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/50',
               tab.id === activeTab?.id
-                ? 'border-navy-700 text-navy-800'
-                : 'border-transparent text-slate-500 hover:border-slate-300 hover:text-slate-700',
+                ? 'bg-surface text-slate-900 shadow-xs'
+                : 'text-slate-500 hover:text-slate-800',
             )}
           >
             {tab.label}
           </button>
         ))}
       </div>
-      <div role="tabpanel" className="pt-4">
+      <div role="tabpanel" className="animate-fade-in pt-4">
         {activeTab?.content}
       </div>
     </div>
