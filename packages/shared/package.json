@@ -1,0 +1,20 @@
+{
+  "name": "@eclens/shared",
+  "version": "0.1.0",
+  "private": true,
+  "description": "ECLens AI shared domain: types, deterministic ECL engine, formatters, synthetic demo data.",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "lint": "eslint src test",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "decimal.js": "^10.6.0",
+    "zod": "^3.25.76"
+  }
+}

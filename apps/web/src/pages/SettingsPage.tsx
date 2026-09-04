@@ -1,0 +1,184 @@
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useMutation } from '@tanstack/react-query';
+import { Check, LogOut, ShieldCheck, User as UserIcon, X } from 'lucide-react';
+import type { RoleName } from '@eclens/shared';
+import { Badge, SyntheticBadge } from '@/components/ui/Badge';
+import { Button } from '@/components/ui/Button';
+import { Card, CardContent, CardHeader } from '@/components/ui/Card';
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
+import { PageHeader } from '@/components/ui/PageHeader';
+import { Select } from '@/components/ui/Select';
+import { useAuth } from '@/providers/AuthProvider';
+import { useSettings } from '@/providers/SettingsProvider';
+
+const CURRENCIES = ['PKR', 'USD', 'EUR', 'GBP', 'AED', 'SAR'];
+
+const ROLE_LABEL: Record<RoleName, string> = {
+  ADMIN: 'Admin',
+  RISK_ANALYST: 'Risk Analyst',
+  REVIEWER: 'Reviewer',
+  AUDITOR: 'Auditor',
+};
+
+interface Capability {
+  label: string;
+  grants: RoleName[];
+}
+
+const CAPABILITIES: Capability[] = [
+  { label: 'View portfolio & runs', grants: ['ADMIN', 'RISK_ANALYST', 'REVIEWER', 'AUDITOR'] },
+  { label: 'Import data', grants: ['ADMIN', 'RISK_ANALYST'] },
+  { label: 'Start ECL runs', grants: ['ADMIN', 'RISK_ANALYST'] },
+  { label: 'Approve scenario weights', grants: ['ADMIN', 'REVIEWER'] },
+  { label: 'Generate reports', grants: ['ADMIN', 'RISK_ANALYST', 'REVIEWER', 'AUDITOR'] },
+  { label: 'Manage users & roles', grants: ['ADMIN'] },
+  { label: 'View audit log', grants: ['ADMIN', 'AUDITOR'] },
+];
+
+const ROLE_ORDER: RoleName[] = ['ADMIN', 'RISK_ANALYST', 'REVIEWER', 'AUDITOR'];
+
+function Cell({ allowed }: { allowed: boolean }) {
+  return allowed ? (
+    <span className="flex justify-center text-emerald-600"><Check className="h-4 w-4" /></span>
+  ) : (
+    <span className="flex justify-center text-slate-300"><X className="h-4 w-4" /></span>
+  );
+}
+
+export function SettingsPage() {
+  const navigate = useNavigate();
+  const { user, logout } = useAuth();
+  const { currency, setCurrency, sidebarCollapsed, toggleSidebar } = useSettings();
+  const [confirmSignOut, setConfirmSignOut] = useState(false);
+
+  const signOut = useMutation({
+    mutationFn: () => logout(),
+    onSuccess: () => navigate('/login'),
+  });
+
+  return (
+    <div>
+      <PageHeader
+        title="Settings"
+        description="Your profile, display preferences and the permissions that govern this workspace."
+        tags={<SyntheticBadge />}
+      />
+
+      <div className="grid gap-4 lg:grid-cols-2">
+        <Card>
+          <CardHeader title="Profile" description="Seeded demo account" />
+          <CardContent className="space-y-4">
+            <div className="flex items-center gap-3">
+              <span className="flex h-12 w-12 items-center justify-center rounded-full bg-navy-100 text-navy-700">
+                <UserIcon className="h-5 w-5" />
+              </span>
+              <div>
+                <p className="text-sm font-semibold text-navy-950">{user?.fullName ?? '—'}</p>
+                <p className="text-xs text-slate-500">{user?.email ?? '—'}</p>
+              </div>
+            </div>
+            <dl className="space-y-2 border-t border-slate-100 pt-3 text-sm">
+              <div className="flex justify-between">
+                <dt className="text-slate-500">Role</dt>
+                <dd>{user ? <Badge tone="info">{ROLE_LABEL[user.role]}</Badge> : '—'}</dd>
+              </div>
+              <div className="flex justify-between">
+                <dt className="text-slate-500">Organization</dt>
+                <dd className="text-slate-800">{user?.organizationName ?? '—'}</dd>
+              </div>
+            </dl>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader title="Display preferences" description="Applies across the workspace and persists locally" />
+          <CardContent className="space-y-4">
+            <Select
+              label="Working currency"
+              hint="Money values across the app are shown in this currency."
+              value={currency}
+              onChange={(event) => setCurrency(event.target.value)}
+            >
+              {CURRENCIES.map((code) => (
+                <option key={code} value={code}>
+                  {code}
+                </option>
+              ))}
+            </Select>
+
+            <div className="flex items-center justify-between rounded-md border border-slate-200 px-3 py-2.5">
+              <div>
+                <p className="text-sm font-medium text-slate-700">Collapse sidebar</p>
+                <p className="text-xs text-slate-500">Show icons only for a denser analyst layout.</p>
+              </div>
+              <Button size="sm" variant="secondary" onClick={toggleSidebar}>
+                {sidebarCollapsed ? 'Expand' : 'Collapse'}
+              </Button>
+            </div>
+
+            <div className="border-t border-slate-100 pt-3">
+              <Button
+                variant="danger"
+                size="sm"
+                icon={<LogOut className="h-4 w-4" />}
+                onClick={() => setConfirmSignOut(true)}
+              >
+                Sign out
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      <Card className="mt-4">
+        <CardHeader
+          title="Role permissions"
+          description={
+            <span className="flex items-center gap-1.5">
+              <ShieldCheck className="h-3.5 w-3.5 text-navy-600" />
+              Enforced by authorization middleware on the API
+            </span>
+          }
+        />
+        <CardContent>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-slate-200 text-left text-[11px] uppercase tracking-wider text-slate-500">
+                  <th className="py-2 pr-3 font-semibold">Capability</th>
+                  {ROLE_ORDER.map((role) => (
+                    <th key={role} className="px-3 py-2 text-center font-semibold">{ROLE_LABEL[role]}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {CAPABILITIES.map((capability) => (
+                  <tr key={capability.label} className="border-b border-slate-100 last:border-b-0">
+                    <td className="py-2.5 pr-3 text-slate-700">{capability.label}</td>
+                    {ROLE_ORDER.map((role) => (
+                      <td key={role} className="px-3 py-2.5">
+                        <Cell allowed={capability.grants.includes(role)} />
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </CardContent>
+      </Card>
+
+      <ConfirmDialog
+        open={confirmSignOut}
+        title="Sign out?"
+        description="You will be returned to the login screen. Your working preferences are kept."
+        confirmLabel="Sign out"
+        destructive
+        loading={signOut.isPending}
+        onCancel={() => setConfirmSignOut(false)}
+        onConfirm={() => signOut.mutate()}
+      />
+    </div>
+  );
+}

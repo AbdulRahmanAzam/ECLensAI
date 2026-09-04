@@ -1,0 +1,30 @@
+node_modules/
+dist/
+build/
+coverage/
+*.tsbuildinfo
+
+# Environment files with real values — never commit secrets
+.env
+.env.local
+.env.*.local
+
+# Keep committed examples
+!.env.example
+
+# Logs
+*.log
+logs/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# SQLite database files (dev.db, test.db) and their WAL/journal sidecars —
+# each developer's own local data, never shared via git.
+apps/api/prisma/*.db
+apps/api/prisma/*.db-journal
+apps/api/prisma/*.db-shm
+apps/api/prisma/*.db-wal

@@ -1,0 +1,25 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: eclens-postgres
+    restart: unless-stopped
+    environment:
+      # Local development credentials only. Production deployments must use
+      # secrets managed outside source control.
+      POSTGRES_USER: eclens
+      POSTGRES_PASSWORD: eclens_local_dev
+      POSTGRES_DB: eclens
+    ports:
+      # Host port 5433 avoids conflicts with locally installed PostgreSQL services
+      # that commonly occupy the default 5432.
+      - '5433:5432'
+    volumes:
+      - eclens_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U eclens -d eclens']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  eclens_pgdata:

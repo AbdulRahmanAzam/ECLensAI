@@ -1,0 +1,969 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["omitApi"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ---------------------------------------------------------------------------
+// Enums
+// ---------------------------------------------------------------------------
+
+enum RoleName {
+  ADMIN
+  RISK_ANALYST
+  REVIEWER
+  AUDITOR
+}
+
+/// A newly created scenario set starts PENDING; only a REVIEWER or ADMIN can
+/// approve it, and nothing about approval changes the version's content —
+/// creation and approval are deliberately separate steps.
+enum ScenarioApprovalStatus {
+  PENDING
+  APPROVED
+}
+
+/// Draft -> running -> completed -> submitted -> approved (locked) | rejected.
+enum RunStatus {
+  DRAFT
+  PENDING
+  RUNNING
+  COMPLETED
+  FAILED
+  SUBMITTED
+  APPROVED
+  REJECTED
+}
+
+enum ImportSourceFormat {
+  CSV
+  XLSX
+}
+
+enum ImportStatus {
+  QUEUED
+  UPLOADED
+  MAPPING
+  VALIDATING
+  VALIDATED
+  QUARANTINED
+  COMMITTED
+  IMPORTED
+  FAILED
+}
+
+enum IssueSeverity {
+  ERROR
+  WARNING
+  INFO
+}
+
+enum PdBasis {
+  MARGINAL
+  CONDITIONAL
+  CUMULATIVE
+}
+
+enum SnapshotSource {
+  SEED
+  IMPORT
+  RUN
+}
+
+enum ExceptionKind {
+  DATA_QUALITY
+  ANALYST_OVERRIDE
+  LARGE_ECL_CHANGE
+  NEAR_STAGING_THRESHOLD
+}
+
+enum ExceptionSeverity {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+enum ExceptionStatus {
+  OPEN
+  ACKNOWLEDGED
+  RESOLVED
+}
+
+enum OverrideReviewStatus {
+  PENDING_REVIEW
+  REVIEWED
+  REJECTED
+}
+
+enum ReviewDecision {
+  APPROVED
+  REJECTED
+}
+
+// --- Step 3: governed AI copilot -------------------------------------------
+
+/// Lifecycle of an uploaded document. `INDEXED` means text is chunked and
+/// searchable; `EXTRACTED` means the structured AI reading also succeeded.
+enum DocumentProcessingStatus {
+  QUEUED
+  PARSING
+  INDEXED
+  EXTRACTED
+  FAILED
+  UNSUPPORTED
+}
+
+enum DocumentCategory {
+  POLICY
+  BORROWER_FINANCIAL
+  GUIDANCE
+  SUPPORTING
+  OTHER
+}
+
+/// An AI-proposed risk signal stays PROPOSED until a person decides. Accepting
+/// or rejecting is itself the audited act, so the row is never deleted.
+enum DocumentSignalStatus {
+  PROPOSED
+  ACCEPTED
+  REJECTED
+}
+
+enum AiFeature {
+  PORTFOLIO_COPILOT
+  EXPLAIN_ECL
+  IMPORT_MAPPING
+  DATA_QUALITY_INVESTIGATION
+  SCENARIO_DRAFT
+  DOCUMENT_INTELLIGENCE
+  EXECUTIVE_COMMENTARY
+}
+
+/// `SCHEMA_REPAIRED` means the first response failed validation and the repair
+/// retry produced a usable one — recorded rather than hidden, because a model
+/// that needs repairing often is a model worth watching.
+enum AiRequestStatus {
+  SUCCEEDED
+  SCHEMA_REPAIRED
+  SCHEMA_INVALID
+  FAILED
+  UNAVAILABLE
+}
+
+enum AiMessageRole {
+  USER
+  ASSISTANT
+}
+
+enum AiFeedbackVote {
+  UP
+  DOWN
+}
+
+// ---------------------------------------------------------------------------
+// Tenancy and identity
+// ---------------------------------------------------------------------------
+
+model Organization {
+  id        String   @id @default(cuid())
+  name      String
+  currency  String   @default("PKR")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  users               User[]
+  borrowers           Borrower[]
+  portfolioSnapshots  PortfolioSnapshot[]
+  exposures           Exposure[]
+  scenarioSets        ScenarioSet[]
+  modelConfigurations ModelConfiguration[]
+  eclRuns             EclRun[]
+  importBatches       ImportBatch[]
+  stageOverrides      StageOverride[]
+  exceptions          ExceptionItem[]
+  aiInsights          AiInsight[]
+  documents           Document[]
+  documentChunks      DocumentChunk[]
+  documentSignals     DocumentSignal[]
+  aiConversations     AiConversation[]
+  aiMessages          AiMessage[]
+  aiRequests          AiRequest[]
+  auditEvents         AuditEvent[]
+}
+
+model Role {
+  id          String   @id @default(cuid())
+  name        RoleName @unique
+  description String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  users       User[]
+}
+
+model User {
+  id             String    @id @default(cuid())
+  organizationId String
+  roleId         String
+  publicId       String    @unique
+  email          String    @unique
+  fullName       String
+  passwordHash   String
+  isActive       Boolean   @default(true)
+  lastLoginAt    DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  role         Role         @relation(fields: [roleId], references: [id])
+
+  @@index([organizationId])
+}
+
+model Borrower {
+  id             String   @id @default(cuid())
+  organizationId String
+  publicId       String
+  name           String
+  industry       String
+  region         String
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  exposures    Exposure[]
+
+  @@unique([organizationId, publicId])
+  @@index([organizationId])
+}
+
+// ---------------------------------------------------------------------------
+// Portfolio input snapshots
+// ---------------------------------------------------------------------------
+
+/// An immutable point-in-time input set. A run reads exactly one snapshot, and
+/// the snapshot's `inputVersion` is what appears in every result's lineage.
+model PortfolioSnapshot {
+  id                 String         @id @default(cuid())
+  organizationId     String
+  publicId           String
+  label              String
+  asOfDate           DateTime
+  source             SnapshotSource @default(SEED)
+  /// Lineage key reported as the "input version" of every calculation.
+  inputVersion       String
+  exposureCount      Int            @default(0)
+  totalGrossExposure Decimal        @default(0) @db.Decimal(24, 2)
+  totalEcl           Decimal        @default(0) @db.Decimal(24, 2)
+  coverageRatio      Decimal        @default(0) @db.Decimal(20, 12)
+  stage3Share        Decimal        @default(0) @db.Decimal(20, 12)
+  importBatchId      String?
+  createdAt          DateTime       @default(now())
+  updatedAt          DateTime       @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  exposures    Exposure[]
+  eclRuns      EclRun[]
+
+  @@unique([organizationId, publicId])
+  @@unique([organizationId, inputVersion])
+  @@index([organizationId, asOfDate])
+}
+
+/// One committed exposure row. Money is exact Decimal(24,2); every rate,
+/// probability and factor is exact Decimal(20,12) — never a binary float.
+model Exposure {
+  id                     String   @id @default(cuid())
+  organizationId         String
+  snapshotId             String
+  borrowerId             String
+  publicId               String
+  segment                String
+  productType            String
+  originationDate        DateTime
+  maturityDate           DateTime
+  reportingDate          DateTime
+  currency               String   @default("PKR")
+  grossCarryingAmount    Decimal  @db.Decimal(24, 2)
+  undrawnCommitment      Decimal  @default(0) @db.Decimal(24, 2)
+  creditConversionFactor Decimal  @default(0) @db.Decimal(20, 12)
+  effectiveInterestRate  Decimal  @db.Decimal(20, 12)
+  daysPastDue            Int      @default(0)
+  originalCreditRating   String
+  currentCreditRating    String
+  twelveMonthPd          Decimal  @db.Decimal(20, 12)
+  lifetimePd             Decimal  @db.Decimal(20, 12)
+  pdAtOrigination        Decimal  @default(0) @db.Decimal(20, 12)
+  lgd                    Decimal  @db.Decimal(20, 12)
+  collateralValue        Decimal  @default(0) @db.Decimal(24, 2)
+  defaultFlag            Boolean  @default(false)
+  creditImpairedFlag     Boolean  @default(false)
+  forbearanceFlag        Boolean  @default(false)
+  restructuringFlag      Boolean  @default(false)
+  watchlistFlag          Boolean  @default(false)
+  region                 String
+  industry               String
+  /// Which labelled profile the engine falls back to when no schedule exists.
+  simplifiedEadProfile   String   @default("LINEAR_AMORTIZATION")
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
+
+  organization       Organization             @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  snapshot           PortfolioSnapshot        @relation(fields: [snapshotId], references: [id], onDelete: Cascade)
+  borrower           Borrower                 @relation(fields: [borrowerId], references: [id])
+  eadSchedule        ExposureEadPeriod[]
+  pdTermStructure    ExposurePdTermStructure?
+  stagingAssessments StagingAssessment[]
+  stageOverrides     StageOverride[]
+  results            EclResult[]
+  exceptions         ExceptionItem[]
+
+  @@unique([snapshotId, publicId])
+  @@index([organizationId, segment])
+  @@index([snapshotId])
+  @@index([borrowerId])
+}
+
+/// Contractual amortization / EAD schedule. When present its period balances are
+/// authoritative; when absent the engine uses a clearly labelled simplified
+/// profile and says so in the result.
+model ExposureEadPeriod {
+  id                String  @id @default(cuid())
+  exposureId        String
+  period            Int
+  drawnBalance      Decimal @db.Decimal(24, 2)
+  undrawnCommitment Decimal @db.Decimal(24, 2)
+
+  exposure Exposure @relation(fields: [exposureId], references: [id], onDelete: Cascade)
+
+  @@unique([exposureId, period])
+}
+
+/// Supplier PD term structure. Points are stored as exact decimal strings inside
+/// JSON so no binary float is ever introduced on the way in or out.
+model ExposurePdTermStructure {
+  id         String   @id @default(cuid())
+  exposureId String   @unique
+  basis      PdBasis
+  /// [{ "period": 1, "pd": "0.0042000000" }, ...]
+  points     Json
+  createdAt  DateTime @default(now())
+
+  exposure Exposure @relation(fields: [exposureId], references: [id], onDelete: Cascade)
+}
+
+// ---------------------------------------------------------------------------
+// Ingestion
+// ---------------------------------------------------------------------------
+
+/// One upload. Holds the raw parsed table so preview, re-mapping and
+/// re-validation never need the original bytes again.
+model ImportBatch {
+  id                      String             @id @default(cuid())
+  organizationId          String
+  publicId                String
+  fileName                String
+  sourceFormat            ImportSourceFormat
+  status                  ImportStatus       @default(UPLOADED)
+  storageKey              String?
+  sizeBytes               Int                @default(0)
+  rowCount                Int                @default(0)
+  previewRowCount         Int                @default(0)
+  validRowCount           Int                @default(0)
+  quarantinedRowCount     Int                @default(0)
+  errorCount              Int                @default(0)
+  warningCount            Int                @default(0)
+  message                 String             @default("")
+  headers                 Json
+  mapping                 Json
+  suggestedMapping        Json
+  missingRequiredFields   Json
+  unmappedHeaders         Json
+  percentageNormalization String             @default("AUTO_DETECT")
+  truncated               Boolean            @default(false)
+  rowsSkippedByTruncation Int                @default(0)
+  /// RawTable as produced by the streaming parser: { rows: [{ rowNumber, sheetRow, cells }] }.
+  rawTable                Json
+  uploadedById            String?
+  uploadedBy              String
+  committedAt             DateTime?
+  committedById           String?
+  committedBy             String?
+  snapshotId              String?
+  snapshotLabel           String?
+  createdAt               DateTime           @default(now())
+  updatedAt               DateTime           @updatedAt
+
+  organization Organization            @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  issues       ImportValidationIssue[]
+
+  @@unique([organizationId, publicId])
+  @@index([organizationId, createdAt])
+}
+
+/// Quarantine / error report rows. Never silently repaired: each issue carries
+/// the row, the field, the raw value, a code, a severity and a suggestion.
+model ImportValidationIssue {
+  id                  String        @id @default(cuid())
+  batchId             String
+  rowNumber           Int
+  sheetRow            Int
+  field               String
+  rawValue            String?
+  issueCode           String
+  severity            IssueSeverity
+  message             String
+  suggestedCorrection String?
+  normalizationNote   String?
+  createdAt           DateTime      @default(now())
+
+  batch ImportBatch @relation(fields: [batchId], references: [id], onDelete: Cascade)
+
+  @@index([batchId, severity])
+  @@index([batchId, rowNumber])
+}
+
+// ---------------------------------------------------------------------------
+// Versioned model governance
+// ---------------------------------------------------------------------------
+
+/// Scenario weights and PD/LGD factors. Immutable once created: changing an
+/// assumption means creating a new version, never editing this row.
+model ScenarioSet {
+  id             String                 @id @default(cuid())
+  organizationId String
+  name           String
+  version        String
+  isActive       Boolean                @default(false)
+  description    String                 @default("")
+  createdById    String?
+  createdBy      String
+  createdAt      DateTime               @default(now())
+  approvalStatus ScenarioApprovalStatus @default(PENDING)
+  approvedById   String?
+  approvedBy     String?
+  approvedAt     DateTime?
+
+  organization Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  scenarios    ScenarioFactor[]
+  eclRuns      EclRun[]
+
+  @@unique([organizationId, name, version])
+  @@index([organizationId, isActive])
+}
+
+model ScenarioFactor {
+  id            String  @id @default(cuid())
+  scenarioSetId String
+  code          String
+  name          String
+  kind          String  @default("BASE")
+  weight        Decimal @db.Decimal(20, 12)
+  pdMultiplier  Decimal @db.Decimal(20, 12)
+  lgdMultiplier Decimal @db.Decimal(20, 12)
+  isActive      Boolean @default(true)
+  description   String  @default("")
+  indicators    Json?
+
+  scenarioSet ScenarioSet @relation(fields: [scenarioSetId], references: [id], onDelete: Cascade)
+
+  @@unique([scenarioSetId, code])
+}
+
+/// Staging thresholds, bounds, horizon caps and the discount convention.
+/// Immutable and versioned; a completed run stores the exact object it used.
+model ModelConfiguration {
+  id                            String   @id @default(cuid())
+  organizationId                String
+  name                          String
+  version                       String
+  isActive                      Boolean  @default(false)
+  description                   String   @default("")
+  stagingRuleSetId              String
+  stagingRuleSetVersion         String
+  /// The full StagingRuleSetConfig object, frozen as authored.
+  stagingRuleSet                Json
+  lgdFloor                      Decimal  @db.Decimal(20, 12)
+  lgdCeiling                    Decimal  @db.Decimal(20, 12)
+  pdFloor                       Decimal  @db.Decimal(20, 12)
+  pdCeiling                     Decimal  @db.Decimal(20, 12)
+  lifetimeHorizonMonthsCap      Int
+  maxCalculationPeriods         Int
+  discountConvention            String
+  effectiveInterestRateMin      Decimal  @db.Decimal(20, 12)
+  effectiveInterestRateMax      Decimal  @db.Decimal(20, 12)
+  defaultCreditConversionFactor Decimal  @db.Decimal(20, 12)
+  defaultSimplifiedEadProfile   String
+  twelveMonthWindow             Int
+  exceptionThresholds           Json
+  approvedBy                    String
+  approvedAt                    DateTime
+  supersedesVersion             String?
+  createdById                   String?
+  createdBy                     String
+  createdAt                     DateTime @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  eclRuns      EclRun[]
+
+  @@unique([organizationId, name, version])
+  @@index([organizationId, isActive])
+}
+
+// ---------------------------------------------------------------------------
+// Runs, results and the calculation lineage
+// ---------------------------------------------------------------------------
+
+model EclRun {
+  id                   String          @id @default(cuid())
+  organizationId       String
+  publicId             String
+  runDate              DateTime
+  status               RunStatus       @default(DRAFT)
+  snapshotId           String
+  modelConfigurationId String
+  scenarioSetId        String
+  /// Frozen copies taken when the run completes. Later edits to the source
+  /// configuration rows cannot change these, so history is never rewritten.
+  lockedConfiguration  Json?
+  lockedScenarioSet    Json?
+  lockedStagingRuleSet Json?
+  scenarioWeights      Json?
+  lineage              Json?
+  totals               Json?
+  notes                String?
+  error                String?
+  readiness            Json?
+  createdById          String?
+  createdBy            String
+  startedAt            DateTime?
+  completedAt          DateTime?
+  durationMs           Int?
+  submittedById        String?
+  submittedBy          String?
+  submittedAt          DateTime?
+  reviewDecision       ReviewDecision?
+  reviewedById         String?
+  reviewedBy           String?
+  reviewedAt           DateTime?
+  reviewComment        String?
+  lockedAt             DateTime?
+  createdAt            DateTime        @default(now())
+  updatedAt            DateTime        @updatedAt
+
+  organization       Organization        @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  snapshot           PortfolioSnapshot   @relation(fields: [snapshotId], references: [id])
+  modelConfiguration ModelConfiguration  @relation(fields: [modelConfigurationId], references: [id])
+  scenarioSet        ScenarioSet         @relation(fields: [scenarioSetId], references: [id])
+  results            EclResult[]
+  stagingAssessments StagingAssessment[]
+  exceptions         ExceptionItem[]
+
+  @@unique([organizationId, publicId])
+  @@index([organizationId, runDate])
+  @@index([organizationId, status])
+}
+
+model EclResult {
+  id                         String   @id @default(cuid())
+  runId                      String
+  exposureId                 String
+  stage                      Int
+  /// The full StagingDecision: primary reason, every triggered rule, source
+  /// fields, rule-set version and whether an override is in force.
+  staging                    Json
+  horizonBasisNote           String
+  remainingContractualMonths Int
+  horizonMonths              Int
+  grossCarryingAmount        Decimal  @db.Decimal(24, 2)
+  eadAtReportingDate         Decimal  @db.Decimal(24, 2)
+  eadProfileKind             String
+  eadProfileLabel            String
+  eadScheduleExtendedFlat    Boolean  @default(false)
+  pdSourceKind               String
+  effectiveInterestRate      Decimal  @db.Decimal(20, 12)
+  discountConvention         String
+  lifetimePdAtReportingDate  Decimal  @db.Decimal(20, 12)
+  lossAllowance              Decimal  @db.Decimal(24, 2)
+  netCarryingAmount          Decimal  @db.Decimal(24, 2)
+  coverageRatio              Decimal  @db.Decimal(20, 12)
+  coverageOfEad              Decimal  @db.Decimal(20, 12)
+  educationalApproximation   Json
+  explanation                Json
+  lineage                    Json
+  createdAt                  DateTime @default(now())
+
+  run             EclRun              @relation(fields: [runId], references: [id], onDelete: Cascade)
+  exposure        Exposure            @relation(fields: [exposureId], references: [id], onDelete: Cascade)
+  scenarioResults EclScenarioResult[]
+
+  @@unique([runId, exposureId])
+  @@index([runId, stage])
+  @@index([exposureId])
+}
+
+model EclScenarioResult {
+  id                    String  @id @default(cuid())
+  resultId              String
+  scenarioCode          String
+  scenarioName          String
+  weight                Decimal @db.Decimal(20, 12)
+  pdMultiplier          Decimal @db.Decimal(20, 12)
+  lgdMultiplier         Decimal @db.Decimal(20, 12)
+  horizonMonths         Int
+  unweightedEcl         Decimal @db.Decimal(24, 2)
+  weightedEcl           Decimal @db.Decimal(24, 2)
+  cumulativePdInHorizon Decimal @db.Decimal(20, 12)
+
+  result  EclResult              @relation(fields: [resultId], references: [id], onDelete: Cascade)
+  periods EclCalculationPeriod[]
+
+  @@unique([resultId, scenarioCode])
+}
+
+/// The period-level drill-down: marginal PD, LGD, EAD, discount factor, the
+/// expected loss and the exact formula string an auditor can replay.
+model EclCalculationPeriod {
+  id                      String   @id @default(cuid())
+  scenarioResultId        String
+  period                  Int
+  periodStart             DateTime
+  periodEnd               DateTime
+  monthsFromReportingDate Int
+  marginalPd              Decimal  @db.Decimal(20, 12)
+  cumulativePd            Decimal  @db.Decimal(20, 12)
+  lgd                     Decimal  @db.Decimal(20, 12)
+  ead                     Decimal  @db.Decimal(24, 2)
+  discountFactor          Decimal  @db.Decimal(20, 12)
+  expectedLoss            Decimal  @db.Decimal(24, 2)
+  weightedExpectedLoss    Decimal  @db.Decimal(24, 2)
+  formulaTrace            String
+
+  scenarioResult EclScenarioResult @relation(fields: [scenarioResultId], references: [id], onDelete: Cascade)
+
+  @@unique([scenarioResultId, period])
+}
+
+// ---------------------------------------------------------------------------
+// Staging assessments and overrides
+// ---------------------------------------------------------------------------
+
+/// Every staging decision the engine made, kept whether or not a run was
+/// approved, so an exposure's stage history is reconstructable.
+model StagingAssessment {
+  id              String   @id @default(cuid())
+  organizationId  String
+  runId           String?
+  exposureId      String
+  stage           Int
+  modelStage      Int
+  primaryReason   String
+  primaryRuleCode String
+  triggeredRules  Json
+  ruleSetId       String
+  ruleSetVersion  String
+  hasOverride     Boolean  @default(false)
+  overrideId      String?
+  assessedAt      DateTime @default(now())
+
+  run      EclRun?  @relation(fields: [runId], references: [id], onDelete: Cascade)
+  exposure Exposure @relation(fields: [exposureId], references: [id], onDelete: Cascade)
+
+  @@index([exposureId, assessedAt])
+  @@index([runId])
+}
+
+/// An authorized analyst override. Requires a reason, records before/after,
+/// actor, timestamp and reviewer status. Never updates an existing row.
+model StageOverride {
+  id             String               @id @default(cuid())
+  organizationId String
+  exposureId     String
+  stageBefore    Int
+  stageAfter     Int
+  reason         String
+  actorId        String
+  actorName      String
+  actorRole      RoleName
+  occurredAt     DateTime             @default(now())
+  reviewerStatus OverrideReviewStatus @default(PENDING_REVIEW)
+  reviewerId     String?
+  reviewerName   String?
+  reviewedAt     DateTime?
+  reviewComment  String?
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  exposure     Exposure     @relation(fields: [exposureId], references: [id], onDelete: Cascade)
+
+  @@index([exposureId, occurredAt])
+  @@index([organizationId, reviewerStatus])
+}
+
+// ---------------------------------------------------------------------------
+// Exceptions, insights, documents
+// ---------------------------------------------------------------------------
+
+model ExceptionItem {
+  id               String            @id @default(cuid())
+  organizationId   String
+  kind             ExceptionKind
+  severity         ExceptionSeverity
+  status           ExceptionStatus   @default(OPEN)
+  exposureId       String?
+  runId            String?
+  title            String
+  detail           String
+  metric           String?
+  acknowledgedById String?
+  acknowledgedBy   String?
+  acknowledgedAt   DateTime?
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  exposure     Exposure?    @relation(fields: [exposureId], references: [id], onDelete: Cascade)
+  run          EclRun?      @relation(fields: [runId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, status, severity])
+  @@index([exposureId])
+}
+
+model AiInsight {
+  id             String   @id @default(cuid())
+  organizationId String
+  runId          String?
+  exposureIds    String[]
+  kind           String
+  title          String
+  body           String
+  confidence     Float
+  createdAt      DateTime @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+}
+
+/// An uploaded document: a policy, a borrower financial statement, guidance.
+///
+/// Treated as **untrusted data** from the moment it lands. The bytes are hashed
+/// for dedupe, the MIME type is verified against the file's own signature rather
+/// than trusted from the client, and the extracted text is only ever handed to
+/// the model inside delimiters that mark it as content, never as instructions.
+model Document {
+  id               String                   @id @default(cuid())
+  organizationId   String
+  publicId         String
+  name             String
+  category         DocumentCategory         @default(OTHER)
+  mimeType         String
+  sizeBytes        Int                      @default(0)
+  /// Content hash. Two uploads of the same bytes are detected and reported
+  /// rather than silently indexed twice, which would double-count a citation.
+  sha256           String
+  storageKey       String?
+  pageCount        Int?
+  chunkCount       Int                      @default(0)
+  processingStatus DocumentProcessingStatus @default(QUEUED)
+  message          String                   @default("")
+  /// Set by extraction: what the model believes the document is.
+  documentType     String?
+  summary          String?
+  /// The full structured extraction, as validated by Zod before it was stored.
+  extraction       Json?
+  /// Part of the seeded governance knowledge base rather than a user upload.
+  seeded           Boolean                  @default(false)
+  sourceUrl        String?
+  uploadedById     String?
+  uploadedBy       String
+  createdAt        DateTime                 @default(now())
+  updatedAt        DateTime                 @updatedAt
+
+  organization Organization    @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  chunks       DocumentChunk[]
+  signals      DocumentSignal[]
+
+  @@unique([organizationId, publicId])
+  @@index([organizationId, category])
+  @@index([organizationId, processingStatus])
+  @@index([organizationId, sha256])
+}
+
+/// One retrievable slice of a document, with enough location metadata to render
+/// a citation a reviewer can verify: document name, page, and position.
+model DocumentChunk {
+  id             String   @id @default(cuid())
+  documentId     String
+  organizationId String
+  ordinal        Int
+  page           Int?
+  heading        String?
+  text           String
+  /// Rough token count, used to bound how much text is sent to the model.
+  tokenEstimate  Int      @default(0)
+  /// Stored as JSON so the retrieval provider can be swapped without a
+  /// migration. Null under the default lexical provider.
+  embedding      Json?
+  embeddingModel String?
+  createdAt      DateTime @default(now())
+
+  document Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([documentId, ordinal])
+  @@index([organizationId])
+}
+
+/// A risk signal the model proposed from a document. Inert until decided: no
+/// staging, exception or exposure row is touched by creating one of these.
+model DocumentSignal {
+  id             String               @id @default(cuid())
+  documentId     String
+  organizationId String
+  code           String
+  title          String
+  detail         String
+  severity       ExceptionSeverity
+  page           Int?
+  /// The document text that supports the signal. A signal without support is
+  /// not stored, because an unverifiable claim is worse than no claim.
+  supportingText String
+  status         DocumentSignalStatus @default(PROPOSED)
+  decidedById    String?
+  decidedBy      String?
+  decidedAt      DateTime?
+  decisionNote   String?
+  createdAt      DateTime             @default(now())
+  updatedAt      DateTime             @updatedAt
+
+  document Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([documentId, status])
+  @@index([organizationId, status])
+}
+
+/// A copilot conversation. Persisted so a reviewer can read back what was asked
+/// and what was answered, which the browser-only Step 2 assistant could not do.
+model AiConversation {
+  id             String      @id @default(cuid())
+  organizationId String
+  publicId       String
+  title          String
+  createdById    String?
+  createdBy      String
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+
+  messages AiMessage[]
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, publicId])
+  @@index([organizationId, updatedAt])
+}
+
+model AiMessage {
+  id             String             @id @default(cuid())
+  conversationId String
+  organizationId String
+  role           AiMessageRole
+  /// The user's question verbatim, or the assistant's validated answer text.
+  content        String
+  /// Assistant turns only: the full validated structured response.
+  parsed         Json?
+  /// Assistant turns only: which tools ran, in user-facing language.
+  toolActivity   Json?
+  status         AiRequestStatus?
+  model          String?
+  latencyMs      Int?
+  /// True when Gemini was unavailable and the deterministic demo layer answered.
+  degraded       Boolean            @default(false)
+  feedbackVote   AiFeedbackVote?
+  feedbackNote   String?
+  aiRequestId    String?
+  createdAt      DateTime           @default(now())
+
+  conversation AiConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([conversationId, createdAt])
+  @@index([organizationId])
+}
+
+/// Telemetry for one model call.
+///
+/// Deliberately stores **no** raw prompt and **no** raw completion: a prompt
+/// carries borrower names and balances, and this table is read by whoever
+/// monitors cost and latency. What it does store is enough to answer "who asked
+/// what feature, against which sources, with which model, for how long, and did
+/// the response validate" — plus the data categories that left the building.
+model AiRequest {
+  id                String          @id @default(cuid())
+  organizationId    String
+  feature           AiFeature
+  status            AiRequestStatus
+  model             String
+  schemaVersion     String
+  actorId           String?
+  actorName         String
+  actorRole         RoleName
+  latencyMs         Int             @default(0)
+  attempts          Int             @default(1)
+  promptTokens      Int             @default(0)
+  completionTokens  Int             @default(0)
+  totalTokens       Int             @default(0)
+  /// Rough cost telemetry in integer micro-units so no float is stored.
+  estimatedCostMicro Int            @default(0)
+  toolCalls         Int             @default(0)
+  /// Which tools ran, as names only.
+  toolsUsed         String[]
+  /// Public ids the answer drew on: runs, exposures, snapshots, documents.
+  sourceRefs        Json?
+  /// Data categories sent to the model, e.g. ["EXPOSURE_AGGREGATES"].
+  dataCategoriesSent String[]
+  /// Which redaction profile was applied before anything left the process.
+  redactionProfile  String
+  /// True when a numeric claim failed grounding and was stripped or rejected.
+  groundingRejected Boolean         @default(false)
+  /// A stable, user-safe error code. Never a stack trace, never prompt text.
+  errorCode         String?
+  conversationId    String?
+  requestId         String?
+  createdAt         DateTime        @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, createdAt])
+  @@index([organizationId, feature])
+  @@index([organizationId, status])
+}
+
+/// Append-only. No `updatedAt`, and no code path in the API ever updates or
+/// deletes one of these rows.
+model AuditEvent {
+  id             String   @id @default(cuid())
+  organizationId String
+  userId         String?
+  userName       String
+  role           RoleName
+  action         String
+  entityType     String
+  entityId       String
+  detail         String
+  ipAddress      String?
+  requestId      String?
+  occurredAt     DateTime @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, occurredAt])
+  @@index([organizationId, action])
+  @@index([entityType, entityId])
+}

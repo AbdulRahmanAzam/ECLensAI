@@ -1,0 +1,33 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    @apply bg-slate-100 text-slate-800;
+  }
+
+  :focus-visible {
+    @apply outline-none ring-2 ring-navy-500 ring-offset-1;
+  }
+
+  /* Compact, unobtrusive scrollbars for dense analyst tables */
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply rounded-full bg-slate-300;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-slate-400;
+  }
+  ::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+}
