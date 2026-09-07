@@ -6,15 +6,20 @@
  *   `sync`   — the handler runs inside the API process. No broker, no Redis.
  *              This is the documented development fallback, and it is the
  *              default, so the demo is never blocked by Redis being absent.
+ *   `inline` — the same in-process handler, but awaited before `enqueue`
+ *              resolves. Required on serverless platforms (Vercel), where the
+ *              execution context is frozen the moment the response is sent, so
+ *              a job started on a later tick would simply never finish.
  *   `bullmq` — a durable queue plus worker over Redis. Selected only when
  *              JOB_QUEUE_DRIVER=bullmq AND REDIS_URL is set.
  *
- * Under BOTH drivers `enqueue` returns before the work completes. The HTTP
- * request answers immediately with the entity in a transitional state
+ * Under `sync` and `bullmq` `enqueue` returns before the work completes. The
+ * HTTP request answers immediately with the entity in a transitional state
  * (VALIDATING / RUNNING) and the client polls for the outcome. That keeps a
  * full portfolio run — hundreds of exposures x scenarios x periods, tens of
  * thousands of persisted period rows — off the request path without requiring
- * an external broker to demonstrate it.
+ * an external broker to demonstrate it. Under `inline` the client polls the
+ * same way; it just finds the terminal state already written on its first poll.
  *
  * Handlers are responsible for their own terminal state: each one writes
  * COMPLETED/FAILED (or IMPORTED/FAILED) to the database inside a try/catch, so
@@ -50,21 +55,33 @@ export interface EnqueueReceipt {
 }
 
 export interface JobRunner {
-  readonly driver: 'sync' | 'bullmq';
+  readonly driver: 'sync' | 'inline' | 'bullmq';
   register<K extends JobName>(name: K, handler: JobHandler<K>): void;
   enqueue<K extends JobName>(name: K, payload: JobPayloadMap[K]): Promise<EnqueueReceipt>;
   shutdown(): Promise<void>;
 }
 
 /**
- * In-process driver. Work is started on a later tick so the HTTP response is
- * not held, but it shares the API's memory and event loop — which is exactly
- * why it is a development fallback and not the production recommendation.
+ * In-process driver. Work shares the API's memory and event loop — which is
+ * exactly why it is a fallback and not the production recommendation.
+ *
+ * `awaitInline` decides *when* the work runs relative to the HTTP response:
+ * false starts it on a later tick and answers immediately, which is what a
+ * long-lived Node server wants; true awaits it so the response is only sent
+ * once the job is done. A serverless invocation is frozen as soon as it
+ * responds, so the deferred form would leave every import stuck in VALIDATING
+ * there — hence an option on this class rather than a second copy of it.
  */
 class SyncJobRunner implements JobRunner {
-  readonly driver = 'sync' as const;
+  readonly driver: 'sync' | 'inline';
   private readonly handlers = new Map<string, JobHandler<JobName>>();
+  private readonly awaitInline: boolean;
   private sequence = 0;
+
+  constructor(awaitInline: boolean) {
+    this.awaitInline = awaitInline;
+    this.driver = awaitInline ? 'inline' : 'sync';
+  }
 
   register<K extends JobName>(name: K, handler: JobHandler<K>): void {
     this.handlers.set(name, handler as JobHandler<JobName>);
@@ -76,21 +93,25 @@ class SyncJobRunner implements JobRunner {
       throw new Error(`No handler registered for job "${name}"`);
     }
     this.sequence += 1;
-    const jobId = `sync-${name}-${this.sequence}`;
+    const jobId = `${this.driver}-${name}-${this.sequence}`;
 
-    setImmediate(() => {
-      void (async () => {
-        const startedAt = Date.now();
-        try {
-          await handler(payload);
-          logger.debug({ jobId, job: name, durationMs: Date.now() - startedAt }, 'job finished');
-        } catch (error) {
-          // The handler persists its own FAILED state; this is the safety net
-          // for anything it did not catch, so the process never dies on a job.
-          logger.error({ jobId, job: name, err: error }, 'unhandled job failure');
-        }
-      })();
-    });
+    const run = async (): Promise<void> => {
+      const startedAt = Date.now();
+      try {
+        await handler(payload);
+        logger.debug({ jobId, job: name, durationMs: Date.now() - startedAt }, 'job finished');
+      } catch (error) {
+        // The handler persists its own FAILED state; this is the safety net
+        // for anything it did not catch, so the process never dies on a job.
+        logger.error({ jobId, job: name, err: error }, 'unhandled job failure');
+      }
+    };
+
+    if (this.awaitInline) {
+      await run();
+    } else {
+      setImmediate(() => void run());
+    }
 
     return { jobId, driver: this.driver, inProcess: true };
   }
@@ -176,15 +197,21 @@ function createRunner(): JobRunner {
   }
   if (env.JOB_QUEUE_DRIVER === 'bullmq' && !env.REDIS_URL) {
     logger.warn(
-      'JOB_QUEUE_DRIVER=bullmq but REDIS_URL is not set — falling back to the in-process sync driver. Jobs will not survive a restart.',
-    );
-  } else {
-    logger.info(
-      { driver: 'sync' },
-      'job runner: in-process sync driver (development fallback; set JOB_QUEUE_DRIVER=bullmq and REDIS_URL for a durable queue)',
+      'JOB_QUEUE_DRIVER=bullmq but REDIS_URL is not set — falling back to the in-process driver. Jobs will not survive a restart.',
     );
   }
-  return new SyncJobRunner();
+  if (resolvedJobQueueDriver === 'inline') {
+    logger.info(
+      { driver: 'inline' },
+      'job runner: in-process driver awaited before the response (serverless-safe; the request is held for the length of the job)',
+    );
+    return new SyncJobRunner(true);
+  }
+  logger.info(
+    { driver: 'sync' },
+    'job runner: in-process sync driver (development fallback; set JOB_QUEUE_DRIVER=bullmq and REDIS_URL for a durable queue)',
+  );
+  return new SyncJobRunner(false);
 }
 
 export const jobs: JobRunner = createRunner();

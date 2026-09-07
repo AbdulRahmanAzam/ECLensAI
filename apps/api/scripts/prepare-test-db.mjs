@@ -28,15 +28,26 @@ if (!existsSync(envTestPath)) {
 
 loadDotenv({ path: envTestPath });
 
-// SQLite: DATABASE_URL is a `file:` path, not a server URL — there is no
-// hostname/pathname to parse the way a postgresql:// URL has. The safety
-// check instead looks at the file's own name.
+// Two URL shapes have to be understood here. A `file:` URL is a SQLite path
+// with no hostname to parse; a postgresql:// URL carries the database in its
+// pathname. Either way the guard is the same: the name must say 'test', so a
+// mistyped .env.test can never point the suite at a real book.
 const databaseUrl = process.env.DATABASE_URL ?? '';
-const databaseName = databaseUrl.startsWith('file:') ? databaseUrl.slice('file:'.length).replace(/^\.?\/*/, '') : '';
+
+function databaseNameOf(url) {
+  if (url.startsWith('file:')) return url.slice('file:'.length).replace(/^\.?\/*/, '');
+  try {
+    return new URL(url).pathname.replace(/^\//, '');
+  } catch {
+    return '';
+  }
+}
+
+const databaseName = databaseNameOf(databaseUrl);
 
 if (!databaseName.includes('test')) {
   console.error(
-    `[prepare-test-db] refusing to touch database '${databaseName || 'unknown'}': .env.test must point at a SQLite file with 'test' in its name.`,
+    `[prepare-test-db] refusing to touch database '${databaseName || 'unknown'}': .env.test must point at a database with 'test' in its name.`,
   );
   process.exit(1);
 }

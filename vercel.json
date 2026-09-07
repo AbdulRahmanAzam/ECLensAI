@@ -1,0 +1,13 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "installCommand": "npm install",
+  "buildCommand": "npm run build:vercel",
+  "outputDirectory": "apps/web/dist",
+  "functions": {
+    "api/**/*.ts": {
+      "maxDuration": 60,
+      "includeFiles": "{node_modules/.prisma/client/**,apps/api/node_modules/.prisma/client/**,node_modules/pdfkit/js/data/**}"
+    }
+  },
+  "rewrites": [{ "source": "/((?!api/).*)", "destination": "/index.html" }]
+}

@@ -1,8 +1,8 @@
 /**
  * Every palette shade resolves to a CSS variable (see src/styles/tokens.css) so
- * the same utility class renders correctly in both themes. Dark mode is driven
- * by `data-theme` on <html>, set before first paint by the bootstrap script in
- * index.html.
+ * colour lives in one place and utility classes stay declarative.
+ *
+ * The product ships light-only by design — see the note in tokens.css.
  *
  * @type {import('tailwindcss').Config}
  */
@@ -17,7 +17,6 @@ const token = (name) => `rgb(var(--c-${name}) / <alpha-value>)`;
 
 export default {
   content: ['./index.html', './src/**/*.{ts,tsx}'],
-  darkMode: ['selector', '[data-theme="dark"]'],
   theme: {
     extend: {
       colors: {
@@ -35,20 +34,19 @@ export default {
         'surface-3': token('surface-3'),
         line: token('line'),
         'line-soft': token('line-soft'),
+        'line-strong': token('line-strong'),
         brand: token('brand'),
         'brand-hover': token('brand-hover'),
         'brand-soft': token('brand-soft'),
         accent: token('accent'),
         'accent-soft': token('accent-soft'),
 
-        // Always-dark chrome (sidebar, hero, sign-in panel) — never inverts.
         ink: token('ink'),
         'ink-2': token('ink-2'),
         'ink-3': token('ink-3'),
       },
       fontFamily: {
         sans: [
-          'InterVariable',
           'Inter',
           'system-ui',
           '-apple-system',
@@ -58,6 +56,9 @@ export default {
           'Arial',
           'sans-serif',
         ],
+        // Editorial display face, used only for page and hero titles. It is
+        // what stops a dense analyst tool from reading like a stock template.
+        display: ['Instrument Serif', 'Iowan Old Style', 'Georgia', 'serif'],
         mono: ['JetBrains Mono', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'monospace'],
       },
       fontSize: {
@@ -74,14 +75,18 @@ export default {
         '3xl': '1.5rem',
       },
       boxShadow: {
-        // Layered, low-alpha shadows tinted with the brand hue rather than pure
-        // black — pure black reads muddy on the light canvas.
-        xs: '0 1px 2px 0 rgb(var(--shadow-color) / 0.05)',
-        card: '0 1px 2px -1px rgb(var(--shadow-color) / 0.08), 0 2px 6px -2px rgb(var(--shadow-color) / 0.06)',
+        // Layered and low-alpha. The `inset` highlight on `card` is the detail
+        // that makes a white panel read as a lit surface rather than a cutout.
+        xs: '0 1px 2px 0 rgb(var(--shadow-color) / 0.06)',
+        card: '0 0 0 1px rgb(var(--shadow-color) / 0.04), 0 1px 2px -1px rgb(var(--shadow-color) / 0.08), 0 3px 8px -3px rgb(var(--shadow-color) / 0.07)',
         raised:
-          '0 1px 2px -1px rgb(var(--shadow-color) / 0.1), 0 4px 12px -3px rgb(var(--shadow-color) / 0.1)',
-        pop: '0 4px 12px -4px rgb(var(--shadow-color) / 0.12), 0 18px 40px -12px rgb(var(--shadow-color) / 0.22)',
-        glow: '0 0 0 1px rgb(var(--c-brand) / 0.18), 0 8px 24px -8px rgb(var(--c-brand) / 0.45)',
+          '0 0 0 1px rgb(var(--shadow-color) / 0.05), 0 2px 4px -2px rgb(var(--shadow-color) / 0.1), 0 10px 24px -8px rgb(var(--shadow-color) / 0.14)',
+        pop: '0 0 0 1px rgb(var(--shadow-color) / 0.06), 0 6px 16px -6px rgb(var(--shadow-color) / 0.16), 0 24px 48px -16px rgb(var(--shadow-color) / 0.24)',
+        lifted:
+          'inset 0 1px 0 0 rgb(255 255 255 / 0.9), 0 0 0 1px rgb(var(--shadow-color) / 0.05), 0 1px 2px -1px rgb(var(--shadow-color) / 0.1), 0 8px 20px -8px rgb(var(--shadow-color) / 0.12)',
+        // Primary control: a lit top edge plus a tinted drop.
+        control:
+          'inset 0 1px 0 0 rgb(255 255 255 / 0.14), 0 1px 2px 0 rgb(var(--shadow-color) / 0.24)',
       },
       keyframes: {
         'fade-in': {
@@ -89,7 +94,7 @@ export default {
           to: { opacity: '1' },
         },
         'fade-up': {
-          from: { opacity: '0', transform: 'translateY(6px)' },
+          from: { opacity: '0', transform: 'translateY(8px)' },
           to: { opacity: '1', transform: 'none' },
         },
         'scale-in': {
@@ -106,7 +111,7 @@ export default {
       },
       animation: {
         'fade-in': 'fade-in 0.2s ease-out both',
-        'fade-up': 'fade-up 0.28s cubic-bezier(0.22, 1, 0.36, 1) both',
+        'fade-up': 'fade-up 0.34s cubic-bezier(0.22, 1, 0.36, 1) both',
         'scale-in': 'scale-in 0.18s cubic-bezier(0.22, 1, 0.36, 1) both',
         'slide-in-right': 'slide-in-right 0.24s cubic-bezier(0.22, 1, 0.36, 1) both',
       },

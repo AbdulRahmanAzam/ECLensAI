@@ -89,6 +89,15 @@ export function formatDecimalPercent(value: string | null | undefined, digits = 
   return formatPercent(decimalStringToNumber(value), digits);
 }
 
+/**
+ * For the API's `*Percent` fields, which the analytics service has already
+ * multiplied by 100. `formatDecimalPercent` takes a ratio and scales it, so
+ * feeding it a percentage-point value renders a share of 59.62% as "5962%".
+ */
+export function formatDecimalPercentPoints(value: string | null | undefined, digits = 2): string {
+  return formatPercent(decimalStringToNumber(value) / 100, digits);
+}
+
 export function formatDecimalBps(value: string | null | undefined): string {
   return formatBps(decimalStringToNumber(value));
 }

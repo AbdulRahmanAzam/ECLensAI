@@ -146,9 +146,9 @@ export function LandingPage() {
         </div>
       </header>
 
-      {/* Hero — the only always-dark section above the fold; it sets the brand
-          before the product surfaces take over in the reader's own theme. */}
-      <section className="ink-canvas relative overflow-hidden bg-ink">
+      {/* Hero — the only always-dark section above the fold. It sets the brand
+          so every product surface below can stay quiet paper. */}
+      <section className="ink-canvas grain relative overflow-hidden bg-ink">
         <div
           aria-hidden
           className="absolute inset-0 opacity-[0.15]"
@@ -160,16 +160,16 @@ export function LandingPage() {
             WebkitMaskImage: 'radial-gradient(70% 60% at 30% 0%, black, transparent)',
           }}
         />
-        <div className="relative mx-auto max-w-6xl px-4 py-20 md:px-8 md:py-28">
+        <div className="relative mx-auto max-w-6xl px-4 py-24 md:px-8 md:py-32">
           <p className="mb-5 inline-flex items-center gap-2 rounded-full bg-white/[0.07] py-1 pl-2 pr-3 text-xs font-medium text-teal-200 ring-1 ring-inset ring-white/15">
             <span className="flex h-5 w-5 items-center justify-center rounded-full bg-teal-400/15">
               <Calculator className="h-3 w-3" />
             </span>
             IFRS 9 Expected Credit Loss · Deterministic &amp; explainable
           </p>
-          <h1 className="max-w-3xl text-[2.1rem] font-semibold leading-[1.08] tracking-tightest text-white md:text-[3.4rem]">
+          <h1 className="max-w-4xl font-display text-[2.6rem] font-normal leading-[1.05] tracking-tight text-white md:text-[4.15rem]">
             Expected credit losses your auditors can{' '}
-            <span className="bg-gradient-to-r from-teal-300 to-teal-100 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-teal-300 to-teal-100 bg-clip-text italic text-transparent">
               actually follow.
             </span>
           </h1>
@@ -185,11 +185,7 @@ export function LandingPage() {
               </Button>
             </Link>
             <a href="#workflow">
-              <Button
-                size="lg"
-                variant="ghost"
-                className="border-white/20 text-white hover:bg-white/10 hover:text-white"
-              >
+              <Button size="lg" variant="inverse">
                 See how it works
               </Button>
             </a>
@@ -201,7 +197,7 @@ export function LandingPage() {
               ['0', 'authoritative numbers produced by AI'],
             ].map(([value, label]) => (
               <div key={label}>
-                <dt className="text-3xl font-semibold tracking-tightest text-white tabular-nums">
+                <dt className="font-display text-[2.4rem] font-normal leading-none tracking-tight text-white tabular-nums">
                   {value}
                 </dt>
                 <dd className="mt-1.5 text-xs leading-relaxed text-white/45">{label}</dd>
@@ -213,9 +209,9 @@ export function LandingPage() {
 
       {/* Problem */}
       <section id="problem" className="border-b border-line">
-        <div className="mx-auto max-w-6xl px-4 py-20 md:px-8">
+        <div className="relative mx-auto max-w-6xl px-4 py-20 md:px-8">
           <SectionLabel>The problem</SectionLabel>
-          <h2 className="max-w-2xl text-2xl font-semibold tracking-tightest text-slate-900 md:text-3xl">
+          <h2 className="max-w-2xl font-display text-[2rem] font-normal leading-tight tracking-tight text-slate-900 md:text-[2.6rem]">
             Three failure modes every provisioning team already knows.
           </h2>
           <div className="mt-10 grid gap-4 md:grid-cols-3">
@@ -237,9 +233,9 @@ export function LandingPage() {
 
       {/* Workflow */}
       <section id="workflow" className="border-b border-line bg-surface-2">
-        <div className="mx-auto max-w-6xl px-4 py-20 md:px-8">
+        <div className="relative mx-auto max-w-6xl px-4 py-20 md:px-8">
           <SectionLabel>The pipeline</SectionLabel>
-          <h2 className="text-2xl font-semibold tracking-tightest text-slate-900 md:text-3xl">
+          <h2 className="font-display text-[2rem] font-normal leading-tight tracking-tight text-slate-900 md:text-[2.6rem]">
             How ECLens AI works
           </h2>
           <p className="mt-3 max-w-2xl text-sm leading-relaxed text-slate-500">
@@ -273,11 +269,11 @@ export function LandingPage() {
 
       {/* AI capabilities */}
       <section id="ai" className="border-b border-line">
-        <div className="mx-auto max-w-6xl px-4 py-20 md:px-8">
+        <div className="relative mx-auto max-w-6xl px-4 py-20 md:px-8">
           <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
             <div>
               <SectionLabel>Governed AI</SectionLabel>
-              <h2 className="text-2xl font-semibold tracking-tightest text-slate-900 md:text-3xl">
+              <h2 className="font-display text-[2rem] font-normal leading-tight tracking-tight text-slate-900 md:text-[2.6rem]">
                 AI, on a leash
               </h2>
               <p className="mt-3 max-w-2xl text-sm leading-relaxed text-slate-500">
@@ -302,12 +298,15 @@ export function LandingPage() {
       </section>
 
       {/* Security */}
-      <section id="security" className="ink-canvas border-b border-line bg-ink">
-        <div className="mx-auto max-w-6xl px-4 py-20 md:px-8">
+      <section
+        id="security"
+        className="ink-canvas grain relative overflow-hidden border-b border-line bg-ink"
+      >
+        <div className="relative mx-auto max-w-6xl px-4 py-20 md:px-8">
           <p className="mb-3 text-2xs font-semibold uppercase tracking-[0.18em] text-teal-300">
             Controls
           </p>
-          <h2 className="text-2xl font-semibold tracking-tightest text-white md:text-3xl">
+          <h2 className="font-display text-[2rem] font-normal leading-tight tracking-tight text-white md:text-[2.6rem]">
             Built for regulated environments
           </h2>
           <div className="mt-10 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -330,7 +329,7 @@ export function LandingPage() {
       {/* CTA */}
       <section className="mx-auto max-w-6xl px-4 py-20 md:px-8">
         <div className="rounded-3xl border border-line bg-surface px-6 py-14 text-center shadow-card">
-          <h2 className="text-2xl font-semibold tracking-tightest text-slate-900 md:text-3xl">
+          <h2 className="font-display text-[2rem] font-normal leading-tight tracking-tight text-slate-900 md:text-[2.6rem]">
             See a full ECL workspace in two minutes
           </h2>
           <p className="mx-auto mt-3 max-w-xl text-sm leading-relaxed text-slate-500">

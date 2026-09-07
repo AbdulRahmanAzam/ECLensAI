@@ -68,7 +68,7 @@ export function LoginPage() {
   return (
     <div className="grid min-h-screen lg:grid-cols-[1.05fr_1fr]">
       {/* Brand panel */}
-      <div className="ink-canvas relative hidden flex-col justify-between overflow-hidden bg-ink p-12 lg:flex">
+      <div className="ink-canvas grain relative hidden flex-col justify-between overflow-hidden bg-ink p-12 lg:flex">
         <div
           aria-hidden
           className="absolute inset-0 opacity-[0.13]"
@@ -87,9 +87,9 @@ export function LoginPage() {
         </Link>
 
         <div className="relative">
-          <h2 className="max-w-md text-3xl font-semibold leading-[1.15] tracking-tightest text-white">
+          <h2 className="max-w-md font-display text-[2.6rem] font-normal leading-[1.08] tracking-tight text-white">
             Explainable Expected Credit Loss for{' '}
-            <span className="bg-gradient-to-r from-teal-300 to-teal-100 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-teal-300 to-teal-100 bg-clip-text italic text-transparent">
               regulated lenders.
             </span>
           </h2>
@@ -134,7 +134,9 @@ export function LoginPage() {
             <BrandMark className="h-11 w-11" />
           </div>
 
-          <h1 className="text-2xl font-semibold tracking-tightest text-slate-900">Sign in</h1>
+          <h1 className="font-display text-[2.25rem] font-normal leading-none tracking-tight text-slate-900">
+            Sign in
+          </h1>
           <p className="mt-1.5 text-sm text-slate-500">
             Access the ECL workspace for your organization.
           </p>

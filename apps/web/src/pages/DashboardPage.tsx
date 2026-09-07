@@ -80,7 +80,7 @@ type FilterKey = (typeof FILTER_KEYS)[number];
  */
 export function DashboardPage() {
   const navigate = useNavigate();
-  const { moneyString, percentString } = useSettings();
+  const { moneyString, percentString, percentPointsString } = useSettings();
   const chart = useChartTheme();
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -358,7 +358,10 @@ export function DashboardPage() {
       </Card>
 
       {/* KPI row ------------------------------------------------------------ */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+      {/* Six across only once the tiles are genuinely wide enough for a label
+          to sit on one or two lines — below 2xl they go three across, which
+          keeps the figures comparable instead of ragged. */}
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-6">
         <MetricCard
           label="Gross carrying amount"
           value={moneyString(totals?.grossCarryingAmount, { compact: true })}
@@ -404,7 +407,7 @@ export function DashboardPage() {
                 <div key={row.stage} className="flex items-center justify-between text-xs">
                   <StageBadge stage={row.stage} />
                   <span className="font-semibold tabular-nums text-navy-950">
-                    {percentString(row.shareOfGrossPercent, 0)}
+                    {percentPointsString(row.shareOfGrossPercent, 0)}
                   </span>
                 </div>
               ))}
@@ -698,7 +701,7 @@ export function DashboardPage() {
                               {moneyString(bucket.lossAllowance, { compact: true })}
                             </td>
                             <td className="py-2 text-right tabular-nums">
-                              {percentString(bucket.shareOfAllowancePercent, 1)}
+                              {percentPointsString(bucket.shareOfAllowancePercent, 1)}
                             </td>
                           </tr>
                         ),

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useMutation } from '@tanstack/react-query';
-import { Check, LogOut, Monitor, Moon, ShieldCheck, Sun, User as UserIcon, X } from 'lucide-react';
+import { Check, LogOut, ShieldCheck, User as UserIcon, X } from 'lucide-react';
 import type { RoleName } from '@eclens/shared';
 import { Badge, SyntheticBadge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
@@ -11,16 +11,8 @@ import { PageHeader } from '@/components/ui/PageHeader';
 import { Select } from '@/components/ui/Select';
 import { useAuth } from '@/providers/AuthProvider';
 import { useSettings } from '@/providers/SettingsProvider';
-import type { ThemePreference } from '@/lib/theme';
-import { cn } from '@/lib/utils';
 
 const CURRENCIES = ['PKR', 'USD', 'EUR', 'GBP', 'AED', 'SAR'];
-
-const THEMES: Array<{ value: ThemePreference; label: string; icon: typeof Sun }> = [
-  { value: 'light', label: 'Light', icon: Sun },
-  { value: 'dark', label: 'Dark', icon: Moon },
-  { value: 'system', label: 'System', icon: Monitor },
-];
 
 const ROLE_LABEL: Record<RoleName, string> = {
   ADMIN: 'Admin',
@@ -61,7 +53,7 @@ function Cell({ allowed }: { allowed: boolean }) {
 export function SettingsPage() {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
-  const { currency, setCurrency, sidebarCollapsed, toggleSidebar, theme, setTheme } = useSettings();
+  const { currency, setCurrency, sidebarCollapsed, toggleSidebar } = useSettings();
   const [confirmSignOut, setConfirmSignOut] = useState(false);
 
   const signOut = useMutation({
@@ -121,37 +113,6 @@ export function SettingsPage() {
                 </option>
               ))}
             </Select>
-
-            <div>
-              <p className="mb-1.5 text-xs font-medium text-slate-600">Appearance</p>
-              <div
-                role="radiogroup"
-                aria-label="Appearance"
-                className="grid grid-cols-3 gap-1 rounded-xl border border-line bg-surface-2 p-1"
-              >
-                {THEMES.map((option) => (
-                  <button
-                    key={option.value}
-                    type="button"
-                    role="radio"
-                    aria-checked={theme === option.value}
-                    onClick={() => setTheme(option.value)}
-                    className={cn(
-                      'flex items-center justify-center gap-1.5 rounded-lg px-2 py-2 text-xs font-medium transition-all duration-150',
-                      theme === option.value
-                        ? 'bg-surface text-slate-900 shadow-xs'
-                        : 'text-slate-500 hover:text-slate-800',
-                    )}
-                  >
-                    <option.icon className="h-3.5 w-3.5" />
-                    {option.label}
-                  </button>
-                ))}
-              </div>
-              <p className="mt-1.5 text-xs text-slate-500">
-                “System” follows your operating system setting and updates live.
-              </p>
-            </div>
 
             <div className="flex items-center justify-between rounded-xl border border-line px-3 py-2.5">
               <div>

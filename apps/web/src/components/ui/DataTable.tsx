@@ -197,7 +197,7 @@ export function DataTable<TData>({
 
   if (loading) {
     return (
-      <div className="space-y-2.5 p-4" role="status" aria-label="Loading table">
+      <div className="space-y-2.5 p-5" role="status" aria-label="Loading table">
         {Array.from({ length: 6 }).map((_, index) => (
           <Skeleton key={index} className="h-9 w-full" />
         ))}
@@ -212,7 +212,7 @@ export function DataTable<TData>({
   return (
     <div>
       {enableColumnVisibility ? (
-        <div className="flex justify-end border-b border-line-soft px-3 py-2">
+        <div className="flex justify-end border-b border-line-soft px-4 py-2">
           <ColumnVisibilityMenu
             columns={toggleableColumns}
             visibility={columnVisibility}
@@ -220,18 +220,25 @@ export function DataTable<TData>({
           />
         </div>
       ) : null}
+      {/*
+        The table takes its natural width and the wrapper scrolls, rather than
+        `w-full` squeezing thirteen columns into the viewport — a squeezed
+        financial table wraps every cell onto four lines and stops being
+        scannable. Cells default to `nowrap`; a renderer that genuinely wants
+        prose opts back in with `whitespace-normal` on its own element.
+      */}
       <div className={cn('overflow-x-auto', maxHeightClass)}>
-        <table className="w-full border-collapse text-sm">
+        <table className="w-max min-w-full border-collapse text-sm">
           <thead>
             {table.getHeaderGroups().map((headerGroup) => (
-              <tr key={headerGroup.id} className="border-b border-line bg-surface-2">
+              <tr key={headerGroup.id} className="border-b border-line">
                 {headerGroup.headers.map((header) => {
                   const sorted = header.column.getIsSorted();
                   return (
                     <th
                       key={header.id}
                       className={cn(
-                        'sticky top-0 z-10 bg-surface-2 px-3 py-2.5 text-left text-2xs font-semibold uppercase tracking-[0.07em] text-slate-500',
+                        'sticky top-0 z-10 whitespace-nowrap bg-surface-2/95 px-4 py-2.5 text-left text-2xs font-semibold uppercase tracking-[0.09em] text-slate-500 backdrop-blur',
                         header.column.getCanSort() &&
                           'cursor-pointer select-none transition-colors hover:text-slate-800',
                       )}
@@ -260,14 +267,17 @@ export function DataTable<TData>({
               <tr
                 key={row.id}
                 className={cn(
-                  'border-b border-line-soft transition-colors last:border-b-0',
+                  'group/row relative border-b border-line-soft transition-colors last:border-b-0',
                   row.getIsSelected() && 'bg-brand-soft',
-                  onRowClick && 'cursor-pointer hover:bg-surface-2',
+                  onRowClick && 'cursor-pointer hover:bg-brand-soft/60',
                 )}
                 onClick={onRowClick ? () => onRowClick(row.original) : undefined}
               >
                 {row.getVisibleCells().map((cell) => (
-                  <td key={cell.id} className="px-3 py-2.5 align-middle text-slate-600">
+                  <td
+                    key={cell.id}
+                    className="whitespace-nowrap px-4 py-3 align-middle text-slate-600"
+                  >
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </td>
                 ))}

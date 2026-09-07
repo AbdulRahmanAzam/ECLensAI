@@ -32,6 +32,13 @@ export function createApp(): Express {
 
   const app = express();
   app.disable('x-powered-by');
+  // Behind Vercel's edge every request arrives from the proxy, so the client IP
+  // lives in X-Forwarded-For. One hop, not `true`: express-rate-limit rejects a
+  // permissive setting because a spoofed header would let a caller mint a fresh
+  // rate-limit bucket per request.
+  if (process.env.VERCEL === '1') {
+    app.set('trust proxy', 1);
+  }
 
   app.use(helmet());
   app.use(
@@ -65,7 +72,10 @@ export function createApp(): Express {
     },
   });
 
-  app.get('/health', health);
+  // Two paths for one handler: '/health' is what a container platform probes,
+  // and '/api/v1/health' is reachable through the serverless rewrite, which only
+  // routes '/api/*' to this function.
+  app.get(['/health', '/api/v1/health'], health);
   app.use('/api/v1', apiLimiter);
   app.use('/api/v1/auth', authLimiter, authRouter);
 

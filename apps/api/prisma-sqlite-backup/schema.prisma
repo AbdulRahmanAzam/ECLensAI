@@ -1,12 +1,9 @@
 generator client {
-  provider      = "prisma-client-js"
-  // Vercel's Node runtime is Amazon Linux 2023 (OpenSSL 3.0); the native target
-  // keeps local development working from the same generated client.
-  binaryTargets = ["native", "rhel-openssl-3.0.x"]
+  provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 
@@ -737,8 +734,8 @@ model AiInsight {
   id             String   @id @default(cuid())
   organizationId String
   runId          String?
-  /// A JSON array of exposure public ids. Kept as Json rather than String[] so
-  /// the same shape works on both the SQLite dev path and PostgreSQL.
+  /// SQLite has no native list-of-scalar column type, so this is stored as a
+  /// JSON array of exposure public ids instead of a Prisma String[] field.
   exposureIds    Json
   kind           String
   title          String
@@ -926,8 +923,8 @@ model AiRequest {
   /// Rough cost telemetry in integer micro-units so no float is stored.
   estimatedCostMicro Int            @default(0)
   toolCalls         Int             @default(0)
-  /// Which tools ran, as names only. A JSON string array rather than String[],
-  /// so the same shape works on both the SQLite dev path and PostgreSQL.
+  /// Which tools ran, as names only. Stored as a JSON string array — SQLite
+  /// has no native list-of-scalar column type, unlike PostgreSQL.
   toolsUsed         Json
   /// Public ids the answer drew on: runs, exposures, snapshots, documents.
   sourceRefs        Json?

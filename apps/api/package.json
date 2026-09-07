@@ -11,6 +11,7 @@
     "test": "vitest run",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev --name init",
+    "prisma:migrate:deploy": "prisma migrate deploy",
     "prisma:seed": "prisma db seed",
     "prisma:test:prepare": "node scripts/prepare-test-db.mjs",
     "postinstall": "prisma generate"

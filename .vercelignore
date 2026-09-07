@@ -1,0 +1,13 @@
+# Local artefacts that must never reach a deployment.
+uploads/
+apps/api/uploads/
+apps/api/prisma/*.db
+apps/api/prisma/*.db-journal
+apps/api/prisma/*.db-shm
+apps/api/prisma/*.db-wal
+
+# Superseded by the PostgreSQL schema; kept in the repo for reference only.
+apps/api/prisma-sqlite-backup/
+apps/api/prisma-postgres-backup/
+
+docs/

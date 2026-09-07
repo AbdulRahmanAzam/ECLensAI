@@ -39,7 +39,7 @@ export function AppLayout() {
           onMenuClick={() => setMobileNavOpen(true)}
           onSearchClick={() => setPaletteOpen(true)}
         />
-        <main className="mx-auto w-full max-w-[88rem] flex-1 px-4 py-6 md:px-8 md:py-8">
+        <main className="mx-auto w-full max-w-[88rem] flex-1 px-4 py-7 md:px-8 md:py-9">
           <Breadcrumbs />
           {/* Keyed on the path so each navigation replays the entrance — the
               transition is what tells you the view actually changed. */}
@@ -47,7 +47,7 @@ export function AppLayout() {
             <Outlet />
           </div>
         </main>
-        <footer className="border-t border-line px-4 py-4 text-center text-2xs text-slate-400 md:px-8">
+        <footer className="mt-4 border-t border-line/70 px-4 py-5 text-center text-2xs text-slate-400 md:px-8">
           ECLens AI · All figures are synthetic demo data; AI output is advisory only.
         </footer>
       </div>

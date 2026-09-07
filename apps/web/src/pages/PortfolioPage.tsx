@@ -157,7 +157,7 @@ export function PortfolioPage() {
         header: 'Primary driver',
         enableSorting: false,
         cell: (info) => (
-          <span className="text-2xs text-slate-500">
+          <span className="block max-w-[15rem] whitespace-normal text-2xs leading-4 text-slate-500">
             {stagingCodeLabel(info.row.original.stageRuleCodes[0] ?? '') || info.getValue()}
           </span>
         ),

@@ -1,9 +1,6 @@
-import type { ThemePreference } from './theme';
-
 export interface AppSettings {
   currency: string;
   sidebarCollapsed: boolean;
-  theme: ThemePreference;
 }
 
 const STORAGE_KEY = 'eclens.settings';
@@ -11,7 +8,6 @@ const STORAGE_KEY = 'eclens.settings';
 const DEFAULT_SETTINGS: AppSettings = {
   currency: import.meta.env.VITE_CURRENCY || 'PKR',
   sidebarCollapsed: false,
-  theme: 'system',
 };
 
 export function loadSettings(): AppSettings {

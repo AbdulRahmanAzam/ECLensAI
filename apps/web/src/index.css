@@ -36,38 +36,30 @@
   }
 
   :focus-visible {
-    @apply outline-none ring-2 ring-brand/60 ring-offset-2;
+    @apply outline-none ring-2 ring-brand/50 ring-offset-2;
     --tw-ring-offset-color: rgb(var(--c-canvas));
   }
 
   ::selection {
-    @apply bg-brand/20 text-slate-900;
+    @apply bg-brand/15 text-slate-900;
   }
 
-  /* Compact, unobtrusive scrollbars for dense analyst tables */
+  /* Slim, low-contrast scrollbars — a dense table should not be framed by
+     chrome that competes with the data. */
   ::-webkit-scrollbar {
-    width: 10px;
-    height: 10px;
+    width: 11px;
+    height: 11px;
   }
   ::-webkit-scrollbar-thumb {
     @apply rounded-full bg-slate-300;
     background-clip: padding-box;
-    border: 2px solid transparent;
+    border: 3px solid transparent;
   }
   ::-webkit-scrollbar-thumb:hover {
     @apply bg-slate-400;
   }
   ::-webkit-scrollbar-track {
     @apply bg-transparent;
-  }
-
-  /* The theme flips instantly; only surfaces should cross-fade, never text
-     position, so the transition is scoped to colour properties. */
-  :root[data-theme-ready] body,
-  :root[data-theme-ready] body * {
-    transition:
-      background-color 0.18s ease,
-      border-color 0.18s ease;
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -82,31 +74,63 @@
 }
 
 @layer components {
-  /* Faint blueprint grid behind the app frame — reads as engineered paper
-     rather than a flat grey wash, and costs no image request. */
+  /*
+   * The workspace canvas: a faint blueprint grid under a soft top-light
+   * gradient. Reads as engineered paper rather than a flat grey wash, and
+   * costs no image request.
+   */
   .app-canvas {
     background-image:
-      linear-gradient(to right, rgb(var(--c-slate-400) / 0.07) 1px, transparent 1px),
-      linear-gradient(to bottom, rgb(var(--c-slate-400) / 0.07) 1px, transparent 1px);
-    background-size: 34px 34px;
+      linear-gradient(to bottom, rgb(255 255 255 / 0.75), rgb(255 255 255 / 0) 240px),
+      linear-gradient(to right, rgb(var(--c-slate-500) / 0.05) 1px, transparent 1px),
+      linear-gradient(to bottom, rgb(var(--c-slate-500) / 0.05) 1px, transparent 1px);
+    background-size:
+      100% 100%,
+      36px 36px,
+      36px 36px;
   }
 
+  /* Depth for the always-dark chrome: two off-axis colour pools so the panel
+     is never a flat block of navy. */
   .ink-canvas {
     background-image:
-      radial-gradient(60rem 40rem at 15% -10%, rgb(var(--c-navy-400) / 0.22), transparent 60%),
-      radial-gradient(40rem 30rem at 100% 0%, rgb(var(--c-teal-400) / 0.14), transparent 55%);
+      radial-gradient(58rem 38rem at 12% -12%, rgb(var(--c-navy-400) / 0.26), transparent 62%),
+      radial-gradient(38rem 28rem at 105% 4%, rgb(var(--c-teal-400) / 0.16), transparent 58%);
   }
 
-  .hairline {
-    @apply border-line;
+  /*
+   * Fine film grain. At 3% opacity it is invisible as texture but stops large
+   * dark fields from banding, which is most of what separates a "flat navy
+   * rectangle" from a surface that looks printed.
+   */
+  .grain::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.035;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  /* Hairline rule that fades at both ends — used to separate page sections
+     without drawing a hard box. */
+  .rule-fade {
+    height: 1px;
+    background-image: linear-gradient(
+      to right,
+      transparent,
+      rgb(var(--c-line-strong)) 15%,
+      rgb(var(--c-line-strong)) 85%,
+      transparent
+    );
   }
 
   .gradient-text {
     background-image: linear-gradient(
       100deg,
       rgb(var(--c-slate-900)),
-      rgb(var(--c-navy-600)) 65%,
-      rgb(var(--c-teal-600))
+      rgb(var(--c-navy-700)) 60%,
+      rgb(var(--c-teal-700))
     );
     -webkit-background-clip: text;
     background-clip: text;
@@ -122,12 +146,7 @@
     position: absolute;
     inset: 0;
     transform: translateX(-100%);
-    background-image: linear-gradient(
-      90deg,
-      transparent,
-      rgb(var(--c-surface) / 0.65),
-      transparent
-    );
+    background-image: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.75), transparent);
     animation: shimmer 1.6s infinite;
   }
 }

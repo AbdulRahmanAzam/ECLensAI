@@ -1,40 +1,46 @@
 /*
- * ECLens design tokens.
+ * ECLens design tokens — light only.
  *
- * Colours are stored as space-separated RGB channels so Tailwind can apply its
- * own opacity modifiers (`bg-surface/80`). Every palette shade is a variable,
- * which is what makes the dark theme a one-line switch instead of a per-screen
- * rewrite: flipping `data-theme` re-points the same utility classes at the
- * mirrored ramp.
+ * The product is an IFRS 9 provisioning workspace: it is read next to
+ * spreadsheets, printed into board packs and screen-shared with auditors, so it
+ * commits to a single light theme rather than shipping a half-tuned dark one.
  *
- * Generated shape — edit values here, they are the single source of truth.
+ * Colours are space-separated RGB channels so Tailwind can still apply opacity
+ * modifiers (`bg-surface/80`). The neutral ramp is a custom cool graphite —
+ * deeper and bluer than stock Tailwind slate, which is what keeps large white
+ * surfaces from reading washed-out.
  */
 
 :root {
   color-scheme: light;
 
+  /* Neutrals ------------------------------------------------------------- */
   --c-slate-50: 248 250 252;
-  --c-slate-100: 241 245 249;
-  --c-slate-200: 228 233 240;
-  --c-slate-300: 203 213 225;
-  --c-slate-400: 148 163 184;
-  --c-slate-500: 100 116 139;
-  --c-slate-600: 71 85 105;
-  --c-slate-700: 51 65 85;
-  --c-slate-800: 30 41 59;
-  --c-slate-900: 15 23 42;
-  --c-slate-950: 2 6 23;
-  --c-navy-50: 238 246 252;
-  --c-navy-100: 213 232 247;
-  --c-navy-200: 174 212 240;
-  --c-navy-300: 120 182 228;
-  --c-navy-400: 69 147 209;
-  --c-navy-500: 42 118 182;
-  --c-navy-600: 30 92 148;
-  --c-navy-700: 27 74 118;
-  --c-navy-800: 26 62 96;
-  --c-navy-900: 25 52 79;
-  --c-navy-950: 14 31 49;
+  --c-slate-100: 242 245 249;
+  --c-slate-200: 229 233 240;
+  --c-slate-300: 203 211 224;
+  --c-slate-400: 151 162 181;
+  --c-slate-500: 107 119 137;
+  --c-slate-600: 78 90 110;
+  --c-slate-700: 56 69 90;
+  --c-slate-800: 34 46 66;
+  --c-slate-900: 16 26 43;
+  --c-slate-950: 6 12 22;
+
+  /* Brand — deep ocean navy ---------------------------------------------- */
+  --c-navy-50: 239 246 253;
+  --c-navy-100: 220 235 249;
+  --c-navy-200: 187 215 242;
+  --c-navy-300: 140 187 230;
+  --c-navy-400: 85 152 211;
+  --c-navy-500: 46 121 185;
+  --c-navy-600: 31 95 155;
+  --c-navy-700: 27 76 124;
+  --c-navy-800: 27 64 102;
+  --c-navy-900: 26 54 84;
+  --c-navy-950: 13 31 51;
+
+  /* Status --------------------------------------------------------------- */
   --c-red-50: 254 242 242;
   --c-red-100: 254 226 226;
   --c-red-200: 254 202 202;
@@ -46,6 +52,7 @@
   --c-red-800: 153 27 27;
   --c-red-900: 127 29 29;
   --c-red-950: 69 10 10;
+
   --c-amber-50: 255 251 235;
   --c-amber-100: 254 243 199;
   --c-amber-200: 253 230 138;
@@ -57,6 +64,7 @@
   --c-amber-800: 146 64 14;
   --c-amber-900: 120 53 15;
   --c-amber-950: 69 26 3;
+
   --c-emerald-50: 236 253 245;
   --c-emerald-100: 209 250 229;
   --c-emerald-200: 167 243 208;
@@ -68,6 +76,7 @@
   --c-emerald-800: 6 95 70;
   --c-emerald-900: 6 78 59;
   --c-emerald-950: 2 44 34;
+
   --c-teal-50: 240 253 250;
   --c-teal-100: 204 251 241;
   --c-teal-200: 153 246 228;
@@ -80,112 +89,35 @@
   --c-teal-900: 19 78 74;
   --c-teal-950: 4 47 46;
 
-  --c-canvas: 243 246 250;
-  --c-canvas-alt: 234 239 246;
+  /* Surfaces -------------------------------------------------------------
+     Three tiers, not two: the canvas sits behind cards, `surface-2` is for the
+     quiet zones inside a card (table headers, footers, toolbars) and
+     `surface-3` for the pressed/selected state of those zones. */
+  --c-canvas: 241 244 249;
+  --c-canvas-alt: 233 238 245;
   --c-surface: 255 255 255;
-  --c-surface-2: 248 250 252;
-  --c-surface-3: 241 245 249;
-  --c-line: 228 233 240;
-  --c-line-soft: 238 242 247;
-  --c-brand: 26 62 96;
-  --c-brand-hover: 14 31 49;
-  --c-brand-soft: 238 246 252;
+  --c-surface-2: 249 250 252;
+  --c-surface-3: 242 245 249;
+
+  /* Hairlines. `line` is the structural border; `line-soft` divides content
+     inside one component, where a full-strength rule would over-segment. */
+  --c-line: 227 232 240;
+  --c-line-soft: 238 241 246;
+  --c-line-strong: 205 213 226;
+
+  /* Brand roles ----------------------------------------------------------- */
+  --c-brand: 27 64 102;
+  --c-brand-hover: 13 31 51;
+  --c-brand-soft: 239 246 253;
   --c-accent: 13 148 136;
   --c-accent-soft: 240 253 250;
 
-  --c-ink: 11 26 43;
-  --c-ink-2: 18 40 64;
-  --c-ink-3: 26 62 96;
+  /* Always-dark chrome: sidebar, marketing hero, sign-in brand panel. */
+  --c-ink: 10 25 41;
+  --c-ink-2: 16 38 62;
+  --c-ink-3: 27 64 102;
 
-  --shadow-color: 15 30 55;
-}
-
-:root[data-theme='dark'] {
-  color-scheme: dark;
-
-  --c-slate-50: 17 21 29;
-  --c-slate-100: 22 27 37;
-  --c-slate-200: 35 42 55;
-  --c-slate-300: 51 60 76;
-  --c-slate-400: 124 135 152;
-  --c-slate-500: 148 160 178;
-  --c-slate-600: 173 183 198;
-  --c-slate-700: 199 206 219;
-  --c-slate-800: 223 228 236;
-  --c-slate-900: 240 243 248;
-  --c-slate-950: 251 252 254;
-  --c-navy-50: 16 36 52;
-  --c-navy-100: 21 45 65;
-  --c-navy-200: 29 61 87;
-  --c-navy-300: 38 81 115;
-  --c-navy-400: 60 130 180;
-  --c-navy-500: 89 163 211;
-  --c-navy-600: 125 187 227;
-  --c-navy-700: 159 205 236;
-  --c-navy-800: 191 222 243;
-  --c-navy-900: 218 235 249;
-  --c-navy-950: 238 246 253;
-  --c-red-50: 44 15 16;
-  --c-red-100: 59 20 22;
-  --c-red-200: 92 29 31;
-  --c-red-300: 139 43 44;
-  --c-red-400: 220 74 74;
-  --c-red-500: 242 101 101;
-  --c-red-600: 249 141 141;
-  --c-red-700: 252 176 176;
-  --c-red-800: 254 205 205;
-  --c-red-900: 254 228 228;
-  --c-red-950: 254 244 244;
-  --c-amber-50: 42 28 5;
-  --c-amber-100: 55 37 10;
-  --c-amber-200: 84 54 13;
-  --c-amber-300: 124 76 14;
-  --c-amber-400: 209 138 16;
-  --c-amber-500: 237 166 23;
-  --c-amber-600: 246 191 63;
-  --c-amber-700: 251 208 106;
-  --c-amber-800: 253 228 159;
-  --c-amber-900: 254 242 204;
-  --c-amber-950: 255 251 235;
-  --c-emerald-50: 5 32 24;
-  --c-emerald-100: 8 41 31;
-  --c-emerald-200: 11 63 47;
-  --c-emerald-300: 15 92 68;
-  --c-emerald-400: 18 163 119;
-  --c-emerald-500: 31 196 143;
-  --c-emerald-600: 77 218 169;
-  --c-emerald-700: 127 231 193;
-  --c-emerald-800: 174 240 216;
-  --c-emerald-900: 214 248 234;
-  --c-emerald-950: 239 253 247;
-  --c-teal-50: 4 35 34;
-  --c-teal-100: 6 46 44;
-  --c-teal-200: 10 71 68;
-  --c-teal-300: 13 99 94;
-  --c-teal-400: 18 168 154;
-  --c-teal-500: 26 200 182;
-  --c-teal-600: 69 223 204;
-  --c-teal-700: 121 235 221;
-  --c-teal-800: 169 243 233;
-  --c-teal-900: 211 250 244;
-  --c-teal-950: 240 253 251;
-
-  --c-canvas: 10 14 21;
-  --c-canvas-alt: 7 10 16;
-  --c-surface: 18 23 34;
-  --c-surface-2: 23 29 41;
-  --c-surface-3: 29 36 49;
-  --c-line: 36 44 58;
-  --c-line-soft: 27 34 48;
-  --c-brand: 47 128 196;
-  --c-brand-hover: 69 147 209;
-  --c-brand-soft: 16 36 52;
-  --c-accent: 45 212 191;
-  --c-accent-soft: 10 47 44;
-
-  --c-ink: 11 26 43;
-  --c-ink-2: 18 40 64;
-  --c-ink-3: 26 62 96;
-
-  --shadow-color: 0 0 0;
+  /* Shadows are tinted with the brand hue — neutral black shadows go muddy
+     against a cool canvas. */
+  --shadow-color: 14 32 56;
 }
